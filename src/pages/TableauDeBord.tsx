@@ -1,55 +1,34 @@
-import { Link } from 'react-router-dom';
-import Tile from '../components/Tile';
+import { useEffect, useState } from "react";
+import Tile from "../components/Tile";
 
-export default function TableauDeBord() {
+type User = { name:string };
+
+export default function TableauDeBord(){
+  const [user,setUser] = useState<User|null>(null);
+  useEffect(()=>{
+    const raw = localStorage.getItem("itinerisUser");
+    if(raw) setUser(JSON.parse(raw));
+  },[]);
+
   return (
-    <main>
-      <header className="db-header">
+    <main className="container-page">
+      <header className="mb-5 flex items-center justify-between">
         <div>
-          <h1>Bonjour 👋</h1>
-          <p className="muted">Prêt à continuer ton voyage d’apprentissage ?</p>
+          <h1 className="text-2xl font-semibold">
+            Bonjour{user?.name ? `, ${user.name}` : ""} 👋
+          </h1>
+          <p className="text-muted">Prêt à continuer ton voyage d'apprentissage ?</p>
         </div>
-        <Link to="/parametres" aria-label="Paramètres" className="settings-btn">⚙︎</Link>
+        <a href="/itineris/parametres" className="btn-ghost" aria-label="Paramètres">⚙︎</a>
       </header>
 
-      <section className="tiles-grid">
-        <Tile
-          to="/todo"
-          icon={<span className="emoji">☑️</span>}
-          title="Tâches"
-          subtitle="Gérez vos tâches"
-          meta="5 éléments"
-        />
-        <Tile
-          to="/minuteur"
-          icon={<span className="emoji">🕒</span>}
-          title="Minuteur"
-          subtitle="Sessions Pomodoro"
-        />
-        <Tile
-          to="/statistiques"
-          icon={<span className="emoji">📊</span>}
-          title="Statistiques"
-          subtitle="Suivez vos progrès"
-        />
-        <Tile
-          to="/conseils"
-          icon={<span className="emoji">📝</span>}
-          title="Conseils"
-          subtitle="Astuces d’étude"
-        />
-        <Tile
-          to="/notesrapides"
-          icon={<span className="emoji">🗒️</span>}
-          title="Notes rapides"
-          subtitle="Idées et rappels"
-        />
-        <Tile
-          to="/assistant"
-          icon={<span className="emoji">💬</span>}
-          title="Assistant IA"
-          subtitle="Bientôt disponible"
-        />
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Tile to="/todo" title="Tâches" subtitle="Gérez vos tâches" icon={<span>☑️</span>} />
+        <Tile to="/minuteur" title="Minuteur" subtitle="Sessions Pomodoro" icon={<span>🕒</span>} />
+        <Tile to="/stats" title="Statistiques" subtitle="Suivez vos progrès" icon={<span>📊</span>} />
+        <Tile to="/conseils" title="Conseils" subtitle="Astuces d’étude" icon={<span>📝</span>} />
+        <Tile to="/notes" title="Notes rapides" subtitle="Idées & rappels" icon={<span>🗒️</span>} />
+        <Tile to="/assistant" title="Assistant IA" subtitle="Bientôt dispo" icon={<span>💬</span>} />
       </section>
     </main>
   );

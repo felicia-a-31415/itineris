@@ -1,21 +1,16 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
-type TileProps = {
-  to: string;
-  icon?: React.ReactNode;
-  title: string;
-  subtitle?: string;
-  meta?: string; // e.g., "5 éléments"
-};
-
-export default function Tile({ to, icon, title, subtitle, meta }: TileProps) {
+export default function Tile(
+  { to, title, subtitle, icon }:{
+    to:string; title:string; subtitle?:string; icon?:React.ReactNode
+  }
+){
   return (
-    <Link to={to} className="tile">
-      <div className="tile-icon">{icon}</div>
-      <div className="tile-text">
-        <div className="tile-title">{title}</div>
-        {subtitle && <div className="tile-sub">{subtitle}</div>}
-        {meta && <div className="tile-meta">{meta}</div>}
+    <Link to={to} className="tile flex gap-3 no-underline">
+      <div className="w-12 h-12 rounded-xl bg-primary/10 grid place-items-center">{icon}</div>
+      <div>
+        <div className="font-semibold">{title}</div>
+        {subtitle && <div className="text-muted text-sm">{subtitle}</div>}
       </div>
     </Link>
   );

@@ -2,6 +2,7 @@ import './styles/globals.css'
 
 import { Routes, Route } from 'react-router-dom'
 import Bienvenue from './pages/Bienvenue'
+import Onboarding from './pages/Onboarding'
 import TableauDeBord from './pages/TableauDeBord'
 import Parametres from './pages/Parametres'
 import Todo from './pages/Todo'
@@ -18,6 +19,7 @@ export default function App() {
       {/* Routes define the different pages */}
       <Routes>
         <Route path="/" element={<Bienvenue />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/tableaudebord" element={<TableauDeBord />} />
         <Route path="/parametres" element={<Parametres />} />
         <Route path="/todo" element={<Todo />} />
