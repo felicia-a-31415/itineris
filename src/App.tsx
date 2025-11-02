@@ -21,16 +21,16 @@ export default function App() {
 
       {/* Routes define the different pages */}
       <Routes>
-        <Route path="/itineris" element={<Bienvenue />} />
-        <Route path="/itineris/tableaudebord" element={<TableauDeBord />} />
-        <Route path="/itineris/parametres" element={<Parametres />} />
-        <Route path="/itineris/todo" element={<Todo />} />
-        <Route path="/itineris/minuteur" element={<Minuteur />} />
-        <Route path="/itineris/statistiques" element={<Statistiques />} />
-        <Route path="/itineris/conseils" element={<Conseils />} />
-        <Route path="/itineris/notes-rapides" element={<NotesRapides />} />
-        <Route path="/itineris/assistant" element={<Assistant />} />
-        <Route path="/itineris/*" element={<Erreur />} />
+        <Route path="/" element={<Bienvenue />} />
+        <Route path="/tableaudebord" element={<TableauDeBord />} />
+        <Route path="/parametres" element={<Parametres />} />
+        <Route path="/todo" element={<Todo />} />
+        <Route path="/minuteur" element={<Minuteur />} />
+        <Route path="/statistiques" element={<Statistiques />} />
+        <Route path="/conseils" element={<Conseils />} />
+        <Route path="/notes-rapides" element={<NotesRapides />} />
+        <Route path="/assistant" element={<Assistant />} />
+        <Route path="/*" element={<Erreur />} />
       </Routes>
     </div>
   )
