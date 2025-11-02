@@ -31,23 +31,60 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     lifeGoals: '',
   });
 
-  const subjects = [
-    'Mathématiques',
-    'Français',
-    'Anglais',
-    'Histoire',
-    'Géographie',
-    'Sciences',
-    'Physique',
-    'Chimie',
-    'Monde contemporain',
-    'Arts',
-    'Éducation financière',
-    'Éducation physique',
-    'Culture et société',
-    'Histoire du XXe siècle',
-    'Autre',
-  ];
+  const getSubjectsForYear = (year: string): string[] => {
+    // Sec 1-2
+    if (year === 'Secondaire 1' || year === 'Secondaire 2') {
+      return [
+        'Mathématiques',
+        'Anglais',
+        'Français',
+        'Géographie',
+        'Histoire',
+        'Latin',
+        'Espagnol',
+        'Arts plastiques',
+        'Sciences',
+        'CCQ',
+        'Autre',
+      ];
+    }
+    
+    // Sec 3-4
+    if (year === 'Secondaire 3' || year === 'Secondaire 4') {
+      return [
+        'Mathématiques',
+        'Anglais',
+        'Français',
+        'Histoire',
+        'Latin',
+        'Espagnol',
+        'Arts plastiques',
+        'Sciences',
+        'CCQ',
+        'Autre',
+      ];
+    }
+    
+    // Sec 5
+    if (year === 'Secondaire 5') {
+      return [
+        'Mathématiques',
+        'Anglais',
+        'Français',
+        'Arts plastiques',
+        'Chimie',
+        'Physique',
+        'Histoire du XXe siècle',
+        'Culture et société',
+        'CCQ',
+        'Autre',
+      ];
+    }
+
+    return [];
+}
+
+  const subjects = getSubjectsForYear(formData.year);
 
   const years = [
     'Secondaire 1',
