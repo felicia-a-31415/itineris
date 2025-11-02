@@ -25,7 +25,7 @@ export function TableauDeBord({ onNavigate, userName = 'étudiant' }: TableauDeB
       tasks: 5,
     },
     {
-      id: 'timer',
+      id: 'minuteur',
       title: 'Minuteur',
       icon: Clock,
       color: '#4169E1',
@@ -33,7 +33,7 @@ export function TableauDeBord({ onNavigate, userName = 'étudiant' }: TableauDeB
       tasks: null,
     },
     {
-      id: 'stats',
+      id: 'statistiques',
       title: 'Statistiques',
       icon: BarChart3,
       color: '#8B8680',
@@ -41,7 +41,7 @@ export function TableauDeBord({ onNavigate, userName = 'étudiant' }: TableauDeB
       tasks: null,
     },
     {
-      id: 'notes',
+      id: 'conseils',
       title: 'Conseils',
       icon: FileText,
       color: '#6B9AC4',
@@ -49,7 +49,7 @@ export function TableauDeBord({ onNavigate, userName = 'étudiant' }: TableauDeB
       tasks: null,
     },
     {
-      id: 'quicknotes',
+      id: 'notesrapides',
       title: 'Notes rapides',
       icon: StickyNote,
       color: '#8B8680',
@@ -57,7 +57,7 @@ export function TableauDeBord({ onNavigate, userName = 'étudiant' }: TableauDeB
       tasks: null,
     },
     {
-      id: 'chatbot',
+      id: 'assistant',
       title: 'Assistant IA',
       icon: MessageSquare,
       color: '#4169E1',
