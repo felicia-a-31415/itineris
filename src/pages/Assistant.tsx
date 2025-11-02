@@ -1,3 +1,8 @@
 export default function Assistant() {
-  return <h1>Assistant IA</h1>
+  return (
+    <main>
+      <h1>Assistant IA</h1>
+      <p>Fonctionnalité bientôt disponible.</p>
+    </main>
+  )
 }

@@ -9,6 +9,8 @@ import Statistiques from './pages/Statistiques'
 import Conseils from './pages/Conseils'
 import NotesRapides from './pages/NotesRapides'
 import Assistant from './pages/Assistant'
+import Erreur from './pages/Erreur'
+import Nav from './components/Nav'
 
 export default function App() {
   return (
@@ -23,6 +25,7 @@ export default function App() {
         <Route path="/conseils" element={<Conseils />} />
         <Route path="/notes-rapides" element={<NotesRapides />} />
         <Route path="/assistant" element={<Assistant />} />
+        <Route path="*" element={<Erreur />} />
       </Routes>
     </div>
   )

@@ -1,4 +1,8 @@
-
 export default function Parametres() {
-  return <h1>Paramètres</h1>
+  return (
+    <main>
+      <h1>Paramètres</h1>
+      <p>Modifie les réglages de ton application.</p>
+    </main>
+  )
 }

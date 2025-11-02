@@ -1,4 +1,8 @@
-
 export default function NotesRapides() {
-  return <h1>Notes rapides</h1>
+  return (
+    <main>
+      <h1>Notes rapides</h1>
+      <p>Prends des notes ici.</p>
+    </main>
+  )
 }

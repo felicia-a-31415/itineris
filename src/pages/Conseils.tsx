@@ -1,4 +1,8 @@
-
 export default function Conseils() {
-  return <h1>Conseils</h1>
+  return (
+    <main>
+      <h1>Conseils</h1>
+      <p>Page contenant les conseils d’organisation et d’étude.</p>
+    </main>
+  )
 }
