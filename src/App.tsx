@@ -1,5 +1,4 @@
 import './styles/globals.css'
-import Nav from './components/Nav'
 
 import { Routes, Route } from 'react-router-dom'
 import Bienvenue from './pages/Bienvenue'
@@ -16,9 +15,6 @@ import Erreur from './pages/Erreur'
 export default function App() {
   return (
     <div className="min-h-screen bg-[#F5F1E8] text-[#2C2C2C]">
-      {/* Navigation bar at the top */}
-      <Nav />
-
       {/* Routes define the different pages */}
       <Routes>
         <Route path="/" element={<Bienvenue />} />
