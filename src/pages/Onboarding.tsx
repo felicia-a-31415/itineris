@@ -45,6 +45,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         'Arts plastiques',
         'Sciences',
         'CCQ',
+        'Éducation physique',
         'Autre',
       ];
     }
@@ -61,6 +62,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         'Arts plastiques',
         'Sciences',
         'CCQ',
+        'Éducation physique',
         'Autre',
       ];
     }
@@ -77,6 +79,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         'Histoire du XXe siècle',
         'Culture et société',
         'CCQ',
+        'Éducation physique',
         'Autre',
       ];
     }
