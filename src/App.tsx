@@ -5,7 +5,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom'
 
 import { Bienvenue } from './pages/Bienvenue'
 import { Onboarding } from './pages/Onboarding'
-import TableauDeBord from './pages/TableauDeBord'
+import { TableauDeBord } from './pages/TableauDeBord'
 import Parametres from './pages/Parametres'
 import Todo from './pages/Todo'
 import Minuteur from './pages/Minuteur'
@@ -31,7 +31,7 @@ export default function App() {
 
   const handleOnboardingComplete = (data: UserData) => {
     setUserData(data);
-    navigate('/onboarding')
+    navigate('/tableaudebord')
   };
 
   return (
@@ -39,19 +39,24 @@ export default function App() {
       {/* Routes define the different pages */}
       <Routes>
 
-        // Welcome Screen Route
+        {/* Welcome Screen Route */}
         <Route
           path="/"
           element={<Bienvenue onGetStarted={() => navigate('/onboarding')} />}
         />
 
-        // Onboarding Screen Route
+        {/* Onboarding Screen Route */}
         <Route 
           path="/onboarding" 
           element={<Onboarding onComplete={handleOnboardingComplete}/>} 
         />
 
-        <Route path="/tableaudebord" element={<TableauDeBord />} />
+        {/* Dashboard Screen Route */}
+        <Route 
+          path="/tableaudebord"
+          element={<TableauDeBord onNavigate={(screen) => navigate(`/${screen}`)} userName={userData?.name} />} 
+        />
+
         <Route path="/parametres" element={<Parametres />} />
         <Route path="/todo" element={<Todo />} />
         <Route path="/minuteur" element={<Minuteur />} />
