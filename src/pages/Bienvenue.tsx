@@ -1,28 +1,23 @@
-import { BookOpen, Compass } from 'lucide-react';
+import { Compass } from 'lucide-react';
 import { Button } from '../ui/button';
 
 interface BienvenueProps {
   onGetStarted: () => void;
 }
 
-export default function Bienvenue({ onGetStarted }: BienvenueProps) {
+export function Bienvenue({ onGetStarted }: BienvenueProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-[#F5F1E8]">
       <div className="flex flex-col items-center max-w-md text-center space-y-8">
-        {/* Logo - Compass with Book */}
-        <div className="relative">
-          <div className="w-32 h-32 rounded-full bg-white shadow-lg flex items-center justify-center">
-            <Compass className="w-16 h-16 text-[#6B9AC4]" strokeWidth={1.5} />
-          </div>
-          <div className="absolute -bottom-2 -right-2 w-12 h-12 rounded-full bg-[#4169E1] shadow-md flex items-center justify-center">
-            <BookOpen className="w-6 h-6 text-white" strokeWidth={2} />
-          </div>
+        {/* Logo - Compass */}
+        <div className="w-32 h-32 rounded-full bg-[#4169E1] shadow-lg flex items-center justify-center">
+          <Compass className="w-16 h-16 text-white" strokeWidth={2} />
         </div>
 
         {/* App Name */}
         <div className="space-y-2">
           <h1 className="text-5xl text-[#2C2C2C] tracking-tight">Itineris</h1>
-          <p className="text-[#8B8680] text-lg">Votre chemin vers un apprentissage organisé</p>
+          <p className="text-[#8B8680] text-lg">Votre chemin vers la réussite</p>
         </div>
 
         {/* Get Started Button */}

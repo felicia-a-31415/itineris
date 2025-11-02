@@ -1,7 +1,7 @@
 import './styles/globals.css'
 
 import { Routes, Route, useNavigate } from 'react-router-dom'
-import Bienvenue from './pages/Bienvenue'
+import { Bienvenue } from './pages/Bienvenue'
 import Onboarding from './pages/Onboarding'
 import TableauDeBord from './pages/TableauDeBord'
 import Parametres from './pages/Parametres'
