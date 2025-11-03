@@ -20,7 +20,7 @@ import { loadUserData, saveUserData, type UserData } from './lib/storage'
 const STORAGE_KEY = 'itineris_user_data';
 
 export default function App() {
-  const [userData, setUserData] = useState<UserData | null>(null)
+  const [userData, setUserData] = useState<UserData | null>(() => loadUserData() ?? null);
   const navigate = useNavigate()
 
   const defaultUserData: UserData = {

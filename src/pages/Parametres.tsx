@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, User, Palette, BookOpen, Save, Check } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -25,6 +25,10 @@ interface ParametresScreenProps {
 export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) {
   const [formData, setFormData] = useState<UserData>(userData);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setFormData(userData);
+  }, [userData]);
 
   const subjects = [
     'Mathématiques',
