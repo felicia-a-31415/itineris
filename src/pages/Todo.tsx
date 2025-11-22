@@ -22,6 +22,8 @@ interface TagColor {
   border: string;
 }
 
+type TagDialogTarget = 'create' | 'edit' | 'global' | null;
+
 export default function Todo() {
   const navigate = useNavigate();
 
@@ -44,16 +46,27 @@ export default function Todo() {
     'santé',
   ]);
 
+  // création de tâche
   const [newTaskText, setNewTaskText] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showAddTask, setShowAddTask] = useState(false);
+
+  // filtres / drag
   const [filterTags, setFilterTags] = useState<string[]>([]);
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
+
+  // dialog création de tag
   const [newTagName, setNewTagName] = useState('');
   const [showNewTagDialog, setShowNewTagDialog] = useState(false);
+  const [tagDialogTarget, setTagDialogTarget] = useState<TagDialogTarget>(null);
+
+  // édition de tâche (dialog)
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [editingText, setEditingText] = useState('');
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editTags, setEditTags] = useState<string[]>([]);
 
   const getTagColor = (tag: string): TagColor => {
     const colors = [
@@ -74,19 +87,25 @@ export default function Todo() {
       task.tags.forEach(tag => used.add(tag));
     });
 
-    // garder aussi les tags sélectionnés dans le formulaire de création
+    // garder les tags sélectionnés en création / édition en cours
     selectedTags.forEach(tag => used.add(tag));
+    editTags.forEach(tag => used.add(tag));
 
     setCustomTags(prev => prev.filter(tag => used.has(tag)));
     setFilterTags(prev => prev.filter(tag => used.has(tag)));
     setSelectedTags(prev => prev.filter(tag => used.has(tag)));
+    setEditTags(prev => prev.filter(tag => used.has(tag)));
   };
 
   const toggleTask = (id: string) => {
-    setTasks(tasks.map(task =>
+    const newTasks = tasks.map(task =>
       task.id === id ? { ...task, completed: !task.completed } : task
-    ));
+    );
+    setTasks(newTasks);
+    // pas nécessaire pour les tags, ils ne changent pas
   };
+
+  // ------- création de tâche -------
 
   const addTask = () => {
     if (newTaskText.trim() && selectedTags.length > 0) {
@@ -113,28 +132,6 @@ export default function Todo() {
     cleanupUnusedTags(newTasks);
   };
 
-  const startEditingTask = (task: Task) => {
-    setEditingTaskId(task.id);
-    setEditingText(task.text);
-  };
-
-  const saveEditingTask = () => {
-    if (editingTaskId && editingText.trim()) {
-      const newTasks = tasks.map(task =>
-        task.id === editingTaskId ? { ...task, text: editingText.trim() } : task
-      );
-      setTasks(newTasks);
-      // pas besoin de nettoyer les tags ici, ils ne changent pas
-    }
-    setEditingTaskId(null);
-    setEditingText('');
-  };
-
-  const cancelEditingTask = () => {
-    setEditingTaskId(null);
-    setEditingText('');
-  };
-
   const toggleTag = (tag: string) => {
     if (selectedTags.includes(tag)) {
       setSelectedTags(selectedTags.filter(t => t !== tag));
@@ -142,6 +139,56 @@ export default function Todo() {
       setSelectedTags([...selectedTags, tag]);
     }
   };
+
+  // ------- édition de tâche (dialog) -------
+
+  const openEditDialog = (task: Task) => {
+    setEditingTaskId(task.id);
+    setEditTitle(task.text);
+    setEditDescription(task.description ?? '');
+    setEditTags(task.tags);
+    setEditDialogOpen(true);
+  };
+
+  const closeEditDialog = () => {
+    setEditDialogOpen(false);
+    setEditingTaskId(null);
+    setEditTitle('');
+    setEditDescription('');
+    setEditTags([]);
+  };
+
+  const toggleEditTag = (tag: string) => {
+    if (editTags.includes(tag)) {
+      setEditTags(editTags.filter(t => t !== tag));
+    } else {
+      setEditTags([...editTags, tag]);
+    }
+  };
+
+  const saveTaskEdits = () => {
+    if (!editingTaskId || !editTitle.trim()) {
+      closeEditDialog();
+      return;
+    }
+
+    const newTasks = tasks.map(task =>
+      task.id === editingTaskId
+        ? {
+            ...task,
+            text: editTitle.trim(),
+            description: editDescription.trim() || undefined,
+            tags: editTags.length > 0 ? editTags : [], // si 0, plus de tags
+          }
+        : task
+    );
+
+    setTasks(newTasks);
+    cleanupUnusedTags(newTasks);
+    closeEditDialog();
+  };
+
+  // ------- tags globaux / dialog de création de tag -------
 
   const toggleFilterTag = (tag: string) => {
     if (filterTags.includes(tag)) {
@@ -153,14 +200,27 @@ export default function Todo() {
 
   const addCustomTag = () => {
     const name = newTagName.trim().toLowerCase();
-    if (name && !customTags.includes(name)) {
-      setCustomTags([...customTags, name]);
-      // on peut aussi l’ajouter directement aux tags sélectionnés pour la nouvelle tâche
-      setSelectedTags(prev => [...prev, name]);
+    if (!name || customTags.includes(name)) {
+      setNewTagName('');
+      setShowNewTagDialog(false);
+      setTagDialogTarget(null);
+      return;
     }
+
+    setCustomTags(prev => [...prev, name]);
+
+    if (tagDialogTarget === 'create') {
+      setSelectedTags(prev => (prev.includes(name) ? prev : [...prev, name]));
+    } else if (tagDialogTarget === 'edit') {
+      setEditTags(prev => (prev.includes(name) ? prev : [...prev, name]));
+    }
+
     setNewTagName('');
     setShowNewTagDialog(false);
+    setTagDialogTarget(null);
   };
+
+  // ------- drag & drop -------
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
     setDraggedTask(taskId);
@@ -210,39 +270,17 @@ export default function Todo() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Dialog open={showNewTagDialog} onOpenChange={setShowNewTagDialog}>
-              <DialogTrigger asChild>
-                <button className="inline-flex items-center justify-center rounded-xl border border-[#8B8680]/20 bg-white px-3 py-2 hover:bg-[#F5F1E8] transition-colors">
-                  <Tag className="w-5 h-5 text-[#8B8680]" />
-                </button>
-              </DialogTrigger>
-              <DialogContent className="bg-white rounded-2xl">
-                <DialogHeader>
-                  <DialogTitle>Créer un nouveau tag</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <div>
-                    <Label htmlFor="tagName">Nom du tag</Label>
-                    <Input
-                      id="tagName"
-                      value={newTagName}
-                      onChange={(e) => setNewTagName(e.target.value)}
-                      placeholder="Ex: urgent, examen, projet..."
-                      className="mt-2 rounded-xl"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') addCustomTag();
-                      }}
-                    />
-                  </div>
-                  <Button
-                    onClick={addCustomTag}
-                    className="w-full bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl"
-                  >
-                    Créer le tag
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            {/* bouton tags global */}
+            <button
+              className="inline-flex items-center justify-center rounded-xl border border-[#8B8680]/20 bg-white px-3 py-2 hover:bg-[#F5F1E8] transition-colors"
+              onClick={() => {
+                setTagDialogTarget('global');
+                setShowNewTagDialog(true);
+              }}
+            >
+              <Tag className="w-5 h-5 text-[#8B8680]" />
+            </button>
+
             <Button
               onClick={() => setShowAddTask(!showAddTask)}
               className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl shadow-md"
@@ -305,7 +343,6 @@ export default function Todo() {
                 }}
               />
 
-              {/* Description de la tâche */}
               <div>
                 <Label htmlFor="newTaskDescription" className="text-sm text-[#8B8680]">
                   Description (optionnelle)
@@ -320,7 +357,6 @@ export default function Todo() {
                 />
               </div>
 
-              {/* Tags pour la nouvelle tâche */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-[#8B8680]">Tags</span>
@@ -329,7 +365,10 @@ export default function Todo() {
                     variant="outline"
                     size="sm"
                     className="rounded-xl border-[#8B8680]/20 text-xs"
-                    onClick={() => setShowNewTagDialog(true)}
+                    onClick={() => {
+                      setTagDialogTarget('create');
+                      setShowNewTagDialog(true);
+                    }}
                   >
                     <Tag className="w-3 h-3 mr-1" />
                     Nouveau tag
@@ -402,38 +441,18 @@ export default function Todo() {
                   className="rounded-md"
                 />
                 <div className="flex-1 min-w-0">
-                  {editingTaskId === task.id ? (
-                    <Input
-                      value={editingText}
-                      onChange={(e) => setEditingText(e.target.value)}
-                      placeholder="Modifier la tâche"
-                      className="border-[#F5F1E8] rounded-xl"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          saveEditingTask();
-                        } else if (e.key === 'Escape') {
-                          cancelEditingTask();
-                        }
-                      }}
-                      onBlur={saveEditingTask}
-                      autoFocus
-                    />
-                  ) : (
-                    <>
-                      <p
-                        className={`text-[#2C2C2C] cursor-pointer hover:text-[#4169E1] transition-colors ${
-                          task.completed ? 'line-through opacity-50' : ''
-                        }`}
-                        onClick={() => startEditingTask(task)}
-                      >
-                        {task.text}
-                      </p>
-                      {task.description && (
-                        <p className="mt-1 text-sm text-[#8B8680]">
-                          {task.description}
-                        </p>
-                      )}
-                    </>
+                  <p
+                    className={`text-[#2C2C2C] cursor-pointer hover:text-[#4169E1] transition-colors ${
+                      task.completed ? 'line-through opacity-50' : ''
+                    }`}
+                    onClick={() => openEditDialog(task)}
+                  >
+                    {task.text}
+                  </p>
+                  {task.description && (
+                    <p className="mt-1 text-sm text-[#8B8680]">
+                      {task.description}
+                    </p>
                   )}
                 </div>
                 <div className="flex flex-wrap gap-1 max-w-xs">
@@ -476,6 +495,140 @@ export default function Todo() {
           </div>
         )}
       </div>
+
+      {/* Dialog création de tag (utilisé par header + création + édition) */}
+      <Dialog
+        open={showNewTagDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowNewTagDialog(false);
+            setTagDialogTarget(null);
+          } else {
+            setShowNewTagDialog(true);
+          }
+        }}
+      >
+        <DialogContent className="bg-white rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Créer un nouveau tag</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div>
+              <Label htmlFor="tagName">Nom du tag</Label>
+              <Input
+                id="tagName"
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                placeholder="Ex: urgent, examen, projet..."
+                className="mt-2 rounded-xl"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') addCustomTag();
+                }}
+              />
+            </div>
+            <Button
+              onClick={addCustomTag}
+              className="w-full bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl"
+            >
+              Créer le tag
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog édition de tâche */}
+      <Dialog
+        open={editDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeEditDialog();
+          } else {
+            setEditDialogOpen(true);
+          }
+        }}
+      >
+        <DialogContent className="bg-white rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Modifier la tâche</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div>
+              <Label htmlFor="editTitle">Titre</Label>
+              <Input
+                id="editTitle"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="mt-2 rounded-xl"
+                placeholder="Titre de la tâche"
+              />
+            </div>
+            <div>
+              <Label htmlFor="editDescription">Description</Label>
+              <textarea
+                id="editDescription"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={3}
+                className="mt-2 w-full rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4169E1]"
+                placeholder="Ajoute des détails, étapes, liens..."
+              />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-[#8B8680]">Tags</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl border-[#8B8680]/20 text-xs"
+                  onClick={() => {
+                    setTagDialogTarget('edit');
+                    setShowNewTagDialog(true);
+                  }}
+                >
+                  <Tag className="w-3 h-3 mr-1" />
+                  Nouveau tag
+                </Button>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {customTags.map((tag) => {
+                  const colors = getTagColor(tag);
+                  const active = editTags.includes(tag);
+                  return (
+                    <Badge
+                      key={tag}
+                      onClick={() => toggleEditTag(tag)}
+                      className="cursor-pointer rounded-lg capitalize transition-all"
+                      style={{
+                        backgroundColor: active ? colors.text : colors.bg,
+                        color: active ? 'white' : colors.text,
+                        border: `1px solid ${colors.border}`,
+                      }}
+                    >
+                      {tag}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                className="rounded-xl border-[#8B8680]/20"
+                onClick={closeEditDialog}
+              >
+                Annuler
+              </Button>
+              <Button
+                className="rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
+                onClick={saveTaskEdits}
+              >
+                Enregistrer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
