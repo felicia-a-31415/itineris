@@ -13,6 +13,7 @@ interface Task {
   text: string;
   completed: boolean;
   tags: string[];
+  description?: string;
 }
 
 interface TagColor {
@@ -50,13 +51,13 @@ export default function Todo() {
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState('');
   const [showNewTagDialog, setShowNewTagDialog] = useState(false);
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [editingText, setEditingText] = useState('');
 
-  // context menu state for filter tags
-  const [tagMenu, setTagMenu] = useState<{ x: number; y: number; tag: string } | null>(null);
-  const [isRenamingTag, setIsRenamingTag] = useState(false);
-  const [renameTagValue, setRenameTagValue] = useState('');
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editTags, setEditTags] = useState<string[]>([]);
 
   const getTagColor = (tag: string): TagColor => {
     const colors = [
@@ -95,25 +96,51 @@ export default function Todo() {
     setTasks(tasks.filter(task => task.id !== id));
   };
 
-  const startEditingTask = (task: Task) => {
+  // ---------- EDIT TASK DIALOG ----------
+
+  const openEditDialog = (task: Task) => {
     setEditingTaskId(task.id);
-    setEditingText(task.text);
+    setEditTitle(task.text);
+    setEditDescription(task.description ?? '');
+    setEditTags(task.tags);
+    setEditDialogOpen(true);
   };
 
-  const saveEditingTask = () => {
-    if (editingTaskId && editingText.trim()) {
-      setTasks(tasks.map(task =>
-        task.id === editingTaskId ? { ...task, text: editingText.trim() } : task
-      ));
+  const closeEditDialog = () => {
+    setEditDialogOpen(false);
+    setEditingTaskId(null);
+    setEditTitle('');
+    setEditDescription('');
+    setEditTags([]);
+  };
+
+  const toggleEditTag = (tag: string) => {
+    if (editTags.includes(tag)) {
+      setEditTags(editTags.filter(t => t !== tag));
+    } else {
+      setEditTags([...editTags, tag]);
     }
-    setEditingTaskId(null);
-    setEditingText('');
   };
 
-  const cancelEditingTask = () => {
-    setEditingTaskId(null);
-    setEditingText('');
+  const saveTaskEdits = () => {
+    if (!editingTaskId || !editTitle.trim()) {
+      closeEditDialog();
+      return;
+    }
+    setTasks(tasks.map(task =>
+      task.id === editingTaskId
+        ? {
+            ...task,
+            text: editTitle.trim(),
+            description: editDescription.trim() || undefined,
+            tags: editTags.length > 0 ? editTags : task.tags,
+          }
+        : task
+    ));
+    closeEditDialog();
   };
+
+  // ---------- TAGS, DRAG, FILTER ----------
 
   const toggleTag = (tag: string) => {
     if (selectedTags.includes(tag)) {
@@ -139,40 +166,6 @@ export default function Todo() {
     }
   };
 
-  // remove a tag from one specific task
-  const removeTagFromTask = (taskId: string, tagToRemove: string) => {
-    setTasks(tasks.map(task =>
-      task.id === taskId
-        ? { ...task, tags: task.tags.filter(t => t !== tagToRemove) }
-        : task
-    ));
-  };
-
-  // delete a custom tag globally (filter bar + all tasks + selections)
-  const deleteCustomTag = (tagToDelete: string) => {
-    setCustomTags(customTags.filter(t => t !== tagToDelete));
-    setFilterTags(filterTags.filter(t => t !== tagToDelete));
-    setSelectedTags(selectedTags.filter(t => t !== tagToDelete));
-    setTasks(tasks.map(task => ({
-      ...task,
-      tags: task.tags.filter(t => t !== tagToDelete),
-    })));
-  };
-
-  // rename a custom tag globally
-  const renameCustomTag = (oldTag: string, newTagRaw: string) => {
-    const newTag = newTagRaw.trim().toLowerCase();
-    if (!newTag || newTag === oldTag) return;
-
-    setCustomTags(customTags.map(t => (t === oldTag ? newTag : t)));
-    setFilterTags(filterTags.map(t => (t === oldTag ? newTag : t)));
-    setSelectedTags(selectedTags.map(t => (t === oldTag ? newTag : t)));
-    setTasks(tasks.map(task => ({
-      ...task,
-      tags: task.tags.map(t => (t === oldTag ? newTag : t)),
-    })));
-  };
-
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
     setDraggedTask(taskId);
     e.dataTransfer.effectAllowed = 'move';
@@ -196,12 +189,6 @@ export default function Todo() {
     setDraggedTask(null);
   };
 
-  const closeTagMenu = () => {
-    setTagMenu(null);
-    setIsRenamingTag(false);
-    setRenameTagValue('');
-  };
-
   const filteredTasks = filterTags.length > 0
     ? tasks.filter(task => task.tags.some(tag => filterTags.includes(tag)))
     : tasks;
@@ -209,13 +196,8 @@ export default function Todo() {
   const completedCount = filteredTasks.filter(t => t.completed).length;
 
   return (
-    <div
-      className="min-h-screen bg-[#F5F1E8] p-4 md:p-8"
-      onClick={() => {
-        if (tagMenu) closeTagMenu();
-      }}
-    >
-      <div className="max-w-3xl mx-auto relative">
+    <div className="min-h-screen bg-[#F5F1E8] p-4 md:p-8">
+      <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="flex items-center mb-8 md:mb-12">
           <Button
@@ -288,17 +270,6 @@ export default function Todo() {
                   <Badge
                     key={tag}
                     onClick={() => toggleFilterTag(tag)}
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setTagMenu({
-                        x: e.clientX,
-                        y: e.clientY,
-                        tag,
-                      });
-                      setIsRenamingTag(false);
-                      setRenameTagValue('');
-                    }}
                     className="cursor-pointer rounded-lg px-3 py-1.5 transition-all capitalize"
                     style={{
                       backgroundColor: filterTags.includes(tag) ? colors.text : colors.bg,
@@ -320,75 +291,6 @@ export default function Todo() {
               >
                 Réinitialiser les filtres
               </Button>
-            )}
-          </div>
-        )}
-
-        {/* Context menu for filter tags */}
-        {tagMenu && (
-          <div
-            className="fixed z-50 bg-white rounded-xl shadow-lg border border-black/5 py-1 text-sm"
-            style={{ top: tagMenu.y, left: tagMenu.x }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {isRenamingTag ? (
-              <div className="p-2 flex flex-col gap-2 w-48">
-                <Input
-                  value={renameTagValue}
-                  onChange={(e) => setRenameTagValue(e.target.value)}
-                  autoFocus
-                  className="h-8"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      renameCustomTag(tagMenu.tag, renameTagValue);
-                      closeTagMenu();
-                    } else if (e.key === 'Escape') {
-                      closeTagMenu();
-                    }
-                  }}
-                />
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2 text-xs"
-                    onClick={closeTagMenu}
-                  >
-                    Annuler
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="h-7 px-2 text-xs bg-[#4169E1] hover:bg-[#3557C1]"
-                    onClick={() => {
-                      renameCustomTag(tagMenu.tag, renameTagValue);
-                      closeTagMenu();
-                    }}
-                  >
-                    OK
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col w-40">
-                <button
-                  className="px-3 py-1.5 text-left hover:bg-[#F5F1E8]"
-                  onClick={() => {
-                    setIsRenamingTag(true);
-                    setRenameTagValue(tagMenu.tag);
-                  }}
-                >
-                  Renommer
-                </button>
-                <button
-                  className="px-3 py-1.5 text-left text-red-600 hover:bg-red-50"
-                  onClick={() => {
-                    deleteCustomTag(tagMenu.tag);
-                    closeTagMenu();
-                  }}
-                >
-                  Supprimer
-                </button>
-              </div>
             )}
           </div>
         )}
@@ -468,69 +370,38 @@ export default function Todo() {
                   className="rounded-md"
                 />
                 <div className="flex-1 min-w-0">
-                  {editingTaskId === task.id ? (
-                    <Input
-                      value={editingText}
-                      onChange={(e) => setEditingText(e.target.value)}
-                      placeholder="Modifier la tâche"
-                      className="border-[#F5F1E8] rounded-xl"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          saveEditingTask();
-                        } else if (e.key === 'Escape') {
-                          cancelEditingTask();
-                        }
-                      }}
-                      onBlur={saveEditingTask}
-                      autoFocus
-                    />
-                  ) : (
-                    <p
-                      className={`text-[#2C2C2C] cursor-pointer hover:text-[#4169E1] transition-colors ${
-                        task.completed ? 'line-through opacity-50' : ''
-                      }`}
-                      onClick={() => startEditingTask(task)}
-                    >
-                      {task.text}
+                  <p
+                    className={`text-[#2C2C2C] cursor-pointer hover:text-[#4169E1] transition-colors ${
+                      task.completed ? 'line-through opacity-50' : ''
+                    }`}
+                    onClick={() => openEditDialog(task)}
+                  >
+                    {task.text}
+                  </p>
+                  {task.description && (
+                    <p className="mt-1 text-sm text-[#8B8680]">
+                      {task.description}
                     </p>
                   )}
                 </div>
-
-                {/* Tags for this task, with removable X on hover */}
                 <div className="flex flex-wrap gap-1 max-w-xs">
                   {task.tags.map((tag) => {
                     const colors = getTagColor(tag);
                     return (
-                      <div
+                      <Badge
                         key={tag}
-                        className="relative group/tag flex items-center"
-                        draggable={false}
+                        className="rounded-lg capitalize text-xs"
+                        style={{
+                          backgroundColor: colors.bg,
+                          color: colors.text,
+                          border: `1px solid ${colors.border}`,
+                        }}
                       >
-                        <Badge
-                          className="rounded-lg capitalize text-xs pr-5"
-                          style={{
-                            backgroundColor: colors.bg,
-                            color: colors.text,
-                            border: `1px solid ${colors.border}`,
-                          }}
-                        >
-                          {tag}
-                        </Badge>
-                        <button
-                          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/tag:opacity-100 transition-opacity rounded-full hover:bg-black/5 p-[2px]"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            removeTagFromTask(task.id, tag);
-                          }}
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
+                        {tag}
+                      </Badge>
                     );
                   })}
                 </div>
-
                 <Button
                   onClick={() => deleteTask(task.id)}
                   variant="ghost"
@@ -553,6 +424,82 @@ export default function Todo() {
           </div>
         )}
       </div>
+
+      {/* Edit Task Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          closeEditDialog();
+        } else {
+          setEditDialogOpen(true);
+        }
+      }}>
+        <DialogContent className="bg-white rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Modifier la tâche</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div>
+              <Label htmlFor="editTitle">Titre</Label>
+              <Input
+                id="editTitle"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="mt-2 rounded-xl"
+                placeholder="Titre de la tâche"
+              />
+            </div>
+            <div>
+              <Label htmlFor="editDescription">Description</Label>
+              <textarea
+                id="editDescription"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={3}
+                className="mt-2 w-full rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4169E1]"
+                placeholder="Ajoute des détails, étapes, liens..."
+              />
+            </div>
+            <div>
+              <span className="text-sm text-[#8B8680]">Tags</span>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {customTags.map((tag) => {
+                  const colors = getTagColor(tag);
+                  const active = editTags.includes(tag);
+                  return (
+                    <Badge
+                      key={tag}
+                      onClick={() => toggleEditTag(tag)}
+                      className="cursor-pointer rounded-lg capitalize transition-all"
+                      style={{
+                        backgroundColor: active ? colors.text : colors.bg,
+                        color: active ? 'white' : colors.text,
+                        border: `1px solid ${colors.border}`,
+                      }}
+                    >
+                      {tag}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                className="rounded-xl border-[#8B8680]/20"
+                onClick={closeEditDialog}
+              >
+                Annuler
+              </Button>
+              <Button
+                className="rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
+                onClick={saveTaskEdits}
+              >
+                Enregistrer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
