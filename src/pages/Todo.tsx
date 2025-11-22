@@ -53,6 +53,11 @@ export default function Todo() {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
 
+  // context menu state for filter tags
+  const [tagMenu, setTagMenu] = useState<{ x: number; y: number; tag: string } | null>(null);
+  const [isRenamingTag, setIsRenamingTag] = useState(false);
+  const [renameTagValue, setRenameTagValue] = useState('');
+
   const getTagColor = (tag: string): TagColor => {
     const colors = [
       { bg: '#6B9AC415', text: '#6B9AC4', border: '#6B9AC430' },
@@ -134,6 +139,40 @@ export default function Todo() {
     }
   };
 
+  // remove a tag from one specific task
+  const removeTagFromTask = (taskId: string, tagToRemove: string) => {
+    setTasks(tasks.map(task =>
+      task.id === taskId
+        ? { ...task, tags: task.tags.filter(t => t !== tagToRemove) }
+        : task
+    ));
+  };
+
+  // delete a custom tag globally (filter bar + all tasks + selections)
+  const deleteCustomTag = (tagToDelete: string) => {
+    setCustomTags(customTags.filter(t => t !== tagToDelete));
+    setFilterTags(filterTags.filter(t => t !== tagToDelete));
+    setSelectedTags(selectedTags.filter(t => t !== tagToDelete));
+    setTasks(tasks.map(task => ({
+      ...task,
+      tags: task.tags.filter(t => t !== tagToDelete),
+    })));
+  };
+
+  // rename a custom tag globally
+  const renameCustomTag = (oldTag: string, newTagRaw: string) => {
+    const newTag = newTagRaw.trim().toLowerCase();
+    if (!newTag || newTag === oldTag) return;
+
+    setCustomTags(customTags.map(t => (t === oldTag ? newTag : t)));
+    setFilterTags(filterTags.map(t => (t === oldTag ? newTag : t)));
+    setSelectedTags(selectedTags.map(t => (t === oldTag ? newTag : t)));
+    setTasks(tasks.map(task => ({
+      ...task,
+      tags: task.tags.map(t => (t === oldTag ? newTag : t)),
+    })));
+  };
+
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
     setDraggedTask(taskId);
     e.dataTransfer.effectAllowed = 'move';
@@ -157,6 +196,12 @@ export default function Todo() {
     setDraggedTask(null);
   };
 
+  const closeTagMenu = () => {
+    setTagMenu(null);
+    setIsRenamingTag(false);
+    setRenameTagValue('');
+  };
+
   const filteredTasks = filterTags.length > 0
     ? tasks.filter(task => task.tags.some(tag => filterTags.includes(tag)))
     : tasks;
@@ -164,8 +209,13 @@ export default function Todo() {
   const completedCount = filteredTasks.filter(t => t.completed).length;
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] p-4 md:p-8">
-      <div className="max-w-3xl mx-auto">
+    <div
+      className="min-h-screen bg-[#F5F1E8] p-4 md:p-8"
+      onClick={() => {
+        if (tagMenu) closeTagMenu();
+      }}
+    >
+      <div className="max-w-3xl mx-auto relative">
         {/* Header */}
         <div className="flex items-center mb-8 md:mb-12">
           <Button
@@ -238,6 +288,17 @@ export default function Todo() {
                   <Badge
                     key={tag}
                     onClick={() => toggleFilterTag(tag)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setTagMenu({
+                        x: e.clientX,
+                        y: e.clientY,
+                        tag,
+                      });
+                      setIsRenamingTag(false);
+                      setRenameTagValue('');
+                    }}
                     className="cursor-pointer rounded-lg px-3 py-1.5 transition-all capitalize"
                     style={{
                       backgroundColor: filterTags.includes(tag) ? colors.text : colors.bg,
@@ -259,6 +320,75 @@ export default function Todo() {
               >
                 Réinitialiser les filtres
               </Button>
+            )}
+          </div>
+        )}
+
+        {/* Context menu for filter tags */}
+        {tagMenu && (
+          <div
+            className="fixed z-50 bg-white rounded-xl shadow-lg border border-black/5 py-1 text-sm"
+            style={{ top: tagMenu.y, left: tagMenu.x }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {isRenamingTag ? (
+              <div className="p-2 flex flex-col gap-2 w-48">
+                <Input
+                  value={renameTagValue}
+                  onChange={(e) => setRenameTagValue(e.target.value)}
+                  autoFocus
+                  className="h-8"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      renameCustomTag(tagMenu.tag, renameTagValue);
+                      closeTagMenu();
+                    } else if (e.key === 'Escape') {
+                      closeTagMenu();
+                    }
+                  }}
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={closeTagMenu}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="h-7 px-2 text-xs bg-[#4169E1] hover:bg-[#3557C1]"
+                    onClick={() => {
+                      renameCustomTag(tagMenu.tag, renameTagValue);
+                      closeTagMenu();
+                    }}
+                  >
+                    OK
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col w-40">
+                <button
+                  className="px-3 py-1.5 text-left hover:bg-[#F5F1E8]"
+                  onClick={() => {
+                    setIsRenamingTag(true);
+                    setRenameTagValue(tagMenu.tag);
+                  }}
+                >
+                  Renommer
+                </button>
+                <button
+                  className="px-3 py-1.5 text-left text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    deleteCustomTag(tagMenu.tag);
+                    closeTagMenu();
+                  }}
+                >
+                  Supprimer
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -365,24 +495,42 @@ export default function Todo() {
                     </p>
                   )}
                 </div>
+
+                {/* Tags for this task, with removable X on hover */}
                 <div className="flex flex-wrap gap-1 max-w-xs">
                   {task.tags.map((tag) => {
                     const colors = getTagColor(tag);
                     return (
-                      <Badge
+                      <div
                         key={tag}
-                        className="rounded-lg capitalize text-xs"
-                        style={{
-                          backgroundColor: colors.bg,
-                          color: colors.text,
-                          border: `1px solid ${colors.border}`,
-                        }}
+                        className="relative group/tag flex items-center"
+                        draggable={false}
                       >
-                        {tag}
-                      </Badge>
+                        <Badge
+                          className="rounded-lg capitalize text-xs pr-5"
+                          style={{
+                            backgroundColor: colors.bg,
+                            color: colors.text,
+                            border: `1px solid ${colors.border}`,
+                          }}
+                        >
+                          {tag}
+                        </Badge>
+                        <button
+                          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/tag:opacity-100 transition-opacity rounded-full hover:bg-black/5 p-[2px]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            removeTagFromTask(task.id, tag);
+                          }}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
+
                 <Button
                   onClick={() => deleteTask(task.id)}
                   variant="ghost"
