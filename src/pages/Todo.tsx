@@ -134,7 +134,6 @@ export default function Todo() {
     }
   };
 
-  // changed generic to HTMLElement so we can reuse for any element if needed
   const handleDragStart = (e: React.DragEvent<HTMLElement>, taskId: string) => {
   setDraggedTask(taskId);
   e.dataTransfer.effectAllowed = 'move';
@@ -143,11 +142,24 @@ export default function Todo() {
   const card = handleEl.closest('[data-task-id]') as HTMLElement | null;
 
   if (card) {
-    const rect = card.getBoundingClientRect();
-    // centre le drag image sur la carte
-    e.dataTransfer.setDragImage(card, rect.width / 2, rect.height / 2);
+    const clone = card.cloneNode(true) as HTMLElement;
+    clone.style.position = 'absolute';
+    clone.style.top = '-9999px';
+    clone.style.left = '-9999px';
+    clone.style.width = `${card.offsetWidth}px`;
+    clone.style.pointerEvents = 'none';
+    clone.style.opacity = '1';
+
+    document.body.appendChild(clone);
+
+    e.dataTransfer.setDragImage(clone, clone.offsetWidth / 2, clone.offsetHeight / 2);
+
+    setTimeout(() => {
+      document.body.removeChild(clone);
+    }, 0);
   }
 };
+
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
     e.preventDefault();
@@ -332,7 +344,7 @@ export default function Todo() {
           {filteredTasks.map((task) => (
             <div
               key={task.id}
-              data-task-id={task.id} // <-- pour retrouver la carte dans handleDragStart
+              data-task-id={task.id} 
               onDragOver={(e) => handleDragOver(e, task.id)}
               className={`
                 bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group
