@@ -73,7 +73,7 @@ export function TableauDeBord({ onNavigate, userName = 'étudiant' }: TableauDeB
         <div className="mb-8 md:mb-12 flex justify-between items-start">
           <div>
             <h1 className="text-[#2C2C2C] mb-2">{getGreeting()}, {userName} 👋</h1>
-            <p className="text-[#8B8680]">Prêt à continuer ton voyage d'apprentissage ?</p>
+            <p className="text-[#8B8680]">Prêt(e) à continuer ton voyage d'apprentissage ?</p>
           </div>
           <Button
             onClick={() => onNavigate('parametres')}
