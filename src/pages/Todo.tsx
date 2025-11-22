@@ -323,14 +323,15 @@ export default function Todo() {
           {filteredTasks.map((task) => (
             <div
               key={task.id}
-              // card is ONLY a drop target now
+              data-task-id={task.id} // <-- pour retrouver la carte dans handleDragStart
               onDragOver={(e) => handleDragOver(e, task.id)}
-              className={`bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group ${
-                draggedTask === task.id ? 'opacity-50' : ''
-              }`}
+              className={`
+                bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group
+                ${draggedTask === task.id ? 'opacity-70 scale-[0.98] shadow-lg ring-2 ring-[#4169E1]/30' : ''}
+              `}
             >
               <div className="flex items-center gap-4">
-                {/* Drag handle only */}
+                {/* handle */}
                 <div
                   className="flex items-center justify-center cursor-move flex-shrink-0"
                   draggable
@@ -369,7 +370,7 @@ export default function Todo() {
                         task.completed ? 'line-through opacity-50' : ''
                       }`}
                       onClick={() => startEditingTask(task)}
-                      draggable={false} // avoid text-drag behavior
+                      draggable={false}
                     >
                       {task.text}
                     </p>
