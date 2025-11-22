@@ -29,7 +29,7 @@ export default function Todo() {
     { id: '2', text: 'Terminer le devoir de chimie', completed: false, tags: ['étude', 'sciences'] },
     { id: '3', text: 'Pratiquer le vocabulaire anglais', completed: true, tags: ['révision', 'langues'] },
     { id: '4', text: 'Préparer les diapositives de présentation', completed: false, tags: ['étude', 'projet'] },
-    { id: '5', text: 'Faire 30 minutes d\'exercice', completed: false, tags: ['personnel', 'santé'] },
+    { id: '5', text: "Faire 30 minutes d'exercice", completed: false, tags: ['personnel', 'santé'] },
   ]);
 
   const [customTags, setCustomTags] = useState<string[]>([
@@ -50,6 +50,8 @@ export default function Todo() {
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState('');
   const [showNewTagDialog, setShowNewTagDialog] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState('');
 
   const getTagColor = (tag: string): TagColor => {
     const colors = [
@@ -64,7 +66,7 @@ export default function Todo() {
   };
 
   const toggleTask = (id: string) => {
-    setTasks(tasks.map(task => 
+    setTasks(tasks.map(task =>
       task.id === id ? { ...task, completed: !task.completed } : task
     ));
   };
@@ -86,6 +88,26 @@ export default function Todo() {
 
   const deleteTask = (id: string) => {
     setTasks(tasks.filter(task => task.id !== id));
+  };
+
+  const startEditingTask = (task: Task) => {
+    setEditingTaskId(task.id);
+    setEditingText(task.text);
+  };
+
+  const saveEditingTask = () => {
+    if (editingTaskId && editingText.trim()) {
+      setTasks(tasks.map(task =>
+        task.id === editingTaskId ? { ...task, text: editingText.trim() } : task
+      ));
+    }
+    setEditingTaskId(null);
+    setEditingText('');
+  };
+
+  const cancelEditingTask = () => {
+    setEditingTaskId(null);
+    setEditingText('');
   };
 
   const toggleTag = (tag: string) => {
@@ -179,7 +201,9 @@ export default function Todo() {
                       onChange={(e) => setNewTagName(e.target.value)}
                       placeholder="Ex: urgent, examen, projet..."
                       className="mt-2 rounded-xl"
-                      onKeyPress={(e) => e.key === 'Enter' && addCustomTag()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') addCustomTag();
+                      }}
                     />
                   </div>
                   <Button
@@ -248,7 +272,9 @@ export default function Todo() {
                 onChange={(e) => setNewTaskText(e.target.value)}
                 placeholder="Que devez-vous faire ?"
                 className="border-[#F5F1E8] rounded-xl"
-                onKeyPress={(e) => e.key === 'Enter' && addTask()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') addTask();
+                }}
               />
               <div className="flex flex-wrap gap-2">
                 {customTags.map((tag) => {
@@ -312,13 +338,32 @@ export default function Todo() {
                   className="rounded-md"
                 />
                 <div className="flex-1 min-w-0">
-                  <p
-                    className={`text-[#2C2C2C] ${
-                      task.completed ? 'line-through opacity-50' : ''
-                    }`}
-                  >
-                    {task.text}
-                  </p>
+                  {editingTaskId === task.id ? (
+                    <Input
+                      value={editingText}
+                      onChange={(e) => setEditingText(e.target.value)}
+                      placeholder="Modifier la tâche"
+                      className="border-[#F5F1E8] rounded-xl"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          saveEditingTask();
+                        } else if (e.key === 'Escape') {
+                          cancelEditingTask();
+                        }
+                      }}
+                      onBlur={saveEditingTask}
+                      autoFocus
+                    />
+                  ) : (
+                    <p
+                      className={`text-[#2C2C2C] cursor-pointer hover:text-[#4169E1] transition-colors ${
+                        task.completed ? 'line-through opacity-50' : ''
+                      }`}
+                      onClick={() => startEditingTask(task)}
+                    >
+                      {task.text}
+                    </p>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-1 max-w-xs">
                   {task.tags.map((tag) => {
@@ -353,8 +398,8 @@ export default function Todo() {
         {filteredTasks.length === 0 && (
           <div className="text-center py-12">
             <p className="text-[#8B8680]">
-              {filterTags.length > 0 
-                ? 'Aucune tâche ne correspond aux filtres sélectionnés.' 
+              {filterTags.length > 0
+                ? 'Aucune tâche ne correspond aux filtres sélectionnés.'
                 : 'Aucune tâche pour le moment. Ajoutez votre première tâche pour commencer !'}
             </p>
           </div>
