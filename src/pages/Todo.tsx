@@ -136,9 +136,18 @@ export default function Todo() {
 
   // changed generic to HTMLElement so we can reuse for any element if needed
   const handleDragStart = (e: React.DragEvent<HTMLElement>, taskId: string) => {
-    setDraggedTask(taskId);
-    e.dataTransfer.effectAllowed = 'move';
-  };
+  setDraggedTask(taskId);
+  e.dataTransfer.effectAllowed = 'move';
+
+  const handleEl = e.currentTarget as HTMLElement;
+  const card = handleEl.closest('[data-task-id]') as HTMLElement | null;
+
+  if (card) {
+    const rect = card.getBoundingClientRect();
+    // centre le drag image sur la carte
+    e.dataTransfer.setDragImage(card, rect.width / 2, rect.height / 2);
+  }
+};
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
     e.preventDefault();
