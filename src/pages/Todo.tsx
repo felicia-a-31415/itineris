@@ -134,7 +134,8 @@ export default function Todo() {
     }
   };
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
+  // changed generic to HTMLElement so we can reuse for any element if needed
+  const handleDragStart = (e: React.DragEvent<HTMLElement>, taskId: string) => {
     setDraggedTask(taskId);
     e.dataTransfer.effectAllowed = 'move';
   };
@@ -322,21 +323,29 @@ export default function Todo() {
           {filteredTasks.map((task) => (
             <div
               key={task.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, task.id)}
+              // card is ONLY a drop target now
               onDragOver={(e) => handleDragOver(e, task.id)}
-              onDragEnd={handleDragEnd}
-              className={`bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group cursor-move ${
+              className={`bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group ${
                 draggedTask === task.id ? 'opacity-50' : ''
               }`}
             >
               <div className="flex items-center gap-4">
-                <GripVertical className="w-5 h-5 text-[#8B8680]/40 flex-shrink-0" />
+                {/* Drag handle only */}
+                <div
+                  className="flex items-center justify-center cursor-move flex-shrink-0"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, task.id)}
+                  onDragEnd={handleDragEnd}
+                >
+                  <GripVertical className="w-5 h-5 text-[#8B8680]/40" />
+                </div>
+
                 <Checkbox
                   checked={task.completed}
                   onCheckedChange={() => toggleTask(task.id)}
                   className="rounded-md"
                 />
+
                 <div className="flex-1 min-w-0">
                   {editingTaskId === task.id ? (
                     <Input
@@ -360,11 +369,13 @@ export default function Todo() {
                         task.completed ? 'line-through opacity-50' : ''
                       }`}
                       onClick={() => startEditingTask(task)}
+                      draggable={false} // avoid text-drag behavior
                     >
                       {task.text}
                     </p>
                   )}
                 </div>
+
                 <div className="flex flex-wrap gap-1 max-w-xs">
                   {task.tags.map((tag) => {
                     const colors = getTagColor(tag);
@@ -383,6 +394,7 @@ export default function Todo() {
                     );
                   })}
                 </div>
+
                 <Button
                   onClick={() => deleteTask(task.id)}
                   variant="ghost"
