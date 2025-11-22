@@ -134,32 +134,10 @@ export default function Todo() {
     }
   };
 
-  const handleDragStart = (e: React.DragEvent<HTMLElement>, taskId: string) => {
-  setDraggedTask(taskId);
-  e.dataTransfer.effectAllowed = 'move';
-
-  const handleEl = e.currentTarget as HTMLElement;
-  const card = handleEl.closest('[data-task-id]') as HTMLElement | null;
-
-  if (card) {
-    const clone = card.cloneNode(true) as HTMLElement;
-    clone.style.position = 'absolute';
-    clone.style.top = '-9999px';
-    clone.style.left = '-9999px';
-    clone.style.width = `${card.offsetWidth}px`;
-    clone.style.pointerEvents = 'none';
-    clone.style.opacity = '1';
-
-    document.body.appendChild(clone);
-
-    e.dataTransfer.setDragImage(clone, clone.offsetWidth / 2, clone.offsetHeight / 2);
-
-    setTimeout(() => {
-      document.body.removeChild(clone);
-    }, 0);
-  }
-};
-
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
+    setDraggedTask(taskId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
     e.preventDefault();
@@ -344,30 +322,21 @@ export default function Todo() {
           {filteredTasks.map((task) => (
             <div
               key={task.id}
-              data-task-id={task.id} 
+              draggable
+              onDragStart={(e) => handleDragStart(e, task.id)}
               onDragOver={(e) => handleDragOver(e, task.id)}
-              className={`
-                bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group
-                ${draggedTask === task.id ? 'opacity-70 scale-[0.98] shadow-lg ring-2 ring-[#4169E1]/30' : ''}
-              `}
+              onDragEnd={handleDragEnd}
+              className={`bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group cursor-move ${
+                draggedTask === task.id ? 'opacity-50' : ''
+              }`}
             >
               <div className="flex items-center gap-4">
-                {/* handle */}
-                <div
-                  className="flex items-center justify-center cursor-move flex-shrink-0"
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, task.id)}
-                  onDragEnd={handleDragEnd}
-                >
-                  <GripVertical className="w-5 h-5 text-[#8B8680]/40" />
-                </div>
-
+                <GripVertical className="w-5 h-5 text-[#8B8680]/40 flex-shrink-0" />
                 <Checkbox
                   checked={task.completed}
                   onCheckedChange={() => toggleTask(task.id)}
                   className="rounded-md"
                 />
-
                 <div className="flex-1 min-w-0">
                   {editingTaskId === task.id ? (
                     <Input
@@ -391,13 +360,11 @@ export default function Todo() {
                         task.completed ? 'line-through opacity-50' : ''
                       }`}
                       onClick={() => startEditingTask(task)}
-                      draggable={false}
                     >
                       {task.text}
                     </p>
                   )}
                 </div>
-
                 <div className="flex flex-wrap gap-1 max-w-xs">
                   {task.tags.map((tag) => {
                     const colors = getTagColor(tag);
@@ -416,7 +383,6 @@ export default function Todo() {
                     );
                   })}
                 </div>
-
                 <Button
                   onClick={() => deleteTask(task.id)}
                   variant="ghost"
