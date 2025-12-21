@@ -297,10 +297,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </Button>
 
           <div className="flex-1">
-            <p className="text-[#8B8680] text-sm uppercase tracking-wide">
+            <h1 className="text-xl md:text-2xl font-semibold text-[#2C2C2C]">
               {getGreeting()}, {userName} 👋
-            </p>
-            <h1 className="text-2xl text-[#2C2C2C]">Pomodoro, tâches et agenda en un seul écran</h1>
+            </h1>
+            <p className="text-[#8B8680] text-sm mt-1">Prêt(e) à continuer ton voyage d&apos;apprentissage ?</p>
           </div>
 
           <Button
