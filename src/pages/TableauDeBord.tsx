@@ -497,8 +497,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               {tasks.map((task) => (
                 <div
                   key={task.id}
-                  className="rounded-2xl border border-[#E8E3D6] p-4 hover:shadow-sm transition-all"
-                  style={{ borderLeft: `4px solid ${task.color}` }}
+                  className="rounded-2xl border border-[#E8E3D6] bg-white p-4 hover:shadow-sm transition-all"
                 >
                   <div className="flex items-start gap-3">
                     <Checkbox
