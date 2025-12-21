@@ -1,27 +1,21 @@
-import './styles/globals.css'
+import './styles/globals.css';
 
 import { useEffect, useState } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom'
+import { Route, Routes, useNavigate } from 'react-router-dom';
 
-import { Bienvenue } from './pages/Bienvenue'
-import { Onboarding } from './pages/Onboarding'
-import { TableauDeBord } from './pages/TableauDeBord'
-import { Parametres } from './pages/Parametres'
-import Todo from './pages/Todo'
-import Minuteur from './pages/Minuteur'
-import Statistiques from './pages/Statistiques'
-import Conseils from './pages/Conseils'
-import NotesRapides from './pages/NotesRapides'
-import Assistant from './pages/Assistant'
-import Erreur from './pages/Erreur'
+import { Bienvenue } from './pages/Bienvenue';
+import { Onboarding } from './pages/Onboarding';
+import { Parametres } from './pages/Parametres';
+import { TableauDeBord } from './pages/TableauDeBord';
+import Erreur from './pages/Erreur';
 
-import { loadUserData, saveUserData, type UserData } from './lib/storage'
+import { loadUserData, saveUserData, type UserData } from './lib/storage';
 
 const STORAGE_KEY = 'itineris_user_data';
 
 export default function App() {
   const [userData, setUserData] = useState<UserData | null>(() => loadUserData() ?? null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
 
   const defaultUserData: UserData = {
@@ -31,7 +25,7 @@ export default function App() {
     strongSubjects: [],
     weakSubjects: [],
     lifeGoals: '',
-  }
+  };
 
   // 1) Au démarrage: charger les données + rediriger si nécessaire
   useEffect(() => {
@@ -50,17 +44,17 @@ export default function App() {
 
   // 2) Quand l’onboarding est terminé: sauver + rediriger
   const handleOnboardingComplete = (data: UserData) => {
-    setUserData(data)
-    saveUserData(data)
+    setUserData(data);
+    saveUserData(data);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    navigate('/tableaudebord')
-  }
+    navigate('/tableaudebord');
+  };
 
   const handleSettingsSave = (data: UserData) => {
-    setUserData(data)
-    saveUserData(data)
+    setUserData(data);
+    saveUserData(data);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
+  };
 
   if (isLoading) {
     return (
@@ -73,39 +67,21 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#F5F1E8] text-[#2C2C2C]">
       <Routes>
+        <Route path="/" element={<Bienvenue onGetStarted={() => navigate('/onboarding')} />} />
+        <Route path="/onboarding" element={<Onboarding onComplete={handleOnboardingComplete} />} />
+        <Route path="/tableaudebord" element={<TableauDeBord userName={userData?.name} />} />
         <Route
-          path="/"
-          element={<Bienvenue onGetStarted={() => navigate('/onboarding')} />}
-        />
-        <Route
-          path="/onboarding"
-          element={<Onboarding onComplete={handleOnboardingComplete} />}
-        />
-        <Route
-          path="/tableaudebord"
-          element={
-            <TableauDeBord
-              onNavigate={(screen) => navigate(`/${screen}`)}
-              userName={userData?.name}
-            />
-          }
-        />
-        <Route 
-          path="/parametres" 
+          path="/parametres"
           element={
             <Parametres
               onBack={() => navigate('/tableaudebord')}
               userData={userData ?? defaultUserData}
               onSave={handleSettingsSave}
-           />} />
-        <Route path="/todo" element={<Todo />} />
-        <Route path="/minuteur" element={<Minuteur />} />
-        <Route path="/statistiques" element={<Statistiques />} />
-        <Route path="/conseils" element={<Conseils />} />
-        <Route path="/notesrapides" element={<NotesRapides />} />
-        <Route path="/assistant" element={<Assistant />} />
+            />
+          }
+        />
         <Route path="/*" element={<Erreur />} />
       </Routes>
     </div>
-  )
+  );
 }

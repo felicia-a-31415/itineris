@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, X, GripVertical, Calendar, List } from 'lucide-react';
+import {
+  ArrowLeft,
+  Flame,
+  Pause,
+  Play,
+  Plus,
+  RotateCcw,
+  Sparkles,
+  Upload,
+  X,
+} from 'lucide-react';
 
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
-import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 
 interface Task {
   id: string;
@@ -38,10 +46,37 @@ const PRIORITIES = [
   { value: 3, label: '!!!', name: 'Haute' },
 ] as const;
 
+const getCurrentWeekDates = () => {
+  const today = new Date();
+  const currentDay = today.getDay();
+  const diff = currentDay === 0 ? -6 : 1 - currentDay; // lundi comme début
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + diff);
+
+  const dates: Date[] = [];
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    dates.push(date);
+  }
+  return dates;
+};
+
+const formatDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getDayName = (date: Date) => {
+  const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+  return days[date.getDay()];
+};
+
 export default function Todo() {
   const navigate = useNavigate();
-
-  const [viewMode, setViewMode] = useState<'list' | 'agenda'>('agenda');
+  const weekDates = getCurrentWeekDates();
 
   const [tasks, setTasks] = useState<Task[]>([
     {
@@ -51,6 +86,7 @@ export default function Todo() {
       completed: false,
       color: '#6B9AC4',
       priority: 2,
+      date: formatDate(weekDates[1]),
     },
     {
       id: '2',
@@ -59,6 +95,8 @@ export default function Todo() {
       completed: false,
       color: '#4169E1',
       priority: 3,
+      date: formatDate(weekDates[2]),
+      time: '09:00',
     },
     {
       id: '3',
@@ -67,22 +105,10 @@ export default function Todo() {
       completed: false,
       color: '#6B9AC4',
       priority: 1,
-      date: '2024-12-22',
-      time: '10:00',
-    },
-    {
-      id: '4',
-      name: 'Étudier physique',
-      description: 'Chapitre 5 - Électromagnétisme',
-      completed: false,
-      color: '#4169E1',
-      priority: 2,
-      date: '2024-12-22',
+      date: formatDate(weekDates[3]),
+      time: '14:00',
     },
   ]);
-
-  const [showAddTaskDialog, setShowAddTaskDialog] = useState(false);
-  const [draggedTask, setDraggedTask] = useState<string | null>(null);
 
   // édition inline (liste)
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -96,39 +122,55 @@ export default function Todo() {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
 
-  const getCurrentWeekDates = () => {
-    const today = new Date();
-    const currentDay = today.getDay();
-    const diff = currentDay === 0 ? -6 : 1 - currentDay; // lundi comme début
-    const monday = new Date(today);
-    monday.setDate(today.getDate() + diff);
+  // pomodoro
+  const [timerMinutes, setTimerMinutes] = useState(25);
+  const [timeLeft, setTimeLeft] = useState(timerMinutes * 60);
+  const [isRunning, setIsRunning] = useState(false);
+  const [sessionsCompleted, setSessionsCompleted] = useState(0);
+  const [studiedMinutes, setStudiedMinutes] = useState(120);
+  const [streakDays, setStreakDays] = useState(3);
+  const [uploadNotice, setUploadNotice] = useState<string | null>(null);
+  const [aiNotice, setAiNotice] = useState<string | null>(null);
 
-    const dates: Date[] = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      dates.push(date);
+  const safeMinutes = Math.max(5, timerMinutes || 5);
+
+  useEffect(() => {
+    if (!isRunning) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          setIsRunning(false);
+          setSessionsCompleted((s) => s + 1);
+          setStudiedMinutes((m) => m + safeMinutes);
+          setStreakDays((s) => Math.max(s, 1) + 1);
+          return safeMinutes * 60;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isRunning, safeMinutes]);
+
+  useEffect(() => {
+    if (!isRunning) {
+      setTimeLeft(safeMinutes * 60);
     }
-    return dates;
+  }, [safeMinutes, isRunning]);
+
+  const formatTime = (value: number) => {
+    const minutes = Math.floor(value / 60)
+      .toString()
+      .padStart(2, '0');
+    const seconds = Math.floor(value % 60)
+      .toString()
+      .padStart(2, '0');
+    return `${minutes}:${seconds}`;
   };
 
-  const weekDates = getCurrentWeekDates();
-
-  const formatDate = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  const getDayName = (date: Date) => {
-    const days = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
-    return days[date.getDay()];
-  };
-
-  const isToday = (date: Date) => {
-    const today = new Date();
-    return date.toDateString() === today.toDateString();
+  const getPriorityLabel = (priority: 1 | 2 | 3) => {
+    return PRIORITIES.find((p) => p.value === priority)?.label || '!';
   };
 
   const getTasksForDate = (date: string) => {
@@ -157,6 +199,7 @@ export default function Todo() {
     };
 
     setTasks((prev) => [...prev, newTask]);
+    setAiNotice(null);
 
     // reset form
     setNewTaskName('');
@@ -165,7 +208,6 @@ export default function Todo() {
     setSelectedPriority(1);
     setSelectedDate('');
     setSelectedTime('');
-    setShowAddTaskDialog(false);
   };
 
   const toggleTask = (id: string) => {
@@ -198,152 +240,260 @@ export default function Todo() {
     setEditingText('');
   };
 
-  const handleDragStart = (e: React.DragEvent, taskId: string) => {
-    setDraggedTask(taskId);
-    e.dataTransfer.effectAllowed = 'move';
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
   };
 
-  const handleDragOver = (e: React.DragEvent, taskId: string) => {
-    e.preventDefault();
-    if (draggedTask === null || draggedTask === taskId) return;
+  const generateAiTasks = () => {
+    const aiTasks: Task[] = [
+      {
+        id: `ai-${Date.now()}-1`,
+        name: 'Synthèse des cours de la semaine',
+        description: 'IA: blocs de 45 min avec pauses',
+        completed: false,
+        color: '#9B59B6',
+        priority: 2,
+        date: formatDate(weekDates[4]),
+        time: '10:30',
+      },
+      {
+        id: `ai-${Date.now()}-2`,
+        name: 'Préparer la présentation de vendredi',
+        description: 'IA: slides + répétition 20 min',
+        completed: false,
+        color: '#E16941',
+        priority: 3,
+        date: formatDate(weekDates[5]),
+        time: '16:00',
+      },
+      {
+        id: `ai-${Date.now()}-3`,
+        name: 'Lecture rapide des notes',
+        description: 'IA: survol des chapitres avant dodo',
+        completed: false,
+        color: '#41E169',
+        priority: 1,
+        date: formatDate(weekDates[1]),
+        time: '21:00',
+      },
+    ];
 
-    const draggedIndex = tasks.findIndex((t) => t.id === draggedTask);
-    const targetIndex = tasks.findIndex((t) => t.id === taskId);
-
-    const newTasks = [...tasks];
-    const [draggedItem] = newTasks.splice(draggedIndex, 1);
-    newTasks.splice(targetIndex, 0, draggedItem);
-
-    setTasks(newTasks);
+    setTasks((prev) => [...prev, ...aiTasks]);
+    setAiNotice('Tâches générées automatiquement à partir de votre agenda (mock).');
   };
 
-  const handleDragEnd = () => setDraggedTask(null);
+  const handleAgendaImageUpload = (file?: File) => {
+    if (!file) return;
 
-  const getPriorityLabel = (priority: 1 | 2 | 3) => {
-    return PRIORITIES.find((p) => p.value === priority)?.label || '!';
+    const extracted: Task[] = [
+      {
+        id: `photo-${Date.now()}-1`,
+        name: 'Importer le planning photo',
+        description: `IA: extrait depuis ${file.name}`,
+        completed: false,
+        color: '#F39C12',
+        priority: 2,
+        date: formatDate(weekDates[2]),
+        time: '12:00',
+      },
+    ];
+
+    setTasks((prev) => [...prev, ...extracted]);
+    setUploadNotice(`Photo importée et analysée (mock) : ${file.name}`);
   };
 
-  const listTasks = tasks;
-  const completedCount = listTasks.filter((t) => t.completed).length;
+  const progress = Math.min(100, Math.round(((safeMinutes * 60 - timeLeft) / (safeMinutes * 60)) * 100));
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((t) => t.completed).length;
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center mb-8 md:mb-12">
+    <div className="min-h-screen bg-[#F5F1E8] p-6 md:p-10">
+      <div className="max-w-6xl mx-auto space-y-8">
+        <div className="flex items-center gap-4">
           <Button
             onClick={() => navigate(-1)}
             variant="ghost"
-            className="mr-4 text-[#8B8680] hover:text-[#2C2C2C] hover:bg-white/50"
+            className="text-[#8B8680] hover:text-[#2C2C2C] hover:bg-white/50"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
 
           <div className="flex-1">
-            <h1 className="text-[#2C2C2C]">
-              {viewMode === 'list' ? 'Liste de tâches' : 'Agenda'}
-            </h1>
-            <p className="text-[#8B8680] text-sm">
-              {viewMode === 'list'
-                ? `${completedCount} sur ${listTasks.length} tâches terminées`
-                : 'Organisez vos tâches par jour'}
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'agenda' | 'list')}>
-              <TabsList className="bg-white rounded-xl">
-                <TabsTrigger
-                  value="list"
-                  className="rounded-lg data-[state=active]:bg-[#4169E1] data-[state=active]:text-white"
-                >
-                  <List className="w-4 h-4 mr-2" />
-                  Liste
-                </TabsTrigger>
-                <TabsTrigger
-                  value="agenda"
-                  className="rounded-lg data-[state=active]:bg-[#4169E1] data-[state=active]:text-white"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Agenda
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <Button
-              onClick={() => setShowAddTaskDialog(true)}
-              className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl shadow-md"
-            >
-              <Plus className="w-5 h-5" />
-            </Button>
+            <p className="text-[#8B8680] text-sm uppercase tracking-wide">Rituel focus</p>
+            <h1 className="text-2xl text-[#2C2C2C]">Pomodoro, tâches et agenda en un seul écran</h1>
           </div>
         </div>
 
-        {/* Add Task Dialog */}
-        <Dialog open={showAddTaskDialog} onOpenChange={setShowAddTaskDialog}>
-          <DialogContent className="bg-white rounded-2xl max-w-lg" aria-describedby={undefined}>
-            <DialogHeader>
-              <DialogTitle>Ajouter une tâche</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4 pt-4">
+        <div className="grid gap-6 lg:grid-cols-[1.1fr,1.4fr] items-start">
+          {/* Pomodoro */}
+          <section className="bg-white rounded-3xl p-6 shadow-sm">
+            <div className="flex items-start justify-between">
               <div>
+                <p className="text-sm text-[#8B8680]">Minuteur Pomodoro</p>
+                <h2 className="text-xl text-[#2C2C2C]">Personnalise la durée et lance ta session</h2>
+              </div>
+              <Flame className="w-5 h-5 text-[#E16941]" />
+            </div>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-[1.1fr,1fr] items-center">
+              <div className="flex items-center justify-center">
+                <div
+                  className="relative w-48 h-48 rounded-full flex items-center justify-center"
+                  style={{
+                    background: `conic-gradient(#4169E1 ${progress * 3.6}deg, #E8E3D6 ${progress * 3.6}deg)`,
+                  }}
+                >
+                  <div className="absolute inset-3 bg-white rounded-full shadow-inner flex flex-col items-center justify-center">
+                    <span className="text-3xl font-semibold text-[#2C2C2C]">{formatTime(timeLeft)}</span>
+                    <span className="text-xs text-[#8B8680]">{timerMinutes} min</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-[#2C2C2C]">Durée du focus (minutes)</Label>
+                <Input
+                  type="number"
+                  min={5}
+                  max={120}
+                  value={timerMinutes}
+                  onChange={(e) => {
+                    const next = Math.max(5, Math.min(120, Number(e.target.value) || 5));
+                    setTimerMinutes(next);
+                  }}
+                  className="rounded-2xl border-[#E8E3D6]"
+                />
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setIsRunning((r) => !r)}
+                    className="flex-1 bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-2xl"
+                  >
+                    {isRunning ? (
+                      <>
+                        <Pause className="w-4 h-4 mr-2" />
+                        Pause
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4 mr-2" />
+                        Lancer
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setIsRunning(false);
+                      setTimeLeft(safeMinutes * 60);
+                    }}
+                    variant="outline"
+                    className="rounded-2xl border-[#E8E3D6]"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Reset
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between text-sm text-[#8B8680]">
+                  <span>{sessionsCompleted} sessions terminées</span>
+                  <span>{studiedMinutes} min étudiées</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Tasks */}
+          <section className="bg-white rounded-3xl p-6 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm text-[#8B8680]">Tâches à faire</p>
+                <h2 className="text-xl text-[#2C2C2C]">Ajoute, édite ou demande une liste à l&apos;IA</h2>
+              </div>
+              <Button
+                onClick={generateAiTasks}
+                variant="outline"
+                className="rounded-2xl border-[#E8E3D6] text-[#2C2C2C]"
+              >
+                <Sparkles className="w-4 h-4 mr-2 text-[#4169E1]" />
+                Proposer avec l&apos;IA
+              </Button>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2 mt-4">
+              <div className="space-y-2">
                 <Label htmlFor="taskName">Nom de la tâche</Label>
                 <Input
                   id="taskName"
                   value={newTaskName}
                   onChange={(e) => setNewTaskName(e.target.value)}
-                  placeholder="Ex: Réunion d'équipe"
-                  className="mt-2 rounded-xl"
+                  placeholder="Ex: Relire chapitre 4"
+                  className="rounded-2xl border-[#E8E3D6]"
                 />
               </div>
 
-              <div>
-                <Label htmlFor="taskDescription">Description (optionnelle)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="taskDate">Date (agenda en ligne)</Label>
+                <Input
+                  id="taskDate"
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="rounded-2xl border-[#E8E3D6]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="taskTime">Heure (optionnel)</Label>
+                <Input
+                  id="taskTime"
+                  type="time"
+                  value={selectedTime}
+                  onChange={(e) => setSelectedTime(e.target.value)}
+                  className="rounded-2xl border-[#E8E3D6]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Priorité</Label>
+                <div className="flex gap-2">
+                  {PRIORITIES.map((priority) => (
+                    <button
+                      key={priority.value}
+                      type="button"
+                      onClick={() => setSelectedPriority(priority.value)}
+                      className={`px-3 py-2 rounded-xl text-sm transition-all ${
+                        selectedPriority === priority.value
+                          ? 'bg-[#4169E1] text-white shadow'
+                          : 'bg-[#F5F1E8] text-[#2C2C2C]'
+                      }`}
+                    >
+                      {priority.label} {priority.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="taskDescription">Description</Label>
                 <Textarea
                   id="taskDescription"
                   value={newTaskDescription}
                   onChange={(e) => setNewTaskDescription(e.target.value)}
-                  placeholder="Ex: Discuter du projet final"
-                  className="mt-2 rounded-xl min-h-[80px]"
+                  placeholder="Détails, ressources ou minuteur à associer"
+                  className="rounded-2xl border-[#E8E3D6] min-h-[80px]"
                 />
               </div>
 
-              {viewMode === 'agenda' && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="taskDate">Date</Label>
-                    <Input
-                      id="taskDate"
-                      type="date"
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      className="mt-2 rounded-xl"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="taskTime">Heure (optionnelle)</Label>
-                    <Input
-                      id="taskTime"
-                      type="time"
-                      value={selectedTime}
-                      onChange={(e) => setSelectedTime(e.target.value)}
-                      className="mt-2 rounded-xl"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div>
+              <div className="md:col-span-2 space-y-2">
                 <Label>Couleur</Label>
-                <div className="flex gap-2 mt-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap">
                   {TASK_COLORS.map((color) => (
                     <button
                       key={color}
                       type="button"
                       onClick={() => setSelectedColor(color)}
-                      className={`w-10 h-10 rounded-lg transition-all ${
+                      className={`w-10 h-10 rounded-xl transition-all ${
                         selectedColor === color ? 'ring-2 ring-offset-2 ring-[#4169E1]' : ''
                       }`}
                       style={{ backgroundColor: color }}
@@ -352,77 +502,30 @@ export default function Todo() {
                 </div>
               </div>
 
-              <div>
-                <Label>Priorité</Label>
-                <div className="flex gap-2 mt-2">
-                  {PRIORITIES.map((priority) => (
-                    <button
-                      key={priority.value}
-                      type="button"
-                      onClick={() => setSelectedPriority(priority.value)}
-                      className={`px-4 py-2 rounded-lg transition-all text-white ${
-                        selectedPriority === priority.value
-                          ? 'ring-2 ring-offset-2 ring-[#4169E1]'
-                          : 'opacity-60'
-                      }`}
-                      style={{ backgroundColor: selectedColor }}
-                    >
-                      {priority.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-2">
+              <div className="md:col-span-2 flex flex-wrap gap-2">
                 <Button
                   onClick={addTask}
-                  className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl flex-1"
+                  className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-2xl"
                 >
-                  Ajouter
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter à la liste
                 </Button>
-
-                <Button
-                  onClick={() => {
-                    setShowAddTaskDialog(false);
-                    setNewTaskName('');
-                    setNewTaskDescription('');
-                    setSelectedColor(TASK_COLORS[0]);
-                    setSelectedPriority(1);
-                    setSelectedDate('');
-                    setSelectedTime('');
-                  }}
-                  variant="outline"
-                  className="rounded-xl border-[#8B8680]/20"
-                >
-                  Annuler
-                </Button>
+                {aiNotice && <span className="text-xs text-[#8B8680]">{aiNotice}</span>}
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
 
-        {/* List View */}
-        {viewMode === 'list' && (
-          <div className="max-w-3xl mx-auto">
-            <div className="space-y-3">
-              {listTasks.map((task) => (
+            <div className="mt-6 space-y-3 max-h-[260px] overflow-y-auto pr-1">
+              {tasks.map((task) => (
                 <div
                   key={task.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, task.id)}
-                  onDragOver={(e) => handleDragOver(e, task.id)}
-                  onDragEnd={handleDragEnd}
-                  className={`bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group cursor-move ${
-                    draggedTask === task.id ? 'opacity-50' : ''
-                  }`}
+                  className="rounded-2xl border border-[#E8E3D6] p-4 hover:shadow-sm transition-all"
                   style={{ borderLeft: `4px solid ${task.color}` }}
                 >
-                  <div className="flex items-start gap-4">
-                    <GripVertical className="w-5 h-5 text-[#8B8680]/40 flex-shrink-0 mt-1" />
+                  <div className="flex items-start gap-3">
                     <Checkbox
                       checked={task.completed}
                       onCheckedChange={() => toggleTask(task.id)}
-                      className="rounded-md mt-1"
+                      className="mt-1 rounded-md"
                     />
 
                     <div className="flex-1 min-w-0">
@@ -431,7 +534,7 @@ export default function Todo() {
                           value={editingText}
                           onChange={(e) => setEditingText(e.target.value)}
                           placeholder="Modifier la tâche"
-                          className="border-[#F5F1E8] rounded-xl"
+                          className="border-[#E8E3D6] rounded-xl"
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') saveEditingTask();
                             if (e.key === 'Escape') cancelEditingTask();
@@ -440,163 +543,213 @@ export default function Todo() {
                           autoFocus
                         />
                       ) : (
-                        <>
-                          <div className="flex items-center gap-2">
-                            <p
-                              className={`text-[#2C2C2C] cursor-pointer hover:text-[#4169E1] transition-colors ${
-                                task.completed ? 'line-through opacity-50' : ''
-                              }`}
-                              onClick={() => startEditingTask(task)}
-                            >
-                              {task.name}
-                            </p>
-
-                            <span
-                              className="text-xs px-2 py-0.5 rounded"
-                              style={{
-                                backgroundColor: `${task.color}20`,
-                                color: task.color,
-                              }}
-                            >
-                              {getPriorityLabel(task.priority)}
-                            </span>
-                          </div>
-
-                          {task.description && (
-                            <p className="text-sm text-[#8B8680] mt-1">{task.description}</p>
-                          )}
-
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p
+                            className={`text-[#2C2C2C] cursor-pointer hover:text-[#4169E1] transition-colors ${
+                              task.completed ? 'line-through opacity-60' : ''
+                            }`}
+                            onClick={() => startEditingTask(task)}
+                          >
+                            {task.name}
+                          </p>
+                          <span
+                            className="text-xs px-2 py-0.5 rounded"
+                            style={{ backgroundColor: `${task.color}20`, color: task.color }}
+                          >
+                            {getPriorityLabel(task.priority)}
+                          </span>
                           {task.date && (
-                            <p className="text-xs text-[#8B8680] mt-1">
-                              📅 {task.date} {task.time ? `à ${task.time}` : ''}
-                            </p>
+                            <span className="text-xs text-[#8B8680]">
+                              {task.date} {task.time ? `· ${task.time}` : ''}
+                            </span>
                           )}
-                        </>
+                        </div>
+                      )}
+
+                      {task.description && (
+                        <p className="text-sm text-[#8B8680] mt-1 line-clamp-2">{task.description}</p>
                       )}
                     </div>
 
                     <Button
                       onClick={() => deleteTask(task.id)}
                       variant="ghost"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-[#8B8680] hover:text-red-500 hover:bg-red-50 rounded-lg p-2 h-auto flex-shrink-0"
+                      className="text-[#8B8680] hover:text-red-500 hover:bg-red-50 rounded-lg p-2 h-auto flex-shrink-0"
                     >
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
               ))}
+
+              {tasks.length === 0 && (
+                <div className="text-center text-sm text-[#8B8680] py-6">
+                  Aucune tâche. Ajoute ta liste ou laisse l&apos;IA en créer une pour toi.
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
+        {/* Agenda en ligne + import photo */}
+        <section className="bg-white rounded-3xl p-6 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-sm text-[#8B8680]">Agenda en ligne</p>
+              <h2 className="text-xl text-[#2C2C2C]">Encode à la main ou laisse l&apos;IA lire ta photo</h2>
+              <p className="text-xs text-[#8B8680] mt-1">
+                Les tâches datées apparaissent directement dans cette grille hebdo.
+              </p>
             </div>
 
-            {listTasks.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-[#8B8680]">
-                  Aucune tâche pour le moment. Ajoutez votre première tâche pour commencer !
-                </p>
-              </div>
-            )}
+            <div className="flex gap-2 items-center">
+              <label
+                htmlFor="agendaUpload"
+                className="flex items-center gap-2 px-4 py-2 rounded-2xl border border-dashed border-[#E8E3D6] text-[#2C2C2C] cursor-pointer hover:bg-[#F5F1E8]"
+              >
+                <Upload className="w-4 h-4" />
+                Importer une photo
+              </label>
+              <input
+                id="agendaUpload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleAgendaImageUpload(e.target.files?.[0])}
+              />
+            </div>
           </div>
-        )}
 
-        {/* Agenda View */}
-        {viewMode === 'agenda' && (
-          <div>
-            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-              <div className="grid grid-cols-7 border-b border-[#F5F1E8]">
-                {weekDates.map((date, index) => (
+          {(uploadNotice || aiNotice) && (
+            <div className="mt-3 text-xs text-[#8B8680] bg-[#F5F1E8] rounded-2xl px-3 py-2 inline-flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#4169E1]" />
+              {uploadNotice || aiNotice}
+            </div>
+          )}
+
+          <div className="mt-6">
+            <div className="grid grid-cols-7 border-b border-[#F5F1E8]">
+              {weekDates.map((date, index) => (
+                <div
+                  key={index}
+                  className={`p-3 text-center border-r border-[#F5F1E8] last:border-r-0 ${
+                    isToday(date) ? 'bg-[#4169E1]/5' : ''
+                  }`}
+                >
+                  <div className="text-xs text-[#8B8680] uppercase mb-1">{getDayName(date)}</div>
+                  <div
+                    className={`text-lg font-semibold ${
+                      isToday(date)
+                        ? 'text-white bg-[#4169E1] w-10 h-10 rounded-full flex items-center justify-center mx-auto'
+                        : 'text-[#2C2C2C]'
+                    }`}
+                  >
+                    {date.getDate()}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7 min-h-[380px]">
+              {weekDates.map((date, index) => {
+                const dateString = formatDate(date);
+                const tasksForDay = getTasksForDate(dateString);
+
+                return (
                   <div
                     key={index}
-                    className={`p-4 text-center border-r border-[#F5F1E8] last:border-r-0 ${
+                    className={`border-r border-[#F5F1E8] last:border-r-0 p-3 ${
                       isToday(date) ? 'bg-[#4169E1]/5' : ''
                     }`}
                   >
-                    <div className="text-xs text-[#8B8680] uppercase mb-1">{getDayName(date)}</div>
-                    <div
-                      className={`text-2xl ${
-                        isToday(date)
-                          ? 'text-white bg-[#4169E1] w-10 h-10 rounded-full flex items-center justify-center mx-auto'
-                          : 'text-[#2C2C2C]'
-                      }`}
-                    >
-                      {date.getDate()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-7 min-h-[500px]">
-                {weekDates.map((date, index) => {
-                  const dateString = formatDate(date);
-                  const tasksForDay = getTasksForDate(dateString);
-
-                  return (
-                    <div
-                      key={index}
-                      className={`border-r border-[#F5F1E8] last:border-r-0 p-2 ${
-                        isToday(date) ? 'bg-[#4169E1]/5' : ''
-                      }`}
-                    >
-                      <div className="space-y-2">
-                        {tasksForDay.map((task) => (
-                          <div
-                            key={task.id}
-                            className="rounded-lg p-2 text-xs group relative"
-                            style={{
-                              backgroundColor: `${task.color}15`,
-                              borderLeft: `3px solid ${task.color}`,
-                            }}
-                          >
-                            <div className="flex items-start gap-2">
-                              <Checkbox
-                                checked={task.completed}
-                                onCheckedChange={() => toggleTask(task.id)}
-                                className="rounded-sm mt-0.5 h-3 w-3"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1 mb-1">
-                                  {task.time && (
-                                    <span className="text-[10px] text-[#8B8680]">{task.time}</span>
-                                  )}
-                                  <span
-                                    className="text-[9px] px-1 rounded"
-                                    style={{ backgroundColor: task.color, color: 'white' }}
-                                  >
-                                    {getPriorityLabel(task.priority)}
-                                  </span>
-                                </div>
-
-                                <div
-                                  className={`text-[#2C2C2C] break-words ${
-                                    task.completed ? 'line-through opacity-50' : ''
-                                  }`}
+                    <div className="space-y-2">
+                      {tasksForDay.map((task) => (
+                        <div
+                          key={task.id}
+                          className="rounded-lg p-2 text-xs"
+                          style={{
+                            backgroundColor: `${task.color}15`,
+                            borderLeft: `3px solid ${task.color}`,
+                          }}
+                        >
+                          <div className="flex items-start gap-2">
+                            <Checkbox
+                              checked={task.completed}
+                              onCheckedChange={() => toggleTask(task.id)}
+                              className="rounded-sm mt-0.5 h-3 w-3"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1 mb-1">
+                                {task.time && <span className="text-[10px] text-[#8B8680]">{task.time}</span>}
+                                <span
+                                  className="text-[9px] px-1 rounded"
+                                  style={{ backgroundColor: task.color, color: 'white' }}
                                 >
-                                  {task.name}
-                                </div>
-
-                                {task.description && (
-                                  <div className="text-[10px] text-[#8B8680] mt-1 break-words">
-                                    {task.description}
-                                  </div>
-                                )}
+                                  {getPriorityLabel(task.priority)}
+                                </span>
                               </div>
 
-                              <Button
-                                onClick={() => deleteTask(task.id)}
-                                variant="ghost"
-                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto hover:bg-red-50"
+                              <div
+                                className={`text-[#2C2C2C] break-words ${
+                                  task.completed ? 'line-through opacity-50' : ''
+                                }`}
                               >
-                                <X className="w-3 h-3 text-red-500" />
-                              </Button>
+                                {task.name}
+                              </div>
+
+                              {task.description && (
+                                <div className="text-[10px] text-[#8B8680] mt-1 break-words">
+                                  {task.description}
+                                </div>
+                              )}
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        )}
+        </section>
+
+        {/* Statistiques */}
+        <section className="grid gap-4 md:grid-cols-3">
+          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
+            <p className="text-sm text-[#8B8680]">Temps total étudié</p>
+            <p className="text-2xl text-[#2C2C2C]">{studiedMinutes} min</p>
+            <div className="h-2 bg-[#F5F1E8] rounded-full overflow-hidden">
+              <div className="h-full bg-[#4169E1]" style={{ width: `${Math.min(100, (studiedMinutes / 240) * 100)}%` }} />
+            </div>
+          </div>
+          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
+            <p className="text-sm text-[#8B8680]">Streak</p>
+            <p className="text-2xl text-[#2C2C2C]">{streakDays} jours</p>
+            <div className="flex gap-1 mt-1">
+              {Array.from({ length: 7 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`flex-1 h-2 rounded-full ${
+                    idx < Math.min(streakDays, 7) ? 'bg-[#E16941]' : 'bg-[#F5F1E8]'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
+            <p className="text-sm text-[#8B8680]">Tâches terminées</p>
+            <p className="text-2xl text-[#2C2C2C]">
+              {completedTasks}/{totalTasks}
+            </p>
+            <div className="h-2 bg-[#F5F1E8] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[#41E169]"
+                style={{ width: totalTasks === 0 ? '0%' : `${(completedTasks / totalTasks) * 100}%` }}
+              />
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
