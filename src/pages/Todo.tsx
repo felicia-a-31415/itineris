@@ -1,238 +1,214 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, X, GripVertical, Filter, Tag } from 'lucide-react';
+import { ArrowLeft, Plus, X, GripVertical, Calendar, List } from 'lucide-react';
+
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
-import { Badge } from '../ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 
 interface Task {
   id: string;
-  text: string;
+  name: string;
+  description: string;
   completed: boolean;
-  tags: string[];
-  description?: string;
+  color: string;
+  priority: 1 | 2 | 3; // !, !!, !!!
+  date?: string; // yyyy-mm-dd (optionnel)
+  time?: string; // hh:mm (optionnel)
 }
 
-interface TagColor {
-  bg: string;
-  text: string;
-  border: string;
-}
+const TASK_COLORS = [
+  '#6B9AC4', // Bleu pâle
+  '#4169E1', // Bleu royal
+  '#8B8680', // Gris
+  '#E16941', // Orange
+  '#41E169', // Vert
+  '#9B59B6', // Violet
+  '#F39C12', // Jaune
+  '#E91E63', // Rose
+];
 
-type TagDialogTarget = 'create' | 'edit' | 'global' | null;
+const PRIORITIES = [
+  { value: 1, label: '!', name: 'Basse' },
+  { value: 2, label: '!!', name: 'Moyenne' },
+  { value: 3, label: '!!!', name: 'Haute' },
+] as const;
 
 export default function Todo() {
   const navigate = useNavigate();
 
+  const [viewMode, setViewMode] = useState<'list' | 'agenda'>('agenda');
+
   const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', text: 'Réviser les notes de mathématiques', completed: false, tags: ['étude', 'mathématiques'] },
-    { id: '2', text: 'Terminer le devoir de chimie', completed: false, tags: ['étude', 'sciences'] },
-    { id: '3', text: 'Pratiquer le vocabulaire anglais', completed: true, tags: ['révision', 'langues'] },
-    { id: '4', text: 'Préparer les diapositives de présentation', completed: false, tags: ['étude', 'projet'] },
-    { id: '5', text: "Faire 30 minutes d'exercice", completed: false, tags: ['personnel', 'santé'] },
+    {
+      id: '1',
+      name: 'Réviser les notes de mathématiques',
+      description: 'Chapitres 3-5',
+      completed: false,
+      color: '#6B9AC4',
+      priority: 2,
+    },
+    {
+      id: '2',
+      name: 'Terminer le devoir de chimie',
+      description: 'Exercices page 45-48',
+      completed: false,
+      color: '#4169E1',
+      priority: 3,
+    },
+    {
+      id: '3',
+      name: "Réunion d'équipe",
+      description: 'Discuter du projet final',
+      completed: false,
+      color: '#6B9AC4',
+      priority: 1,
+      date: '2024-12-22',
+      time: '10:00',
+    },
+    {
+      id: '4',
+      name: 'Étudier physique',
+      description: 'Chapitre 5 - Électromagnétisme',
+      completed: false,
+      color: '#4169E1',
+      priority: 2,
+      date: '2024-12-22',
+    },
   ]);
 
-  const [customTags, setCustomTags] = useState<string[]>([
-    'étude',
-    'révision',
-    'personnel',
-    'mathématiques',
-    'sciences',
-    'langues',
-    'projet',
-    'santé',
-  ]);
-
-  // création de tâche
-  const [newTaskText, setNewTaskText] = useState('');
-  const [newTaskDescription, setNewTaskDescription] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [showAddTask, setShowAddTask] = useState(false);
-
-  // filtres / drag
-  const [filterTags, setFilterTags] = useState<string[]>([]);
+  const [showAddTaskDialog, setShowAddTaskDialog] = useState(false);
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
 
-  // dialog création de tag
-  const [newTagName, setNewTagName] = useState('');
-  const [showNewTagDialog, setShowNewTagDialog] = useState(false);
-  const [tagDialogTarget, setTagDialogTarget] = useState<TagDialogTarget>(null);
-
-  // édition de tâche (dialog)
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  // édition inline (liste)
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [editDescription, setEditDescription] = useState('');
-  const [editTags, setEditTags] = useState<string[]>([]);
+  const [editingText, setEditingText] = useState('');
 
-  const getTagColor = (tag: string): TagColor => {
-    const colors = [
-      { bg: '#6B9AC415', text: '#6B9AC4', border: '#6B9AC430' },
-      { bg: '#4169E115', text: '#4169E1', border: '#4169E130' },
-      { bg: '#8B868015', text: '#8B8680', border: '#8B868030' },
-      { bg: '#E1694115', text: '#E16941', border: '#E1694130' },
-      { bg: '#41E16915', text: '#41E169', border: '#41E16930' },
-    ];
-    const index = customTags.indexOf(tag) % colors.length;
-    return colors[index];
+  // form “Ajouter une tâche”
+  const [newTaskName, setNewTaskName] = useState('');
+  const [newTaskDescription, setNewTaskDescription] = useState('');
+  const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0]);
+  const [selectedPriority, setSelectedPriority] = useState<1 | 2 | 3>(1);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+
+  const getCurrentWeekDates = () => {
+    const today = new Date();
+    const currentDay = today.getDay();
+    const diff = currentDay === 0 ? -6 : 1 - currentDay; // lundi comme début
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + diff);
+
+    const dates: Date[] = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      dates.push(date);
+    }
+    return dates;
   };
 
-  const cleanupUnusedTags = (taskList: Task[]) => {
-    const used = new Set<string>();
+  const weekDates = getCurrentWeekDates();
 
-    taskList.forEach(task => {
-      task.tags.forEach(tag => used.add(tag));
-    });
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
-    // garder les tags sélectionnés en création / édition en cours
-    selectedTags.forEach(tag => used.add(tag));
-    editTags.forEach(tag => used.add(tag));
+  const getDayName = (date: Date) => {
+    const days = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
+    return days[date.getDay()];
+  };
 
-    setCustomTags(prev => prev.filter(tag => used.has(tag)));
-    setFilterTags(prev => prev.filter(tag => used.has(tag)));
-    setSelectedTags(prev => prev.filter(tag => used.has(tag)));
-    setEditTags(prev => prev.filter(tag => used.has(tag)));
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
+  const getTasksForDate = (date: string) => {
+    return tasks
+      .filter((task) => task.date === date)
+      .sort((a, b) => {
+        if (a.time && b.time) return a.time.localeCompare(b.time);
+        if (a.time) return -1;
+        if (b.time) return 1;
+        return 0;
+      });
+  };
+
+  const addTask = () => {
+    if (!newTaskName.trim()) return;
+
+    const newTask: Task = {
+      id: Date.now().toString(),
+      name: newTaskName.trim(),
+      description: newTaskDescription.trim(),
+      completed: false,
+      color: selectedColor,
+      priority: selectedPriority,
+      date: selectedDate || undefined,
+      time: selectedTime || undefined,
+    };
+
+    setTasks((prev) => [...prev, newTask]);
+
+    // reset form
+    setNewTaskName('');
+    setNewTaskDescription('');
+    setSelectedColor(TASK_COLORS[0]);
+    setSelectedPriority(1);
+    setSelectedDate('');
+    setSelectedTime('');
+    setShowAddTaskDialog(false);
   };
 
   const toggleTask = (id: string) => {
-    const newTasks = tasks.map(task =>
-      task.id === id ? { ...task, completed: !task.completed } : task
+    setTasks((prev) =>
+      prev.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task))
     );
-    setTasks(newTasks);
-    // pas nécessaire pour les tags, ils ne changent pas
-  };
-
-  // ------- création de tâche -------
-
-  const addTask = () => {
-    if (newTaskText.trim() && selectedTags.length > 0) {
-      const newTask: Task = {
-        id: Date.now().toString(),
-        text: newTaskText.trim(),
-        completed: false,
-        tags: selectedTags,
-        description: newTaskDescription.trim() || undefined,
-      };
-      const newTasks = [...tasks, newTask];
-      setTasks(newTasks);
-      setNewTaskText('');
-      setNewTaskDescription('');
-      setSelectedTags([]);
-      setShowAddTask(false);
-      cleanupUnusedTags(newTasks);
-    }
   };
 
   const deleteTask = (id: string) => {
-    const newTasks = tasks.filter(task => task.id !== id);
-    setTasks(newTasks);
-    cleanupUnusedTags(newTasks);
+    setTasks((prev) => prev.filter((task) => task.id !== id));
   };
 
-  const toggleTag = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
-  };
-
-  // ------- édition de tâche (dialog) -------
-
-  const openEditDialog = (task: Task) => {
+  const startEditingTask = (task: Task) => {
     setEditingTaskId(task.id);
-    setEditTitle(task.text);
-    setEditDescription(task.description ?? '');
-    setEditTags(task.tags);
-    setEditDialogOpen(true);
+    setEditingText(task.name);
   };
 
-  const closeEditDialog = () => {
-    setEditDialogOpen(false);
+  const saveEditingTask = () => {
+    if (editingTaskId && editingText.trim()) {
+      setTasks((prev) =>
+        prev.map((task) => (task.id === editingTaskId ? { ...task, name: editingText.trim() } : task))
+      );
+    }
     setEditingTaskId(null);
-    setEditTitle('');
-    setEditDescription('');
-    setEditTags([]);
+    setEditingText('');
   };
 
-  const toggleEditTag = (tag: string) => {
-    if (editTags.includes(tag)) {
-      setEditTags(editTags.filter(t => t !== tag));
-    } else {
-      setEditTags([...editTags, tag]);
-    }
+  const cancelEditingTask = () => {
+    setEditingTaskId(null);
+    setEditingText('');
   };
 
-  const saveTaskEdits = () => {
-    if (!editingTaskId || !editTitle.trim()) {
-      closeEditDialog();
-      return;
-    }
-
-    const newTasks = tasks.map(task =>
-      task.id === editingTaskId
-        ? {
-            ...task,
-            text: editTitle.trim(),
-            description: editDescription.trim() || undefined,
-            tags: editTags.length > 0 ? editTags : [], // si 0, plus de tags
-          }
-        : task
-    );
-
-    setTasks(newTasks);
-    cleanupUnusedTags(newTasks);
-    closeEditDialog();
-  };
-
-  // ------- tags globaux / dialog de création de tag -------
-
-  const toggleFilterTag = (tag: string) => {
-    if (filterTags.includes(tag)) {
-      setFilterTags(filterTags.filter(t => t !== tag));
-    } else {
-      setFilterTags([...filterTags, tag]);
-    }
-  };
-
-  const addCustomTag = () => {
-    const name = newTagName.trim().toLowerCase();
-    if (!name || customTags.includes(name)) {
-      setNewTagName('');
-      setShowNewTagDialog(false);
-      setTagDialogTarget(null);
-      return;
-    }
-
-    setCustomTags(prev => [...prev, name]);
-
-    if (tagDialogTarget === 'create') {
-      setSelectedTags(prev => (prev.includes(name) ? prev : [...prev, name]));
-    } else if (tagDialogTarget === 'edit') {
-      setEditTags(prev => (prev.includes(name) ? prev : [...prev, name]));
-    }
-
-    setNewTagName('');
-    setShowNewTagDialog(false);
-    setTagDialogTarget(null);
-  };
-
-  // ------- drag & drop -------
-
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
+  const handleDragStart = (e: React.DragEvent, taskId: string) => {
     setDraggedTask(taskId);
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
+  const handleDragOver = (e: React.DragEvent, taskId: string) => {
     e.preventDefault();
     if (draggedTask === null || draggedTask === taskId) return;
 
-    const draggedIndex = tasks.findIndex(t => t.id === draggedTask);
-    const targetIndex = tasks.findIndex(t => t.id === taskId);
+    const draggedIndex = tasks.findIndex((t) => t.id === draggedTask);
+    const targetIndex = tasks.findIndex((t) => t.id === taskId);
 
     const newTasks = [...tasks];
     const [draggedItem] = newTasks.splice(draggedIndex, 1);
@@ -241,19 +217,18 @@ export default function Todo() {
     setTasks(newTasks);
   };
 
-  const handleDragEnd = () => {
-    setDraggedTask(null);
+  const handleDragEnd = () => setDraggedTask(null);
+
+  const getPriorityLabel = (priority: 1 | 2 | 3) => {
+    return PRIORITIES.find((p) => p.value === priority)?.label || '!';
   };
 
-  const filteredTasks = filterTags.length > 0
-    ? tasks.filter(task => task.tags.some(tag => filterTags.includes(tag)))
-    : tasks;
-
-  const completedCount = filteredTasks.filter(t => t.completed).length;
+  const listTasks = tasks;
+  const completedCount = listTasks.filter((t) => t.completed).length;
 
   return (
     <div className="min-h-screen bg-[#F5F1E8] p-4 md:p-8">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center mb-8 md:mb-12">
           <Button
@@ -263,26 +238,40 @@ export default function Todo() {
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
+
           <div className="flex-1">
-            <h1 className="text-[#2C2C2C]">Liste de tâches</h1>
+            <h1 className="text-[#2C2C2C]">
+              {viewMode === 'list' ? 'Liste de tâches' : 'Agenda'}
+            </h1>
             <p className="text-[#8B8680] text-sm">
-              {completedCount} sur {filteredTasks.length} tâches terminées
+              {viewMode === 'list'
+                ? `${completedCount} sur ${listTasks.length} tâches terminées`
+                : 'Organisez vos tâches par jour'}
             </p>
           </div>
+
           <div className="flex gap-2">
-            {/* bouton tags global */}
-            <button
-              className="inline-flex items-center justify-center rounded-xl border border-[#8B8680]/20 bg-white px-3 py-2 hover:bg-[#F5F1E8] transition-colors"
-              onClick={() => {
-                setTagDialogTarget('global');
-                setShowNewTagDialog(true);
-              }}
-            >
-              <Tag className="w-5 h-5 text-[#8B8680]" />
-            </button>
+            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'agenda')}>
+              <TabsList className="bg-white rounded-xl">
+                <TabsTrigger
+                  value="list"
+                  className="rounded-lg data-[state=active]:bg-[#4169E1] data-[state=active]:text-white"
+                >
+                  <List className="w-4 h-4 mr-2" />
+                  Liste
+                </TabsTrigger>
+                <TabsTrigger
+                  value="agenda"
+                  className="rounded-lg data-[state=active]:bg-[#4169E1] data-[state=active]:text-white"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Agenda
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
             <Button
-              onClick={() => setShowAddTask(!showAddTask)}
+              onClick={() => setShowAddTaskDialog(true)}
               className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl shadow-md"
             >
               <Plus className="w-5 h-5" />
@@ -290,125 +279,117 @@ export default function Todo() {
           </div>
         </div>
 
-        {/* Filter Tags */}
-        {customTags.length > 0 && (
-          <div className="bg-white rounded-2xl p-4 shadow-sm mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <Filter className="w-4 h-4 text-[#8B8680]" />
-              <span className="text-sm text-[#8B8680]">Filtrer par tags :</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {customTags.map((tag) => {
-                const colors = getTagColor(tag);
-                return (
-                  <Badge
-                    key={tag}
-                    onClick={() => toggleFilterTag(tag)}
-                    className="cursor-pointer rounded-lg px-3 py-1.5 transition-all capitalize"
-                    style={{
-                      backgroundColor: filterTags.includes(tag) ? colors.text : colors.bg,
-                      color: filterTags.includes(tag) ? 'white' : colors.text,
-                      border: `1px solid ${colors.border}`,
-                    }}
-                  >
-                    {tag}
-                  </Badge>
-                );
-              })}
-            </div>
-            {filterTags.length > 0 && (
-              <Button
-                onClick={() => setFilterTags([])}
-                variant="ghost"
-                size="sm"
-                className="mt-2 text-[#8B8680] hover:text-[#2C2C2C]"
-              >
-                Réinitialiser les filtres
-              </Button>
-            )}
-          </div>
-        )}
+        {/* Add Task Dialog */}
+        <Dialog open={showAddTaskDialog} onOpenChange={setShowAddTaskDialog}>
+          <DialogContent className="bg-white rounded-2xl max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Ajouter une tâche</DialogTitle>
+            </DialogHeader>
 
-        {/* Add Task Form */}
-        {showAddTask && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-            <div className="space-y-4">
-              <Input
-                value={newTaskText}
-                onChange={(e) => setNewTaskText(e.target.value)}
-                placeholder="Que devez-vous faire ?"
-                className="border-[#F5F1E8] rounded-xl"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') addTask();
-                }}
-              />
-
+            <div className="space-y-4 pt-4">
               <div>
-                <Label htmlFor="newTaskDescription" className="text-sm text-[#8B8680]">
-                  Description (optionnelle)
-                </Label>
-                <textarea
-                  id="newTaskDescription"
-                  value={newTaskDescription}
-                  onChange={(e) => setNewTaskDescription(e.target.value)}
-                  rows={3}
-                  className="mt-2 w-full rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4169E1]"
-                  placeholder="Ajoute des détails, étapes, liens..."
+                <Label htmlFor="taskName">Nom de la tâche</Label>
+                <Input
+                  id="taskName"
+                  value={newTaskName}
+                  onChange={(e) => setNewTaskName(e.target.value)}
+                  placeholder="Ex: Réunion d'équipe"
+                  className="mt-2 rounded-xl"
                 />
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-[#8B8680]">Tags</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="rounded-xl border-[#8B8680]/20 text-xs"
-                    onClick={() => {
-                      setTagDialogTarget('create');
-                      setShowNewTagDialog(true);
-                    }}
-                  >
-                    <Tag className="w-3 h-3 mr-1" />
-                    Nouveau tag
-                  </Button>
+                <Label htmlFor="taskDescription">Description (optionnelle)</Label>
+                <Textarea
+                  id="taskDescription"
+                  value={newTaskDescription}
+                  onChange={(e) => setNewTaskDescription(e.target.value)}
+                  placeholder="Ex: Discuter du projet final"
+                  className="mt-2 rounded-xl min-h-[80px]"
+                />
+              </div>
+
+              {viewMode === 'agenda' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="taskDate">Date</Label>
+                    <Input
+                      id="taskDate"
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      className="mt-2 rounded-xl"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="taskTime">Heure (optionnelle)</Label>
+                    <Input
+                      id="taskTime"
+                      type="time"
+                      value={selectedTime}
+                      onChange={(e) => setSelectedTime(e.target.value)}
+                      className="mt-2 rounded-xl"
+                    />
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {customTags.map((tag) => {
-                    const colors = getTagColor(tag);
-                    const active = selectedTags.includes(tag);
-                    return (
-                      <Badge
-                        key={tag}
-                        onClick={() => toggleTag(tag)}
-                        className="cursor-pointer rounded-lg capitalize transition-all"
-                        style={{
-                          backgroundColor: active ? colors.text : colors.bg,
-                          color: active ? 'white' : colors.text,
-                          border: `1px solid ${colors.border}`,
-                        }}
-                      >
-                        {tag}
-                      </Badge>
-                    );
-                  })}
+              )}
+
+              <div>
+                <Label>Couleur</Label>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {TASK_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setSelectedColor(color)}
+                      className={`w-10 h-10 rounded-lg transition-all ${
+                        selectedColor === color ? 'ring-2 ring-offset-2 ring-[#4169E1]' : ''
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div>
+                <Label>Priorité</Label>
+                <div className="flex gap-2 mt-2">
+                  {PRIORITIES.map((priority) => (
+                    <button
+                      key={priority.value}
+                      type="button"
+                      onClick={() => setSelectedPriority(priority.value)}
+                      className={`px-4 py-2 rounded-lg transition-all text-white ${
+                        selectedPriority === priority.value
+                          ? 'ring-2 ring-offset-2 ring-[#4169E1]'
+                          : 'opacity-60'
+                      }`}
+                      style={{ backgroundColor: selectedColor }}
+                    >
+                      {priority.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
                 <Button
                   onClick={addTask}
                   className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl flex-1"
                 >
-                  Ajouter la tâche
+                  Ajouter
                 </Button>
+
                 <Button
                   onClick={() => {
-                    setShowAddTask(false);
-                    setNewTaskText('');
+                    setShowAddTaskDialog(false);
+                    setNewTaskName('');
                     setNewTaskDescription('');
-                    setSelectedTags([]);
+                    setSelectedColor(TASK_COLORS[0]);
+                    setSelectedPriority(1);
+                    setSelectedDate('');
+                    setSelectedTime('');
                   }}
                   variant="outline"
                   className="rounded-xl border-[#8B8680]/20"
@@ -417,218 +398,206 @@ export default function Todo() {
                 </Button>
               </div>
             </div>
-          </div>
-        )}
+          </DialogContent>
+        </Dialog>
 
-        {/* Tasks List */}
-        <div className="space-y-3">
-          {filteredTasks.map((task) => (
-            <div
-              key={task.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, task.id)}
-              onDragOver={(e) => handleDragOver(e, task.id)}
-              onDragEnd={handleDragEnd}
-              className={`bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group cursor-move ${
-                draggedTask === task.id ? 'opacity-50' : ''
-              }`}
-            >
-              <div className="flex items-center gap-4">
-                <GripVertical className="w-5 h-5 text-[#8B8680]/40 flex-shrink-0" />
-                <Checkbox
-                  checked={task.completed}
-                  onCheckedChange={() => toggleTask(task.id)}
-                  className="rounded-md"
-                />
-                <div className="flex-1 min-w-0">
-                  <p
-                    className={`text-[#2C2C2C] cursor-pointer hover:text-[#4169E1] transition-colors ${
-                      task.completed ? 'line-through opacity-50' : ''
-                    }`}
-                    onClick={() => openEditDialog(task)}
-                  >
-                    {task.text}
-                  </p>
-                  {task.description && (
-                    <p className="mt-1 text-sm text-[#8B8680]">
-                      {task.description}
-                    </p>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-1 max-w-xs">
-                  {task.tags.map((tag) => {
-                    const colors = getTagColor(tag);
-                    return (
-                      <Badge
-                        key={tag}
-                        className="rounded-lg capitalize text-xs"
-                        style={{
-                          backgroundColor: colors.bg,
-                          color: colors.text,
-                          border: `1px solid ${colors.border}`,
-                        }}
-                      >
-                        {tag}
-                      </Badge>
-                    );
-                  })}
-                </div>
-                <Button
-                  onClick={() => deleteTask(task.id)}
-                  variant="ghost"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-[#8B8680] hover:text-red-500 hover:bg-red-50 rounded-lg p-2 h-auto flex-shrink-0"
+        {/* List View */}
+        {viewMode === 'list' && (
+          <div className="max-w-3xl mx-auto">
+            <div className="space-y-3">
+              {listTasks.map((task) => (
+                <div
+                  key={task.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, task.id)}
+                  onDragOver={(e) => handleDragOver(e, task.id)}
+                  onDragEnd={handleDragEnd}
+                  className={`bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group cursor-move ${
+                    draggedTask === task.id ? 'opacity-50' : ''
+                  }`}
+                  style={{ borderLeft: `4px solid ${task.color}` }}
                 >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+                  <div className="flex items-start gap-4">
+                    <GripVertical className="w-5 h-5 text-[#8B8680]/40 flex-shrink-0 mt-1" />
+                    <Checkbox
+                      checked={task.completed}
+                      onCheckedChange={() => toggleTask(task.id)}
+                      className="rounded-md mt-1"
+                    />
 
-        {filteredTasks.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-[#8B8680]">
-              {filterTags.length > 0
-                ? 'Aucune tâche ne correspond aux filtres sélectionnés.'
-                : 'Aucune tâche pour le moment. Ajoutez votre première tâche pour commencer !'}
-            </p>
-          </div>
-        )}
-      </div>
+                    <div className="flex-1 min-w-0">
+                      {editingTaskId === task.id ? (
+                        <Input
+                          value={editingText}
+                          onChange={(e) => setEditingText(e.target.value)}
+                          placeholder="Modifier la tâche"
+                          className="border-[#F5F1E8] rounded-xl"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveEditingTask();
+                            if (e.key === 'Escape') cancelEditingTask();
+                          }}
+                          onBlur={saveEditingTask}
+                          autoFocus
+                        />
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <p
+                              className={`text-[#2C2C2C] cursor-pointer hover:text-[#4169E1] transition-colors ${
+                                task.completed ? 'line-through opacity-50' : ''
+                              }`}
+                              onClick={() => startEditingTask(task)}
+                            >
+                              {task.name}
+                            </p>
 
-      {/* Dialog création de tag (utilisé par header + création + édition) */}
-      <Dialog
-        open={showNewTagDialog}
-        onOpenChange={(open) => {
-          if (!open) {
-            setShowNewTagDialog(false);
-            setTagDialogTarget(null);
-          } else {
-            setShowNewTagDialog(true);
-          }
-        }}
-      >
-        <DialogContent className="bg-white rounded-2xl">
-          <DialogHeader>
-            <DialogTitle>Créer un nouveau tag</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div>
-              <Label htmlFor="tagName">Nom du tag</Label>
-              <Input
-                id="tagName"
-                value={newTagName}
-                onChange={(e) => setNewTagName(e.target.value)}
-                placeholder="Ex: urgent, examen, projet..."
-                className="mt-2 rounded-xl"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') addCustomTag();
-                }}
-              />
-            </div>
-            <Button
-              onClick={addCustomTag}
-              className="w-full bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl"
-            >
-              Créer le tag
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+                            <span
+                              className="text-xs px-2 py-0.5 rounded"
+                              style={{
+                                backgroundColor: `${task.color}20`,
+                                color: task.color,
+                              }}
+                            >
+                              {getPriorityLabel(task.priority)}
+                            </span>
+                          </div>
 
-      {/* Dialog édition de tâche */}
-      <Dialog
-        open={editDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            closeEditDialog();
-          } else {
-            setEditDialogOpen(true);
-          }
-        }}
-      >
-        <DialogContent className="bg-white rounded-2xl">
-          <DialogHeader>
-            <DialogTitle>Modifier la tâche</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div>
-              <Label htmlFor="editTitle">Titre</Label>
-              <Input
-                id="editTitle"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="mt-2 rounded-xl"
-                placeholder="Titre de la tâche"
-              />
-            </div>
-            <div>
-              <Label htmlFor="editDescription">Description</Label>
-              <textarea
-                id="editDescription"
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                rows={3}
-                className="mt-2 w-full rounded-xl border border-[#E5E5E5] bg-[#FAFAFA] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4169E1]"
-                placeholder="Ajoute des détails, étapes, liens..."
-              />
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-[#8B8680]">Tags</span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="rounded-xl border-[#8B8680]/20 text-xs"
-                  onClick={() => {
-                    setTagDialogTarget('edit');
-                    setShowNewTagDialog(true);
-                  }}
-                >
-                  <Tag className="w-3 h-3 mr-1" />
-                  Nouveau tag
-                </Button>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {customTags.map((tag) => {
-                  const colors = getTagColor(tag);
-                  const active = editTags.includes(tag);
-                  return (
-                    <Badge
-                      key={tag}
-                      onClick={() => toggleEditTag(tag)}
-                      className="cursor-pointer rounded-lg capitalize transition-all"
-                      style={{
-                        backgroundColor: active ? colors.text : colors.bg,
-                        color: active ? 'white' : colors.text,
-                        border: `1px solid ${colors.border}`,
-                      }}
+                          {task.description && (
+                            <p className="text-sm text-[#8B8680] mt-1">{task.description}</p>
+                          )}
+
+                          {task.date && (
+                            <p className="text-xs text-[#8B8680] mt-1">
+                              📅 {task.date} {task.time ? `à ${task.time}` : ''}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    <Button
+                      onClick={() => deleteTask(task.id)}
+                      variant="ghost"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-[#8B8680] hover:text-red-500 hover:bg-red-50 rounded-lg p-2 h-auto flex-shrink-0"
                     >
-                      {tag}
-                    </Badge>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {listTasks.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-[#8B8680]">
+                  Aucune tâche pour le moment. Ajoutez votre première tâche pour commencer !
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Agenda View */}
+        {viewMode === 'agenda' && (
+          <div>
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div className="grid grid-cols-7 border-b border-[#F5F1E8]">
+                {weekDates.map((date, index) => (
+                  <div
+                    key={index}
+                    className={`p-4 text-center border-r border-[#F5F1E8] last:border-r-0 ${
+                      isToday(date) ? 'bg-[#4169E1]/5' : ''
+                    }`}
+                  >
+                    <div className="text-xs text-[#8B8680] uppercase mb-1">{getDayName(date)}</div>
+                    <div
+                      className={`text-2xl ${
+                        isToday(date)
+                          ? 'text-white bg-[#4169E1] w-10 h-10 rounded-full flex items-center justify-center mx-auto'
+                          : 'text-[#2C2C2C]'
+                      }`}
+                    >
+                      {date.getDate()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 min-h-[500px]">
+                {weekDates.map((date, index) => {
+                  const dateString = formatDate(date);
+                  const tasksForDay = getTasksForDate(dateString);
+
+                  return (
+                    <div
+                      key={index}
+                      className={`border-r border-[#F5F1E8] last:border-r-0 p-2 ${
+                        isToday(date) ? 'bg-[#4169E1]/5' : ''
+                      }`}
+                    >
+                      <div className="space-y-2">
+                        {tasksForDay.map((task) => (
+                          <div
+                            key={task.id}
+                            className="rounded-lg p-2 text-xs group relative"
+                            style={{
+                              backgroundColor: `${task.color}15`,
+                              borderLeft: `3px solid ${task.color}`,
+                            }}
+                          >
+                            <div className="flex items-start gap-2">
+                              <Checkbox
+                                checked={task.completed}
+                                onCheckedChange={() => toggleTask(task.id)}
+                                className="rounded-sm mt-0.5 h-3 w-3"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1 mb-1">
+                                  {task.time && (
+                                    <span className="text-[10px] text-[#8B8680]">{task.time}</span>
+                                  )}
+                                  <span
+                                    className="text-[9px] px-1 rounded"
+                                    style={{ backgroundColor: task.color, color: 'white' }}
+                                  >
+                                    {getPriorityLabel(task.priority)}
+                                  </span>
+                                </div>
+
+                                <div
+                                  className={`text-[#2C2C2C] break-words ${
+                                    task.completed ? 'line-through opacity-50' : ''
+                                  }`}
+                                >
+                                  {task.name}
+                                </div>
+
+                                {task.description && (
+                                  <div className="text-[10px] text-[#8B8680] mt-1 break-words">
+                                    {task.description}
+                                  </div>
+                                )}
+                              </div>
+
+                              <Button
+                                onClick={() => deleteTask(task.id)}
+                                variant="ghost"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto hover:bg-red-50"
+                              >
+                                <X className="w-3 h-3 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
             </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button
-                variant="outline"
-                className="rounded-xl border-[#8B8680]/20"
-                onClick={closeEditDialog}
-              >
-                Annuler
-              </Button>
-              <Button
-                className="rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
-                onClick={saveTaskEdits}
-              >
-                Enregistrer
-              </Button>
-            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        )}
+      </div>
     </div>
   );
 }
