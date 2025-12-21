@@ -251,7 +251,7 @@ export default function Todo() {
           </div>
 
           <div className="flex gap-2">
-            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'list' | 'agenda')}>
+            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'agenda' | 'list')}>
               <TabsList className="bg-white rounded-xl">
                 <TabsTrigger
                   value="list"
@@ -281,7 +281,7 @@ export default function Todo() {
 
         {/* Add Task Dialog */}
         <Dialog open={showAddTaskDialog} onOpenChange={setShowAddTaskDialog}>
-          <DialogContent className="bg-white rounded-2xl max-w-lg">
+          <DialogContent className="bg-white rounded-2xl max-w-lg" aria-describedby={undefined}>
             <DialogHeader>
               <DialogTitle>Ajouter une tâche</DialogTitle>
             </DialogHeader>
