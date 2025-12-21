@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Flame, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
+import { Flame, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
@@ -287,15 +287,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   return (
     <div className="min-h-screen bg-[#F5F1E8] p-6 md:p-10">
       <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex items-center gap-4">
-          <Button
-            onClick={() => navigate(-1)}
-            variant="ghost"
-            className="text-[#8B8680] hover:text-[#2C2C2C] hover:bg-white/50"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-
+        <div className="flex items-start gap-4">
           <div className="flex-1">
             <h1 className="text-xl md:text-2xl font-semibold text-[#2C2C2C]">
               {getGreeting()}, {userName} 👋
