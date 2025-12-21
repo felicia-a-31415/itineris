@@ -304,7 +304,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </Button>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.1fr,1.4fr] items-start">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr,1.4fr] items-start">
           {/* Pomodoro */}
           <section className="bg-white rounded-3xl p-6 shadow-sm">
             <div className="flex items-start justify-between">
