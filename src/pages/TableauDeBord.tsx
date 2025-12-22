@@ -360,7 +360,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         >
                           {formatTime(timeLeft)}
                         </button>
-                        <span className="text-xs text-[#8B8680]">{timerMinutes} min • appuie pour modifier</span>
+                        <span className="text-xs text-[#8B8680]">{timerMinutes} min</span>
                       </>
                     )}
                   </div>
