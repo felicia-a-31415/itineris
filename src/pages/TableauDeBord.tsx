@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
+import { Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
-import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 
 interface Task {
@@ -105,6 +104,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [timerMinutes, setTimerMinutes] = useState(25);
   const [timeLeft, setTimeLeft] = useState(timerMinutes * 60);
   const [isRunning, setIsRunning] = useState(false);
+  const [isEditingTimer, setIsEditingTimer] = useState(false);
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const [studiedMinutes, setStudiedMinutes] = useState(120);
   const [streakDays, setStreakDays] = useState(3);
@@ -156,6 +156,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const getPriorityLabel = (priority: 1 | 2 | 3) => {
     return PRIORITIES.find((p) => p.value === priority)?.label || '!';
   };
+
+  useEffect(() => {
+    if (isRunning) {
+      document.title = `itineris | ${formatTime(timeLeft)}`;
+    } else {
+      document.title = 'itineris';
+    }
+    return () => {
+      document.title = 'itineris';
+    };
+  }, [isRunning, timeLeft]);
 
   const getTasksForDate = (date: string) => {
     return tasks
@@ -307,15 +318,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr,1.4fr] items-start">
           {/* Pomodoro */}
           <section className="bg-white rounded-3xl p-6 shadow-sm">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-[#8B8680]">Minuteur Pomodoro</p>
-                <h2 className="text-xl text-[#2C2C2C]">Personnalise la durée et lance ta session</h2>
-              </div>
-              <Flame className="w-5 h-5 text-[#E16941]" />
-            </div>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-[1.1fr,1fr] items-center">
+            <div className="grid gap-4 sm:grid-cols-[1.1fr,1fr] items-center">
               <div className="flex items-center justify-center">
                 <div
                   className="relative w-48 h-48 rounded-full flex items-center justify-center"
@@ -324,26 +327,47 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   }}
                 >
                   <div className="absolute inset-3 bg-white rounded-full shadow-inner flex flex-col items-center justify-center">
-                    <span className="text-3xl font-semibold text-[#2C2C2C]">{formatTime(timeLeft)}</span>
-                    <span className="text-xs text-[#8B8680]">{timerMinutes} min</span>
+                    {isEditingTimer ? (
+                      <Input
+                        type="number"
+                        min={5}
+                        max={120}
+                        value={timerMinutes}
+                        onChange={(e) => {
+                          const next = Math.max(5, Math.min(120, Number(e.target.value) || 5));
+                          setTimerMinutes(next);
+                          setTimeLeft(next * 60);
+                        }}
+                        onBlur={() => setIsEditingTimer(false)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') e.currentTarget.blur();
+                          if (e.key === 'Escape') {
+                            e.currentTarget.blur();
+                          }
+                        }}
+                        className="w-24 text-center rounded-xl border-[#E8E3D6]"
+                        autoFocus
+                      />
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="text-3xl font-semibold text-[#2C2C2C]"
+                          onClick={() => {
+                            setIsRunning(false);
+                            setIsEditingTimer(true);
+                          }}
+                        >
+                          {formatTime(timeLeft)}
+                        </button>
+                        <span className="text-xs text-[#8B8680]">{timerMinutes} min • appuie pour modifier</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Label className="text-[#2C2C2C]">Durée du focus (minutes)</Label>
-                <Input
-                  type="number"
-                  min={5}
-                  max={120}
-                  value={timerMinutes}
-                  onChange={(e) => {
-                    const next = Math.max(5, Math.min(120, Number(e.target.value) || 5));
-                    setTimerMinutes(next);
-                  }}
-                  className="rounded-2xl border-[#E8E3D6]"
-                />
-
                 <div className="flex gap-2">
                   <Button
                     onClick={() => setIsRunning((r) => !r)}
@@ -367,7 +391,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       setTimeLeft(safeMinutes * 60);
                     }}
                     variant="outline"
-                    className="rounded-2xl border-[#E8E3D6]"
+                    className="flex-1 rounded-2xl border-[#E8E3D6]"
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Reset
