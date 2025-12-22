@@ -427,15 +427,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Agenda en ligne + import photo */}
         <section className="bg-white rounded-3xl p-6 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-sm text-[#8B8680]">Agenda en ligne</p>
-              <h2 className="text-xl text-[#2C2C2C]">Encode à la main ou laisse l&apos;IA lire ta photo</h2>
-              <p className="text-xs text-[#8B8680] mt-1">
-                Les tâches datées apparaissent directement dans cette grille hebdo.
-              </p>
-            </div>
-
+          <div className="flex flex-wrap items-start gap-4">
             <div className="flex gap-2 items-center">
               <label
                 htmlFor="agendaUpload"
