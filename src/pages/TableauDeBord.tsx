@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
+import { Pause, Play, RotateCcw, Settings, Sparkles, Upload } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
 
 interface Task {
   id: string;
@@ -25,12 +24,12 @@ const PRIORITIES = [
   { value: 3, label: '!!!', name: 'Haute' },
 ] as const;
 
-const getCurrentWeekDates = () => {
+const getCurrentWeekDates = (offsetWeeks = 0) => {
   const today = new Date();
   const currentDay = today.getDay();
   const diff = currentDay === 0 ? -6 : 1 - currentDay; // lundi comme début
   const monday = new Date(today);
-  monday.setDate(today.getDate() + diff);
+  monday.setDate(today.getDate() + diff + offsetWeeks * 7);
   const dates: Date[] = [];
   for (let i = 0; i < 7; i++) {
     const date = new Date(monday);
@@ -58,7 +57,8 @@ interface TableauDeBordScreenProps {
 
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
-  const weekDates = useMemo(getCurrentWeekDates, []);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const weekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
 
   const [tasks, setTasks] = useState<Task[]>([
     {
@@ -91,15 +91,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       time: '14:00',
     },
   ]);
-
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [editingText, setEditingText] = useState('');
-  const [newTaskName, setNewTaskName] = useState('');
-  const [newTaskDescription, setNewTaskDescription] = useState('');
-  const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0]);
-  const [selectedPriority, setSelectedPriority] = useState<1 | 2 | 3>(1);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
 
   const [timerMinutes, setTimerMinutes] = useState(25);
   const [timeLeft, setTimeLeft] = useState(timerMinutes * 60);
@@ -190,56 +181,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       });
   };
 
-  const addTask = () => {
-    if (!newTaskName.trim()) return;
-    const newTask: Task = {
-      id: Date.now().toString(),
-      name: newTaskName.trim(),
-      description: newTaskDescription.trim(),
-      completed: false,
-      color: selectedColor,
-      priority: selectedPriority,
-      date: selectedDate || undefined,
-      time: selectedTime || undefined,
-    };
-    setTasks((prev) => [...prev, newTask]);
-    setAiNotice(null);
-    setNewTaskName('');
-    setNewTaskDescription('');
-    setSelectedColor(TASK_COLORS[0]);
-    setSelectedPriority(1);
-    setSelectedDate('');
-    setSelectedTime('');
-  };
-
   const toggleTask = (id: string) => {
     setTasks((prev) =>
       prev.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task))
     );
-  };
-
-  const deleteTask = (id: string) => {
-    setTasks((prev) => prev.filter((task) => task.id !== id));
-  };
-
-  const startEditingTask = (task: Task) => {
-    setEditingTaskId(task.id);
-    setEditingText(task.name);
-  };
-
-  const saveEditingTask = () => {
-    if (editingTaskId && editingText.trim()) {
-      setTasks((prev) =>
-        prev.map((task) => (task.id === editingTaskId ? { ...task, name: editingText.trim() } : task))
-      );
-    }
-    setEditingTaskId(null);
-    setEditingText('');
-  };
-
-  const cancelEditingTask = () => {
-    setEditingTaskId(null);
-    setEditingText('');
   };
 
   const isToday = (date: Date) => {
@@ -425,10 +370,45 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </section>
         </div>
 
-        {/* Agenda en ligne + import photo */}
+        {/* Agenda en ligne */}
         <section className="bg-white rounded-3xl p-6 shadow-sm">
-          <div className="flex flex-wrap items-start gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3 text-sm text-[#2C2C2C]">
+              <button
+                type="button"
+                className="text-[#4169E1] hover:underline"
+                onClick={() => setWeekOffset((w) => w - 1)}
+              >
+                ← Semaine passée
+              </button>
+              <button
+                type="button"
+                className="text-[#4169E1] hover:underline"
+                onClick={() => setWeekOffset((w) => w + 1)}
+              >
+                Semaine suivante →
+              </button>
+            </div>
+
             <div className="flex gap-2 items-center">
+              <Button
+                onClick={() => {
+                  const targetDate = weekDates[0];
+                  const newTask: Task = {
+                    id: `quick-${Date.now()}`,
+                    name: 'Nouvelle tâche',
+                    description: 'Ajoutez des détails',
+                    completed: false,
+                    color: TASK_COLORS[Math.floor(Math.random() * TASK_COLORS.length)],
+                    priority: 1,
+                    date: formatDate(targetDate),
+                  };
+                  setTasks((prev) => [...prev, newTask]);
+                }}
+                className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
+              >
+                + Ajouter une tâche
+              </Button>
               <label
                 htmlFor="agendaUpload"
                 className="flex items-center gap-2 px-4 py-2 rounded-2xl border border-dashed border-[#E8E3D6] text-[#2C2C2C] cursor-pointer hover:bg-[#F5F1E8]"
@@ -459,13 +439,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 <div
                   key={index}
                   className={`p-3 text-center border-r border-[#F5F1E8] last:border-r-0 ${
-                    isToday(date) ? 'bg-[#4169E1]/5' : ''
+                    isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                   }`}
                 >
                   <div className="text-xs text-[#8B8680] uppercase mb-1">{getDayName(date)}</div>
                   <div
                     className={`text-lg font-semibold ${
-                      isToday(date)
+                      isToday(date) && weekOffset === 0
                         ? 'text-white bg-[#4169E1] w-10 h-10 rounded-full flex items-center justify-center mx-auto'
                         : 'text-[#2C2C2C]'
                     }`}
@@ -485,17 +465,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   <div
                     key={index}
                     className={`border-r border-[#F5F1E8] last:border-r-0 p-3 ${
-                      isToday(date) ? 'bg-[#4169E1]/5' : ''
+                      isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                     }`}
                   >
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {tasksForDay.map((task) => (
                         <div
                           key={task.id}
-                          className="rounded-lg p-2 text-xs"
+                          className="rounded-2xl p-3 text-xs bg-[#F5F8FF] border border-[#E3EAFD] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
                           style={{
-                            backgroundColor: `${task.color}15`,
-                            borderLeft: `3px solid ${task.color}`,
+                            borderLeft: `4px solid ${task.color}`,
                           }}
                         >
                           <div className="flex items-start gap-2">
@@ -506,17 +485,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1 mb-1">
-                                {task.time && <span className="text-[10px] text-[#8B8680]">{task.time}</span>}
+                                {task.time && <span className="text-[11px] text-[#8B8680]">{task.time}</span>}
                                 <span
-                                  className="text-[9px] px-1 rounded"
-                                  style={{ backgroundColor: task.color, color: 'white' }}
+                                  className="text-[10px] px-2 py-0.5 rounded-full"
+                                  style={{ backgroundColor: `${task.color}20`, color: '#2C2C2C' }}
                                 >
                                   {getPriorityLabel(task.priority)}
                                 </span>
                               </div>
 
                               <div
-                                className={`text-[#2C2C2C] break-words ${
+                                className={`text-[#2C2C2C] text-sm break-words ${
                                   task.completed ? 'line-through opacity-50' : ''
                                 }`}
                               >
@@ -524,7 +503,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               </div>
 
                               {task.description && (
-                                <div className="text-[10px] text-[#8B8680] mt-1 break-words">
+                                <div className="text-[11px] text-[#8B8680] mt-1 break-words">
                                   {task.description}
                                 </div>
                               )}
