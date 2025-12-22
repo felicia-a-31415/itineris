@@ -544,8 +544,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Modal ajout tâche */}
         {showAddDialog && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 relative">
+          <div className="fixed inset-0 z-50 flex min-h-screen w-screen items-center justify-center bg-black/40 px-4 py-6">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
               <button
                 className="absolute top-3 right-3 text-[#8B8680] hover:text-[#2C2C2C]"
                 onClick={() => setShowAddDialog(false)}
