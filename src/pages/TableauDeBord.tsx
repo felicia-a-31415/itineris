@@ -412,6 +412,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               >
                 ← Semaine passée
               </button>
+              <div className="h-4 w-px bg-[#E8E3D6]" />
+              <button
+                type="button"
+                className="text-[#4169E1] hover:underline"
+                onClick={() => setWeekOffset(0)}
+              >
+                Aujourd&apos;hui
+              </button>
+              <div className="h-4 w-px bg-[#E8E3D6]" />
               <button
                 type="button"
                 className="text-[#4169E1] hover:underline"
