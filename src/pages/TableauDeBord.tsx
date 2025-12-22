@@ -544,8 +544,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Modal ajout tâche */}
         {showAddDialog && (
-          <div className="fixed inset-0 z-50 flex min-h-screen w-screen items-center justify-center bg-black/40 px-4 py-6">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 relative max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex min-h-screen w-screen items-center justify-center bg-black/40 px-3 py-4 sm:px-4 sm:py-6">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
               <button
                 className="absolute top-3 right-3 text-[#8B8680] hover:text-[#2C2C2C]"
                 onClick={() => setShowAddDialog(false)}
@@ -553,7 +553,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm text-[#2C2C2C]">Nom de la tâche</label>
                   <Input
@@ -614,7 +614,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   />
                 </div>
 
-                <div className="space-y-2 md:col-span-2">
+                <div className="space-y-3 md:col-span-2">
                   <label className="text-sm text-[#2C2C2C]">Couleur</label>
                   <div className="flex gap-2 flex-wrap">
                     {TASK_COLORS.map((color) => (
@@ -622,7 +622,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         key={color}
                         type="button"
                         onClick={() => setSelectedColor(color)}
-                        className={`w-10 h-10 rounded-xl transition-all ${
+                        className={`w-8 h-8 rounded-xl transition-all ${
                           selectedColor === color ? 'ring-2 ring-offset-2 ring-[#4169E1]' : ''
                         }`}
                         style={{ backgroundColor: color }}
