@@ -406,11 +406,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Agenda en ligne */}
         <section className="bg-white rounded-3xl p-6 shadow-sm">
-          <div className="mb-4">
+          <div className="mb-2">
             <p className="text-sm text-[#8B8680]">Agenda</p>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3 text-sm text-[#2C2C2C]">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm text-[#2C2C2C]">
               <button
                 type="button"
                 className="text-[#4169E1] hover:underline"
