@@ -105,6 +105,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [timeLeft, setTimeLeft] = useState(timerMinutes * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [isEditingTimer, setIsEditingTimer] = useState(false);
+  const [editingTimerValue, setEditingTimerValue] = useState('');
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const [studiedMinutes, setStudiedMinutes] = useState(120);
   const [streakDays, setStreakDays] = useState(3);
@@ -155,6 +156,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
   const getPriorityLabel = (priority: 1 | 2 | 3) => {
     return PRIORITIES.find((p) => p.value === priority)?.label || '!';
+  };
+
+  const commitTimerEdit = () => {
+    const parsed = Number(editingTimerValue);
+    if (Number.isFinite(parsed)) {
+      const clamped = Math.min(120, Math.max(5, parsed));
+      setTimerMinutes(clamped);
+      setTimeLeft(clamped * 60);
+    }
+    setIsEditingTimer(false);
   };
 
   useEffect(() => {
@@ -332,17 +343,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         type="number"
                         min={5}
                         max={120}
-                        value={timerMinutes}
-                        onChange={(e) => {
-                          const next = Math.max(5, Math.min(120, Number(e.target.value) || 5));
-                          setTimerMinutes(next);
-                          setTimeLeft(next * 60);
-                        }}
-                        onBlur={() => setIsEditingTimer(false)}
+                        value={editingTimerValue}
+                        onChange={(e) => setEditingTimerValue(e.target.value)}
+                        onBlur={commitTimerEdit}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') e.currentTarget.blur();
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            commitTimerEdit();
+                          }
                           if (e.key === 'Escape') {
-                            e.currentTarget.blur();
+                            setIsEditingTimer(false);
+                            setEditingTimerValue(timerMinutes.toString());
                           }
                         }}
                         className="w-24 text-center rounded-xl border-[#E8E3D6]"
@@ -356,6 +367,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           onClick={() => {
                             setIsRunning(false);
                             setIsEditingTimer(true);
+                            setEditingTimerValue(timerMinutes.toString());
                           }}
                         >
                           {formatTime(timeLeft)}
