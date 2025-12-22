@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pause, Play, RotateCcw, Settings, Sparkles, Upload } from 'lucide-react';
+import { Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 interface Task {
   id: string;
@@ -102,6 +103,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [streakDays, setStreakDays] = useState(3);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const [aiNotice, setAiNotice] = useState<string | null>(null);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [newTaskName, setNewTaskName] = useState('');
+  const [newTaskDescription, setNewTaskDescription] = useState('');
+  const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0]);
+  const [selectedPriority, setSelectedPriority] = useState<1 | 2 | 3>(1);
+  const [selectedDate, setSelectedDate] = useState(formatDate(weekDates[0]));
+  const [selectedTime, setSelectedTime] = useState('');
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
 
@@ -179,6 +187,29 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         if (b.time) return 1;
         return 0;
       });
+  };
+
+  const addTask = () => {
+    if (!newTaskName.trim()) return;
+    const newTask: Task = {
+      id: Date.now().toString(),
+      name: newTaskName.trim(),
+      description: newTaskDescription.trim(),
+      completed: false,
+      color: selectedColor,
+      priority: selectedPriority,
+      date: selectedDate || undefined,
+      time: selectedTime || undefined,
+    };
+    setTasks((prev) => [...prev, newTask]);
+    setShowAddDialog(false);
+    setAiNotice(null);
+    setNewTaskName('');
+    setNewTaskDescription('');
+    setSelectedColor(TASK_COLORS[0]);
+    setSelectedPriority(1);
+    setSelectedDate(formatDate(weekDates[0]));
+    setSelectedTime('');
   };
 
   const toggleTask = (id: string) => {
@@ -393,21 +424,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <div className="flex gap-2 items-center">
               <Button
                 onClick={() => {
-                  const targetDate = weekDates[0];
-                  const newTask: Task = {
-                    id: `quick-${Date.now()}`,
-                    name: 'Nouvelle tâche',
-                    description: 'Ajoutez des détails',
-                    completed: false,
-                    color: TASK_COLORS[Math.floor(Math.random() * TASK_COLORS.length)],
-                    priority: 1,
-                    date: formatDate(targetDate),
-                  };
-                  setTasks((prev) => [...prev, newTask]);
+                  setSelectedDate(formatDate(weekDates[0]));
+                  setShowAddDialog(true);
                 }}
                 className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
               >
-                + Ajouter une tâche
+                <Plus className="w-4 h-4 mr-2" />
+                Ajouter une tâche
               </Button>
               <label
                 htmlFor="agendaUpload"
@@ -518,6 +541,115 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             </div>
           </div>
         </section>
+
+        {/* Modal ajout tâche */}
+        {showAddDialog && (
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+            <div className="bg-white rounded-3xl shadow-xl max-w-3xl w-full p-6 relative">
+              <button
+                className="absolute top-3 right-3 text-[#8B8680] hover:text-[#2C2C2C]"
+                onClick={() => setShowAddDialog(false)}
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm text-[#2C2C2C]">Nom de la tâche</label>
+                  <Input
+                    value={newTaskName}
+                    onChange={(e) => setNewTaskName(e.target.value)}
+                    placeholder="Ex: Relire chapitre 4"
+                    className="rounded-2xl border-[#E8E3D6]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm text-[#2C2C2C]">Date</label>
+                  <Input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="rounded-2xl border-[#E8E3D6]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm text-[#2C2C2C]">Heure (optionnel)</label>
+                  <Input
+                    type="time"
+                    value={selectedTime}
+                    onChange={(e) => setSelectedTime(e.target.value)}
+                    className="rounded-2xl border-[#E8E3D6]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm text-[#2C2C2C]">Priorité</label>
+                  <div className="flex gap-2">
+                    {PRIORITIES.map((priority) => (
+                      <button
+                        key={priority.value}
+                        type="button"
+                        onClick={() => setSelectedPriority(priority.value)}
+                        className={`px-3 py-2 rounded-xl text-sm transition-all ${
+                          selectedPriority === priority.value
+                            ? 'bg-[#4169E1] text-white shadow'
+                            : 'bg-[#F5F1E8] text-[#2C2C2C]'
+                        }`}
+                      >
+                        {priority.label} {priority.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm text-[#2C2C2C]">Description</label>
+                  <Textarea
+                    value={newTaskDescription}
+                    onChange={(e) => setNewTaskDescription(e.target.value)}
+                    placeholder="Ajoute des détails, étapes, liens..."
+                    className="rounded-2xl border-[#E8E3D6] min-h-[90px]"
+                  />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm text-[#2C2C2C]">Couleur</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {TASK_COLORS.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setSelectedColor(color)}
+                        className={`w-10 h-10 rounded-xl transition-all ${
+                          selectedColor === color ? 'ring-2 ring-offset-2 ring-[#4169E1]' : ''
+                        }`}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  className="rounded-2xl border-[#E8E3D6]"
+                  onClick={() => setShowAddDialog(false)}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={addTask}
+                  className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
+                >
+                  Enregistrer
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Statistiques */}
         <section className="grid gap-4 md:grid-cols-3">
