@@ -305,9 +305,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr,1.4fr] items-start">
           {/* Pomodoro */}
           <section className="bg-white rounded-3xl p-6 shadow-sm">
+<<<<<<< ours
             <div className="mb-4">
               <p className="text-sm text-[#8B8680]">Minuteur</p>
             </div>
+=======
+>>>>>>> theirs
             <div className="grid gap-4 sm:grid-cols-[1.1fr,1fr] items-center">
               <div className="flex items-center justify-center">
                 <div
@@ -406,11 +409,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Agenda en ligne */}
         <section className="bg-white rounded-3xl p-6 shadow-sm">
-          <div className="mb-2">
+<<<<<<< ours
+          <div className="mb-4">
             <p className="text-sm text-[#8B8680]">Agenda</p>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm text-[#2C2C2C]">
+=======
+>>>>>>> theirs
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3 text-sm text-[#2C2C2C]">
               <button
                 type="button"
                 className="text-[#4169E1] hover:underline"
