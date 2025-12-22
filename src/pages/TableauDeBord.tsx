@@ -553,9 +553,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 <X className="w-5 h-5" />
               </button>
 
+              <h2 className="text-lg font-semibold text-[#2C2C2C] mb-4">Créer une tâche</h2>
+
               <div className="grid gap-5 md:grid-cols-2">
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm text-[#2C2C2C]">Nom de la tâche</label>
+                <div className="space-y-3 md:col-span-2">
+                  <label className="text-sm text-[#2C2C2C] block">Nom de la tâche</label>
                   <Input
                     value={newTaskName}
                     onChange={(e) => setNewTaskName(e.target.value)}
@@ -564,8 +566,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm text-[#2C2C2C]">Date</label>
+                <div className="space-y-3">
+                  <label className="text-sm text-[#2C2C2C] block">Date</label>
                   <Input
                     type="date"
                     value={selectedDate}
@@ -574,8 +576,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm text-[#2C2C2C]">Heure (optionnel)</label>
+                <div className="space-y-3">
+                  <label className="text-sm text-[#2C2C2C] block">Heure (optionnel)</label>
                   <Input
                     type="time"
                     value={selectedTime}
@@ -584,8 +586,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm text-[#2C2C2C]">Priorité</label>
+                <div className="space-y-3">
+                  <label className="text-sm text-[#2C2C2C] block">Priorité</label>
                   <div className="flex gap-2">
                     {PRIORITIES.map((priority) => (
                       <button
@@ -604,8 +606,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   </div>
                 </div>
 
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm text-[#2C2C2C]">Description</label>
+                <div className="space-y-3 md:col-span-2">
+                  <label className="text-sm text-[#2C2C2C] block">Description</label>
                   <Textarea
                     value={newTaskDescription}
                     onChange={(e) => setNewTaskDescription(e.target.value)}
@@ -615,7 +617,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
 
                 <div className="space-y-3 md:col-span-2">
-                  <label className="text-sm text-[#2C2C2C]">Couleur</label>
+                  <label className="text-sm text-[#2C2C2C] block">Couleur</label>
                   <div className="flex gap-2 flex-wrap">
                     {TASK_COLORS.map((color) => (
                       <button
