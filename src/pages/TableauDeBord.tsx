@@ -63,9 +63,52 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [weekOffset, setWeekOffset] = useState(0);
   const weekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
 
-  const [tasks, setTasks] = useState<Task[]>([
-    // Exemple de tâche
-  ]);
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem(TASK_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      }
+    } catch (err) {
+      console.error('Impossible de charger les tâches', err);
+    }
+
+    const initialWeek = getCurrentWeekDates();
+    return [
+      {
+        id: '1',
+        name: 'Réviser les notes de mathématiques',
+        description: 'Chapitres 3-5',
+        completed: false,
+        color: '#6B9AC4',
+        priority: 2,
+        date: formatDate(initialWeek[1]),
+      },
+      {
+        id: '2',
+        name: 'Terminer le devoir de chimie',
+        description: 'Exercices page 45-48',
+        completed: false,
+        color: '#4169E1',
+        priority: 3,
+        date: formatDate(initialWeek[2]),
+        time: '09:00',
+      },
+      {
+        id: '3',
+        name: "Réunion d'équipe",
+        description: 'Discuter du projet final',
+        completed: false,
+        color: '#6B9AC4',
+        priority: 1,
+        date: formatDate(initialWeek[3]),
+        time: '14:00',
+      },
+    ];
+  });
 
   const [timerMinutes, setTimerMinutes] = useState(25);
   const [timeLeft, setTimeLeft] = useState(timerMinutes * 60);
@@ -108,22 +151,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       setTimeLeft(safeMinutes * 60);
     }
   }, [safeMinutes, isRunning]);
-
-  // Charger les tâches depuis le stockage local au montage
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(TASK_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          setTasks(parsed);
-        }
-      }
-    } catch (err) {
-      console.error('Impossible de charger les tâches', err);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Sauver les tâches à chaque modification
   useEffect(() => {
