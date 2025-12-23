@@ -578,17 +578,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                 </div>
                               )}
                             </div>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setTasks((prev) => prev.filter((t) => t.id !== task.id));
-                              }}
-                              className="text-[#8B8680] hover:text-red-500 px-2 py-1 text-xs"
-                              aria-label="Supprimer la tâche"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
                           </div>
                         </div>
                       ))}
