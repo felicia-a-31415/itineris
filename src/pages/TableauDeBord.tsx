@@ -56,6 +56,8 @@ interface TableauDeBordScreenProps {
   userName?: string;
 }
 
+const TASK_STORAGE_KEY = 'itineris_tasks';
+
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
   const [weekOffset, setWeekOffset] = useState(0);
@@ -135,6 +137,31 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       setTimeLeft(safeMinutes * 60);
     }
   }, [safeMinutes, isRunning]);
+
+  // Charger les tâches depuis le stockage local au montage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(TASK_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          setTasks(parsed);
+        }
+      }
+    } catch (err) {
+      console.error('Impossible de charger les tâches', err);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sauver les tâches à chaque modification
+  useEffect(() => {
+    try {
+      localStorage.setItem(TASK_STORAGE_KEY, JSON.stringify(tasks));
+    } catch (err) {
+      console.error('Impossible de sauvegarder les tâches', err);
+    }
+  }, [tasks]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
