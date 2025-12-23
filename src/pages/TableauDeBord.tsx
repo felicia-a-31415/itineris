@@ -126,6 +126,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [selectedPriority, setSelectedPriority] = useState<1 | 2 | 3>(1);
   const [selectedDate, setSelectedDate] = useState(formatDate(weekDates[0]));
   const [selectedTime, setSelectedTime] = useState('');
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
 
@@ -214,26 +215,51 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       });
   };
 
-  const addTask = () => {
-    if (!newTaskName.trim()) return;
-    const newTask: Task = {
-      id: Date.now().toString(),
-      name: newTaskName.trim(),
-      description: newTaskDescription.trim(),
-      completed: false,
-      color: selectedColor,
-      priority: selectedPriority,
-      date: selectedDate || undefined,
-      time: selectedTime || undefined,
-    };
-    setTasks((prev) => [...prev, newTask]);
-    setShowAddDialog(false);
+  const resetTaskForm = () => {
     setNewTaskName('');
     setNewTaskDescription('');
     setSelectedColor(TASK_COLORS[0]);
     setSelectedPriority(1);
     setSelectedDate(formatDate(weekDates[0]));
     setSelectedTime('');
+    setEditingTaskId(null);
+  };
+
+  const saveTask = () => {
+    if (!newTaskName.trim()) return;
+
+    if (editingTaskId) {
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === editingTaskId
+            ? {
+                ...task,
+                name: newTaskName.trim(),
+                description: newTaskDescription.trim(),
+                color: selectedColor,
+                priority: selectedPriority,
+                date: selectedDate || undefined,
+                time: selectedTime || undefined,
+              }
+            : task
+        )
+      );
+    } else {
+      const newTask: Task = {
+        id: Date.now().toString(),
+        name: newTaskName.trim(),
+        description: newTaskDescription.trim(),
+        completed: false,
+        color: selectedColor,
+        priority: selectedPriority,
+        date: selectedDate || undefined,
+        time: selectedTime || undefined,
+      };
+      setTasks((prev) => [...prev, newTask]);
+    }
+
+    setShowAddDialog(false);
+    resetTaskForm();
   };
 
   const toggleTask = (id: string) => {
@@ -421,6 +447,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               <Button
                 onClick={() => {
                   setSelectedDate(formatDate(weekDates[0]));
+                  resetTaskForm();
                   setShowAddDialog(true);
                 }}
                 className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white h-10 px-4"
@@ -544,12 +571,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
               <button
                 className="absolute top-3 right-3 text-[#8B8680] hover:text-[#2C2C2C]"
-                onClick={() => setShowAddDialog(false)}
+                onClick={() => {
+                  setShowAddDialog(false);
+                  resetTaskForm();
+                }}
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <h2 className="text-lg font-semibold text-[#2C2C2C] mb-4">Créer une tâche</h2>
+              <h2 className="text-lg font-semibold text-[#2C2C2C] mb-4">
+                {editingTaskId ? 'Modifier une tâche' : 'Créer une tâche'}
+              </h2>
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-3 md:col-span-2">
@@ -634,12 +666,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 <Button
                   variant="outline"
                   className="rounded-2xl border-[#E8E3D6]"
-                  onClick={() => setShowAddDialog(false)}
+                  onClick={() => {
+                    setShowAddDialog(false);
+                    resetTaskForm();
+                  }}
                 >
                   Annuler
                 </Button>
                 <Button
-                  onClick={addTask}
+                  onClick={saveTask}
                   className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
                 >
                   Enregistrer
