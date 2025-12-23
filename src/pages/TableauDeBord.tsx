@@ -220,7 +220,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setNewTaskDescription('');
     setSelectedColor(TASK_COLORS[0]);
     setSelectedPriority(1);
-    setSelectedDate(formatDate(weekDates[0]));
+    setSelectedDate(formatDate(new Date()));
     setSelectedTime('');
     setEditingTaskId(null);
   };
@@ -446,7 +446,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <div className="flex gap-2 items-center">
               <Button
                 onClick={() => {
-                  setSelectedDate(formatDate(weekDates[0]));
+                  setSelectedDate(formatDate(new Date()));
                   resetTaskForm();
                   setShowAddDialog(true);
                 }}
@@ -528,7 +528,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             setNewTaskDescription(task.description || '');
                             setSelectedColor(task.color || TASK_COLORS[0]);
                             setSelectedPriority(task.priority || 1);
-                            setSelectedDate(task.date || formatDate(weekDates[0]));
+                            setSelectedDate(task.date || formatDate(new Date()));
                             setSelectedTime(task.time || '');
                             setShowAddDialog(true);
                           }}
