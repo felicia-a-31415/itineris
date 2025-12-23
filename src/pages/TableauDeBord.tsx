@@ -64,35 +64,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const weekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
 
   const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: '1',
-      name: 'Réviser les notes de mathématiques',
-      description: 'Chapitres 3-5',
-      completed: false,
-      color: '#6B9AC4',
-      priority: 2,
-      date: formatDate(weekDates[1]),
-    },
-    {
-      id: '2',
-      name: 'Terminer le devoir de chimie',
-      description: 'Exercices page 45-48',
-      completed: false,
-      color: '#4169E1',
-      priority: 3,
-      date: formatDate(weekDates[2]),
-      time: '09:00',
-    },
-    {
-      id: '3',
-      name: "Réunion d'équipe",
-      description: 'Discuter du projet final',
-      completed: false,
-      color: '#6B9AC4',
-      priority: 1,
-      date: formatDate(weekDates[3]),
-      time: '14:00',
-    },
+    // Exemple de tâche
   ]);
 
   const [timerMinutes, setTimerMinutes] = useState(25);
