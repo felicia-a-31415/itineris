@@ -436,14 +436,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   setSelectedDate(formatDate(weekDates[0]));
                   setShowAddDialog(true);
                 }}
-                className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white h-11 px-4"
+                className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white h-10 px-4"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Ajouter une tâche
               </Button>
               <label
                 htmlFor="agendaUpload"
-                className="flex items-center gap-2 h-11 px-4 rounded-2xl border border-dashed border-[#E8E3D6] text-sm font-medium text-[#2C2C2C] cursor-pointer hover:bg-[#F5F1E8]"
+                className="flex items-center gap-2 h-10 px-4 rounded-2xl border border-dashed border-[#E8E3D6] text-sm font-medium text-[#2C2C2C] cursor-pointer hover:bg-[#F5F1E8]"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Importer une photo
