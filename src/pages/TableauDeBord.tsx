@@ -518,14 +518,25 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       {tasksForDay.map((task) => (
                         <div
                           key={task.id}
-                          className="rounded-2xl p-3 text-xs bg-[#F5F8FF] border border-[#E3EAFD] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
+                          className="rounded-2xl p-3 text-xs bg-[#F5F8FF] border border-[#E3EAFD] shadow-[0_4px_12px_rgba(65,105,225,0.06)] cursor-pointer hover:shadow-md transition"
                           style={{
                             borderLeft: `4px solid ${task.color}`,
+                          }}
+                          onClick={() => {
+                            setEditingTaskId(task.id);
+                            setNewTaskName(task.name || '');
+                            setNewTaskDescription(task.description || '');
+                            setSelectedColor(task.color || TASK_COLORS[0]);
+                            setSelectedPriority(task.priority || 1);
+                            setSelectedDate(task.date || formatDate(weekDates[0]));
+                            setSelectedTime(task.time || '');
+                            setShowAddDialog(true);
                           }}
                         >
                           <div className="flex items-start gap-2">
                             <Checkbox
                               checked={task.completed}
+                              onClick={(e) => e.stopPropagation()}
                               onCheckedChange={() => toggleTask(task.id)}
                               className="rounded-sm mt-0.5 h-3 w-3"
                             />
