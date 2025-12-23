@@ -57,6 +57,7 @@ interface TableauDeBordScreenProps {
 }
 
 const TASK_STORAGE_KEY = 'itineris_tasks';
+const STUDY_MINUTES_KEY = 'itineris_study_minutes';
 
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
@@ -116,7 +117,20 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [isEditingTimer, setIsEditingTimer] = useState(false);
   const [editingTimerValue, setEditingTimerValue] = useState('');
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
-  const [studiedMinutes, setStudiedMinutes] = useState(120);
+  const [studiedMinutes, setStudiedMinutes] = useState(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem(STUDY_MINUTES_KEY);
+        if (raw) {
+          const parsed = Number(raw);
+          if (!Number.isNaN(parsed)) return parsed;
+        }
+      }
+    } catch (err) {
+      console.error('Impossible de charger le temps étudié', err);
+    }
+    return 0;
+  });
   const [streakDays, setStreakDays] = useState(3);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -127,6 +141,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
   const [selectedTime, setSelectedTime] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [lastTick, setLastTick] = useState<number | null>(null);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
 
@@ -143,6 +158,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         }
         return prev - 1;
       });
+      setLastTick(Date.now());
     }, 1000);
     return () => clearInterval(interval);
   }, [isRunning, safeMinutes]);
@@ -161,6 +177,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       console.error('Impossible de sauvegarder les tâches', err);
     }
   }, [tasks]);
+
+  // Sauver le temps étudié
+  useEffect(() => {
+    try {
+      localStorage.setItem(STUDY_MINUTES_KEY, String(studiedMinutes));
+    } catch (err) {
+      console.error('Impossible de sauvegarder le temps étudié', err);
+    }
+  }, [studiedMinutes]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
