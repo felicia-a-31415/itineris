@@ -518,57 +518,38 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       {tasksForDay.map((task) => (
                         <div
                           key={task.id}
-                          className="relative rounded-2xl p-3 bg-[#F5F8FF] border border-[#E3EAFD] shadow-[0_4px_12px_rgba(65,105,225,0.08)] cursor-pointer hover:shadow-lg transition"
-                          onClick={() => {
-                            setEditingTaskId(task.id);
-                            setNewTaskName(task.name || '');
-                            setNewTaskDescription(task.description || '');
-                            setSelectedColor(task.color || TASK_COLORS[0]);
-                            setSelectedPriority(task.priority || 1);
-                            setSelectedDate(task.date || formatDate(weekDates[0]));
-                            setSelectedTime(task.time || '');
-                            setShowAddDialog(true);
+                          className="rounded-2xl p-3 text-xs bg-[#F5F8FF] border border-[#E3EAFD] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
+                          style={{
+                            borderLeft: `4px solid ${task.color}`,
                           }}
                         >
-                          <span
-                            className="absolute inset-y-2 left-2 w-1 rounded-full opacity-70"
-                            style={{
-                              background: `linear-gradient(180deg, ${task.color} 0%, ${task.color}33 100%)`,
-                            }}
-                            aria-hidden
-                          />
                           <div className="flex items-start gap-2">
                             <Checkbox
                               checked={task.completed}
-                              onClick={(e) => e.stopPropagation()}
                               onCheckedChange={() => toggleTask(task.id)}
-                              className="rounded-full mt-0.5 h-4 w-4 border-[#B9C6E4] data-[state=checked]:bg-[#4169E1]"
+                              className="rounded-sm mt-0.5 h-3 w-3"
                             />
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between text-[11px] text-[#8B8680]">
-                                {task.time ? <span>{task.time}</span> : <span>&nbsp;</span>}
+                              <div className="flex items-center gap-1 mb-1">
+                                {task.time && <span className="text-[11px] text-[#8B8680]">{task.time}</span>}
                                 <span
-                                  className="inline-flex items-center rounded-full px-2 py-0.5 bg-[#EAF0FF] text-[#4169E1] text-[10px]"
-                                  style={{ border: `1px solid ${task.color}30` }}
+                                  className="text-[10px] px-2 py-0.5 rounded-full"
+                                  style={{ backgroundColor: `${task.color}20`, color: '#2C2C2C' }}
                                 >
                                   {getPriorityLabel(task.priority)}
                                 </span>
                               </div>
 
                               <div
-                                className={`text-[15px] font-medium text-[#2C2C2C] break-words mt-1 ${
+                                className={`text-[#2C2C2C] text-sm break-words ${
                                   task.completed ? 'line-through opacity-50' : ''
                                 }`}
                               >
                                 {task.name}
                               </div>
 
-                              {task.date && (
-                                <div className="text-[11px] text-[#8B8680] mt-1">{task.date}</div>
-                              )}
-
                               {task.description && (
-                                <div className="text-[12px] text-[#6B7280] mt-1 break-words">
+                                <div className="text-[11px] text-[#8B8680] mt-1 break-words">
                                   {task.description}
                                 </div>
                               )}
