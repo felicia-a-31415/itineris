@@ -533,13 +533,26 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             setShowAddDialog(true);
                           }}
                         >
-                          <div className="flex items-start gap-2">
-                            <Checkbox
-                              checked={task.completed}
-                              onClick={(e) => e.stopPropagation()}
-                              onCheckedChange={() => toggleTask(task.id)}
-                              className="rounded-sm mt-0.5 h-4 w-4"
-                            />
+                          <div className="flex items-start gap-3">
+                            <div className="flex flex-col items-center gap-2 mt-0.5">
+                              <Checkbox
+                                checked={task.completed}
+                                onClick={(e) => e.stopPropagation()}
+                                onCheckedChange={() => toggleTask(task.id)}
+                                className="rounded-sm h-4 w-4"
+                              />
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setTasks((prev) => prev.filter((t) => t.id !== task.id));
+                                }}
+                                className="text-[#8B8680] hover:text-red-500 p-1 text-xs"
+                                aria-label="Supprimer la tâche"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1 mb-1">
                                 {task.time && <span className="text-[11px] text-[#8B8680]">{task.time}</span>}
@@ -565,7 +578,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                 </div>
                               )}
                             </div>
-
                             <button
                               type="button"
                               onClick={(e) => {
@@ -575,7 +587,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               className="text-[#8B8680] hover:text-red-500 px-2 py-1 text-xs"
                               aria-label="Supprimer la tâche"
                             >
-                              Supprimer
+                              <X className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
