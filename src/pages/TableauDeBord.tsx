@@ -443,7 +443,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               </Button>
               <label
                 htmlFor="agendaUpload"
-                className="flex items-center gap-2 h-11 px-4 rounded-2xl border border-dashed border-[#E8E3D6] text-[#2C2C2C] cursor-pointer hover:bg-[#F5F1E8]"
+                className="flex items-center gap-2 h-11 px-4 rounded-2xl border border-dashed border-[#E8E3D6] text-sm font-medium text-[#2C2C2C] cursor-pointer hover:bg-[#F5F1E8]"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Importer une photo
