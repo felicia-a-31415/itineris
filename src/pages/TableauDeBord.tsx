@@ -85,7 +85,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         completed: false,
         color: '#6B9AC4',
         priority: 2,
-        date: formatDate(initialWeek[1]),
+        date: formatDate(new Date()),
       },
       {
         id: '2',
@@ -124,7 +124,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0]);
   const [selectedPriority, setSelectedPriority] = useState<1 | 2 | 3>(1);
-  const [selectedDate, setSelectedDate] = useState(formatDate(weekDates[0]));
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
   const [selectedTime, setSelectedTime] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
