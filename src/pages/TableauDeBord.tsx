@@ -604,16 +604,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         {showAddDialog && (
           <div className="fixed inset-0 z-50 flex min-h-screen w-screen items-center justify-center bg-black/40 px-3 py-4 sm:px-4 sm:py-6">
             <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
-              <button
-                className="absolute top-3 right-3 text-[#8B8680] hover:text-[#2C2C2C]"
-                onClick={() => {
-                  setShowAddDialog(false);
-                  resetTaskForm();
-                }}
-              >
-                <X className="w-5 h-5" />
-              </button>
-
               <h2 className="text-lg font-semibold text-[#2C2C2C] mb-4">
                 {editingTaskId ? 'Modifier une tâche' : 'Créer une tâche'}
               </h2>
