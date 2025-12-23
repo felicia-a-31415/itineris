@@ -538,7 +538,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               checked={task.completed}
                               onClick={(e) => e.stopPropagation()}
                               onCheckedChange={() => toggleTask(task.id)}
-                              className="rounded-sm mt-0.5 h-3 w-3"
+                              className="rounded-sm mt-0.5 h-4 w-4"
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1 mb-1">
