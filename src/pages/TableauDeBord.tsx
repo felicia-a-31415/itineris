@@ -76,7 +76,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [studiedMinutes, setStudiedMinutes] = useState(120);
   const [streakDays, setStreakDays] = useState(3);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
-  const [aiNotice, setAiNotice] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newTaskName, setNewTaskName] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
@@ -202,7 +201,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     };
     setTasks((prev) => [...prev, newTask]);
     setShowAddDialog(false);
-    setAiNotice(null);
     setNewTaskName('');
     setNewTaskDescription('');
     setSelectedColor(TASK_COLORS[0]);
@@ -220,43 +218,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const isToday = (date: Date) => {
     const today = new Date();
     return date.toDateString() === today.toDateString();
-  };
-
-  const generateAiTasks = () => {
-    const aiTasks: Task[] = [
-      {
-        id: `ai-${Date.now()}-1`,
-        name: 'Synthèse des cours de la semaine',
-        description: 'IA: blocs de 45 min avec pauses',
-        completed: false,
-        color: '#9B59B6',
-        priority: 2,
-        date: formatDate(weekDates[4]),
-        time: '10:30',
-      },
-      {
-        id: `ai-${Date.now()}-2`,
-        name: 'Préparer la présentation de vendredi',
-        description: 'IA: slides + répétition 20 min',
-        completed: false,
-        color: '#E16941',
-        priority: 3,
-        date: formatDate(weekDates[5]),
-        time: '16:00',
-      },
-      {
-        id: `ai-${Date.now()}-3`,
-        name: 'Lecture rapide des notes',
-        description: 'IA: survol des chapitres avant dodo',
-        completed: false,
-        color: '#41E169',
-        priority: 1,
-        date: formatDate(weekDates[1]),
-        time: '21:00',
-      },
-    ];
-    setTasks((prev) => [...prev, ...aiTasks]);
-    setAiNotice('Tâches générées automatiquement à partir de votre agenda (mock).');
   };
 
   const handleAgendaImageUpload = (file?: File) => {
@@ -457,10 +418,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             </div>
           </div>
 
-          {(uploadNotice || aiNotice) && (
+          {uploadNotice && (
             <div className="mt-3 text-xs text-[#8B8680] bg-[#F5F1E8] rounded-2xl px-3 py-2 inline-flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#4169E1]" />
-              {uploadNotice || aiNotice}
+              {uploadNotice}
             </div>
           )}
 
