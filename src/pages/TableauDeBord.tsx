@@ -850,74 +850,38 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
         )}
 
-        {/* Statistiques */}
-        <section className="grid gap-4 md:grid-cols-3">
-          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
-            <p className="text-sm text-[#8B8680]">Temps total étudié</p>
-            <p className="text-2xl text-[#2C2C2C]">{roundedStudiedMinutes} min</p>
-            <div className="h-2 bg-[#F5F1E8] rounded-full overflow-hidden">
-              <div className="h-full bg-[#4169E1]" style={{ width: `${Math.min(100, (roundedStudiedMinutes / 240) * 100)}%` }} />
-            </div>
-          </div>
-          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
-            <p className="text-sm text-[#8B8680]">Streak</p>
-            <p className="text-2xl text-[#2C2C2C]">{streakDays} jours</p>
-            <div className="flex gap-1 mt-1">
-              {Array.from({ length: 7 }).map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`flex-1 h-2 rounded-full ${
-                    idx < Math.min(streakDays, 7) ? 'bg-[#E16941]' : 'bg-[#F5F1E8]'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
-            <p className="text-sm text-[#8B8680]">Tâches terminées</p>
-            <p className="text-2xl text-[#2C2C2C]">
-              {completedTasks}/{totalTasks}
-            </p>
-            <div className="h-2 bg-[#F5F1E8] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#41E169]"
-                style={{ width: totalTasks === 0 ? '0%' : `${(completedTasks / totalTasks) * 100}%` }}
-              />
-            </div>
-          </div>
-        </section>
-
         {/* Graphique des minutes étudiées par jour */}
         <section className="bg-white rounded-3xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm text-[#8B8680]">Temps étudié</p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-[#4169E1]">
-              <button
-                type="button"
-                className="hover:underline"
-                onClick={() => setWeekOffset((w) => w - 1)}
-              >
-                ← semaine précédente
-              </button>
-              <div className="h-4 w-px bg-[#E8E3D6]" />
-              <button
-                type="button"
-                className="hover:underline"
-                onClick={() => setWeekOffset(0)}
-              >
-                semaine courante
-              </button>
-              <div className="h-4 w-px bg-[#E8E3D6]" />
-              <button
-                type="button"
-                className="hover:underline"
-                onClick={() => setWeekOffset((w) => w + 1)}
-              >
-                semaine suivante →
-              </button>
-            </div>
+          </div>
+
+          <div className="mb-4 flex items-center gap-2 text-sm text-[#4169E1]">
+            <button
+              type="button"
+              className="hover:underline"
+              onClick={() => setWeekOffset((w) => w - 1)}
+            >
+              ← Semaine précédente
+            </button>
+            <div className="h-4 w-px bg-[#E8E3D6]" />
+            <button
+              type="button"
+              className="hover:underline"
+              onClick={() => setWeekOffset(0)}
+            >
+              Aujourd&apos;hui
+            </button>
+            <div className="h-4 w-px bg-[#E8E3D6]" />
+            <button
+              type="button"
+              className="hover:underline"
+              onClick={() => setWeekOffset((w) => w + 1)}
+            >
+              Semaine suivante →
+            </button>
           </div>
 
           <div className="grid grid-cols-7 gap-3">
