@@ -940,7 +940,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         transition: 'height 0.2s ease',
                       }}
                     />
-                    <div className="absolute inset-0 rounded-2xl border border-[#E8E3D6]" aria-hidden />
                   </div>
                   <div className="text-xs text-[#2C2C2C]">{value} min</div>
                 </div>
