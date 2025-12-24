@@ -158,7 +158,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     if (!isRunning) return;
     const interval = setInterval(() => {
       const now = Date.now();
-      const deltaSec = lastTick ? (now - lastTick) / 1000 : 1;
+      const deltaSec = Math.max(1, Math.round((now - (lastTick ?? now)) / 1000));
 
       setTimeLeft((prev) => {
         if (prev <= deltaSec) {
@@ -438,10 +438,19 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
               <div className="space-y-3">
                 <div className="flex gap-2">
-                  <Button
-                    onClick={() => setIsRunning((r) => !r)}
-                    className="flex-1 bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-2xl"
-                  >
+                <Button
+                  onClick={() => {
+                    setIsRunning((running) => {
+                      if (running) {
+                        setLastTick(null);
+                        return false;
+                      }
+                      setLastTick(Date.now());
+                      return true;
+                    });
+                  }}
+                  className="flex-1 bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-2xl"
+                >
                     {isRunning ? (
                       <>
                         <Pause className="w-4 h-4 mr-2" />
