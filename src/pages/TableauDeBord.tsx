@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
+import alarmSound from '../assets/Christmas-jingle-bells-notification-melody.mp3';
 
 interface Task {
   id: string;
@@ -152,6 +153,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [selectedTime, setSelectedTime] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [lastTick, setLastTick] = useState<number | null>(null);
+  const alarmRef = useRef<HTMLAudioElement | null>(null);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
 
@@ -165,6 +167,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         if (prev <= deltaSec) {
           setIsRunning(false);
           setSessionsCompleted((s) => s + 1);
+          if (alarmRef.current) {
+            try {
+              alarmRef.current.currentTime = 0;
+              void alarmRef.current.play();
+            } catch (err) {
+              console.error('Lecture du son impossible', err);
+            }
+          }
           setLastTick(null);
           return safeMinutes * 60;
         }
@@ -403,6 +413,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const completedTasks = tasks.filter((t) => t.completed).length;
   const roundedStudiedMinutes = Math.round(studiedMinutes);
   const isInitialTime = Math.abs(timeLeft - safeMinutes * 60) < 0.5;
+
+  useEffect(() => {
+    alarmRef.current = new Audio(alarmSound);
+    alarmRef.current.load();
+    return () => {
+      if (alarmRef.current) {
+        alarmRef.current.pause();
+        alarmRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#F5F1E8] p-6 md:p-10">
