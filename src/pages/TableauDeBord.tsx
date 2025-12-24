@@ -570,9 +570,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         <section className="bg-white rounded-3xl p-6 shadow-sm space-y-4">
           <div>
             <p className="text-sm text-[#8B8680]">Agenda en ligne</p>
-            <h2 className="text-xl text-[#2C2C2C]">Vue hebdomadaire</h2>
           </div>
-
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3 text-base font-semibold text-[#4169E1]">
               <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w - 1)}>
