@@ -461,6 +461,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr,1.4fr] items-start">
           {/* Pomodoro */}
           <section className="bg-white rounded-3xl p-6 shadow-sm">
+            <div className="mb-2">
+              <p className="text-sm text-[#8B8680]">Minuteur</p>
+            </div>
             <div className="grid gap-4 sm:grid-cols-[1.1fr,1fr] items-center">
               <div className="flex items-center justify-center">
                 <div
