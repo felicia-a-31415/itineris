@@ -58,6 +58,7 @@ interface TableauDeBordScreenProps {
 
 const TASK_STORAGE_KEY = 'itineris_tasks';
 const STUDY_MINUTES_KEY = 'itineris_study_minutes';
+const STREAK_STORAGE_KEY = 'itineris_streak';
 
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
@@ -140,7 +141,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     }
     return 0;
   });
-  const [streakDays, setStreakDays] = useState(3);
+  const [streakDays, setStreakDays] = useState(1);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newTaskName, setNewTaskName] = useState('');
@@ -164,7 +165,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         if (prev <= deltaSec) {
           setIsRunning(false);
           setSessionsCompleted((s) => s + 1);
-          setStreakDays((s) => Math.max(s, 1) + 1);
           setLastTick(null);
           return safeMinutes * 60;
         }
@@ -278,7 +278,48 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         if (a.time) return -1;
         if (b.time) return 1;
         return 0;
-      });
+  });
+
+  // Streak de connexion quotidienne (login)
+  useEffect(() => {
+    const today = formatDate(new Date());
+    const todayDate = new Date(today);
+    todayDate.setHours(0, 0, 0, 0);
+
+    const loadAndUpdateStreak = () => {
+      try {
+        const raw = localStorage.getItem(STREAK_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const last = parsed?.last as string | undefined;
+          const lastDate = last ? new Date(last) : null;
+          if (lastDate) lastDate.setHours(0, 0, 0, 0);
+
+          const diffDays =
+            lastDate && !Number.isNaN(lastDate.getTime())
+              ? Math.round((todayDate.getTime() - lastDate.getTime()) / 86400000)
+              : null;
+
+          if (diffDays === 0) {
+            setStreakDays(parsed?.streak ?? 1);
+            return;
+          }
+          if (diffDays === 1) {
+            const nextStreak = (parsed?.streak ?? 1) + 1;
+            setStreakDays(nextStreak);
+            localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify({ streak: nextStreak, last: today }));
+            return;
+          }
+        }
+        setStreakDays(1);
+        localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify({ streak: 1, last: today }));
+      } catch (err) {
+        console.error('Impossible de mettre à jour le streak', err);
+      }
+    };
+
+    loadAndUpdateStreak();
+  }, []);
   };
 
   const resetTaskForm = () => {
@@ -472,7 +513,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     className="flex-1 rounded-2xl border-[#E8E3D6]"
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />
-                    Reset
+                    Réinitialiser
                   </Button>
                 </div>
 
