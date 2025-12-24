@@ -179,7 +179,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
   useEffect(() => {
     if (!isRunning) {
-      setTimeLeft(safeMinutes * 60);
       setLastTick(null);
     }
   }, [safeMinutes, isRunning]);
@@ -261,22 +260,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   useEffect(() => {
     if (isRunning) {
       document.title = `itineris | ${formatTime(timeLeft)}`;
+      setLastTick((t) => t ?? Date.now());
     } else {
       document.title = 'itineris';
+      setLastTick(null);
     }
     return () => {
       document.title = 'itineris';
     };
   }, [isRunning, timeLeft]);
-
-  // Initialiser/vider le tick lorsque l'état change
-  useEffect(() => {
-    if (isRunning) {
-      setLastTick(Date.now());
-    } else {
-      setLastTick(null);
-    }
-  }, [isRunning]);
 
   const getTasksForDate = (date: string) => {
     return tasks
@@ -457,7 +449,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     ) : (
                       <>
                         <Play className="w-4 h-4 mr-2" />
-                        Lancer
+                        Relancer
                       </>
                     )}
                   </Button>
