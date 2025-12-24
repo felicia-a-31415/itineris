@@ -63,6 +63,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const navigate = useNavigate();
   const [weekOffset, setWeekOffset] = useState(0);
   const weekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
+  const currentWeekStart = formatDate(getCurrentWeekDates(0)[0]);
 
   const [tasks, setTasks] = useState<Task[]>(() => {
     try {
@@ -122,8 +123,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       if (typeof window !== 'undefined') {
         const raw = localStorage.getItem(STUDY_MINUTES_KEY);
         if (raw) {
-          const parsed = Number(raw);
-          if (!Number.isNaN(parsed)) return parsed;
+          const parsed = JSON.parse(raw);
+          if (
+            parsed &&
+            typeof parsed === 'object' &&
+            typeof parsed.weekStart === 'string' &&
+            typeof parsed.minutes === 'number' &&
+            parsed.weekStart === currentWeekStart
+          ) {
+            return parsed.minutes;
+          }
         }
       }
     } catch (err) {
@@ -187,11 +196,36 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   // Sauver le temps étudié
   useEffect(() => {
     try {
-      localStorage.setItem(STUDY_MINUTES_KEY, String(studiedMinutes));
+      localStorage.setItem(
+        STUDY_MINUTES_KEY,
+        JSON.stringify({ weekStart: currentWeekStart, minutes: studiedMinutes })
+      );
     } catch (err) {
       console.error('Impossible de sauvegarder le temps étudié', err);
     }
-  }, [studiedMinutes]);
+  }, [studiedMinutes, currentWeekStart]);
+
+  // Réinitialiser le compteur si la semaine a changé
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STUDY_MINUTES_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (
+          !parsed ||
+          typeof parsed !== 'object' ||
+          parsed.weekStart !== currentWeekStart ||
+          typeof parsed.minutes !== 'number'
+        ) {
+          setStudiedMinutes(0);
+        }
+      } else {
+        setStudiedMinutes(0);
+      }
+    } catch {
+      setStudiedMinutes(0);
+    }
+  }, [currentWeekStart]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -334,6 +368,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const progress = Math.min(100, Math.round(((safeMinutes * 60 - timeLeft) / (safeMinutes * 60)) * 100));
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.completed).length;
+  const roundedStudiedMinutes = Math.round(studiedMinutes);
 
   return (
     <div className="min-h-screen bg-[#F5F1E8] p-6 md:p-10">
@@ -441,7 +476,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
                 <div className="flex items-center justify-between text-sm text-[#8B8680]">
                   <span>{sessionsCompleted} sessions terminées</span>
-                  <span>{studiedMinutes} min étudiées</span>
+                  <span>{roundedStudiedMinutes} min étudiées</span>
                 </div>
               </div>
             </div>
@@ -742,9 +777,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         <section className="grid gap-4 md:grid-cols-3">
           <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
             <p className="text-sm text-[#8B8680]">Temps total étudié</p>
-            <p className="text-2xl text-[#2C2C2C]">{studiedMinutes} min</p>
+            <p className="text-2xl text-[#2C2C2C]">{roundedStudiedMinutes} min</p>
             <div className="h-2 bg-[#F5F1E8] rounded-full overflow-hidden">
-              <div className="h-full bg-[#4169E1]" style={{ width: `${Math.min(100, (studiedMinutes / 240) * 100)}%` }} />
+              <div className="h-full bg-[#4169E1]" style={{ width: `${Math.min(100, (roundedStudiedMinutes / 240) * 100)}%` }} />
             </div>
           </div>
           <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
