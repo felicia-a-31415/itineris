@@ -932,7 +932,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               return (
                 <div key={idx} className="flex flex-col items-center gap-2">
                   <div className="text-xs text-[#8B8680]">{getDayName(date)}</div>
-                  <div className="relative w-full h-32 bg-[#F5F1E8] rounded-2xl flex items-end">
+                  <div className="relative w-full h-32 flex items-end">
                     <div
                       className="w-full rounded-2xl"
                       style={{
