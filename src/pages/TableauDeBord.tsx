@@ -859,7 +859,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <p className="text-sm text-[#8B8680]">Temps étudié</p>
           </div>
 
-          <div className="mb-4 flex items-center gap-3 text-base font-semibold text-[#4169E1]">
+          <div className="mb-4 flex items-center gap-3 text-base text-[#4169E1]">
             <button
               type="button"
               className="hover:underline"
