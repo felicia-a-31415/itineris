@@ -148,24 +148,30 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   useEffect(() => {
     if (!isRunning) return;
     const interval = setInterval(() => {
+      const now = Date.now();
+      const deltaSec = lastTick ? (now - lastTick) / 1000 : 1;
+
       setTimeLeft((prev) => {
-        if (prev <= 1) {
+        if (prev <= deltaSec) {
           setIsRunning(false);
           setSessionsCompleted((s) => s + 1);
-          setStudiedMinutes((m) => m + safeMinutes);
           setStreakDays((s) => Math.max(s, 1) + 1);
+          setLastTick(null);
           return safeMinutes * 60;
         }
-        return prev - 1;
+        return prev - deltaSec;
       });
-      setLastTick(Date.now());
+
+      setStudiedMinutes((m) => m + deltaSec / 60);
+      setLastTick(now);
     }, 1000);
     return () => clearInterval(interval);
-  }, [isRunning, safeMinutes]);
+  }, [isRunning, safeMinutes, lastTick]);
 
   useEffect(() => {
     if (!isRunning) {
       setTimeLeft(safeMinutes * 60);
+      setLastTick(null);
     }
   }, [safeMinutes, isRunning]);
 
@@ -228,6 +234,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       document.title = 'itineris';
     };
   }, [isRunning, timeLeft]);
+
+  // Initialiser/vider le tick lorsque l'état change
+  useEffect(() => {
+    if (isRunning) {
+      setLastTick(Date.now());
+    } else {
+      setLastTick(null);
+    }
+  }, [isRunning]);
 
   const getTasksForDate = (date: string) => {
     return tasks
