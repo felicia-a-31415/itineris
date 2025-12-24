@@ -228,25 +228,24 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     }
   }, [studyData]);
 
-  // Réinitialiser le compteur si la semaine a changé
+  // S'assurer qu'une entrée existe pour la semaine courante
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STUDY_MINUTES_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (
-          !parsed ||
-          typeof parsed !== 'object' ||
-          parsed.weekStart !== currentWeekStart ||
-          typeof parsed.minutes !== 'number'
-        ) {
-          setStudiedMinutes(0);
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+          setStudyData({ [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] });
+          return;
+        }
+        if (!parsed[currentWeekStart]) {
+          setStudyData({ ...parsed, [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] });
         }
       } else {
-        setStudiedMinutes(0);
+        setStudyData({ [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] });
       }
     } catch {
-      setStudiedMinutes(0);
+      setStudyData({ [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] });
     }
   }, [currentWeekStart]);
 
