@@ -120,27 +120,31 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [isEditingTimer, setIsEditingTimer] = useState(false);
   const [editingTimerValue, setEditingTimerValue] = useState('');
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
-  const [studiedMinutes, setStudiedMinutes] = useState(() => {
+  const [studyData, setStudyData] = useState<Record<string, number[]>>(() => {
     try {
       if (typeof window !== 'undefined') {
         const raw = localStorage.getItem(STUDY_MINUTES_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (
-            parsed &&
-            typeof parsed === 'object' &&
-            typeof parsed.weekStart === 'string' &&
-            typeof parsed.minutes === 'number' &&
-            parsed.weekStart === currentWeekStart
-          ) {
-            return parsed.minutes;
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            const obj = parsed as Record<string, any>;
+            if ('weekStart' in obj && 'minutes' in obj && typeof obj.weekStart === 'string') {
+              return { [obj.weekStart]: [Number(obj.minutes) || 0, 0, 0, 0, 0, 0, 0] };
+            }
+            const cleaned: Record<string, number[]> = {};
+            Object.entries(obj).forEach(([k, v]) => {
+              if (Array.isArray(v)) {
+                cleaned[k] = v.map((n) => (typeof n === 'number' && !Number.isNaN(n) ? n : 0));
+              }
+            });
+            return cleaned;
           }
         }
       }
     } catch (err) {
-      console.error('Impossible de charger le temps étudié', err);
+      console.error('Impossible de charger les minutes étudiées', err);
     }
-    return 0;
+    return { [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] };
   });
   const [streakDays, setStreakDays] = useState(1);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
@@ -156,6 +160,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const alarmRef = useRef<HTMLAudioElement | null>(null);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
+  const currentWeekKey = currentWeekStart;
+  const weekTotal = (studyData[currentWeekKey] || []).reduce((sum, n) => sum + n, 0);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -181,7 +187,18 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         return prev - deltaSec;
       });
 
-      setStudiedMinutes((m) => m + deltaSec / 60);
+      const todayDates = getCurrentWeekDates(0);
+      const todayKey = formatDate(todayDates[0]);
+      const todayIndex = todayDates.findIndex((d) => formatDate(d) === formatDate(new Date()));
+
+      setStudyData((prev) => {
+        const next = { ...prev };
+        const weekArray = [...(next[todayKey] ?? [0, 0, 0, 0, 0, 0, 0])];
+        const idx = todayIndex >= 0 ? todayIndex : 0;
+        weekArray[idx] = (weekArray[idx] ?? 0) + deltaSec / 60;
+        next[todayKey] = weekArray;
+        return next;
+      });
       setLastTick(now);
     }, 1000);
     return () => clearInterval(interval);
@@ -205,14 +222,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   // Sauver le temps étudié
   useEffect(() => {
     try {
-      localStorage.setItem(
-        STUDY_MINUTES_KEY,
-        JSON.stringify({ weekStart: currentWeekStart, minutes: studiedMinutes })
-      );
+      localStorage.setItem(STUDY_MINUTES_KEY, JSON.stringify(studyData));
     } catch (err) {
       console.error('Impossible de sauvegarder le temps étudié', err);
     }
-  }, [studiedMinutes, currentWeekStart]);
+  }, [studyData]);
 
   // Réinitialiser le compteur si la semaine a changé
   useEffect(() => {
@@ -411,7 +425,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const progress = Math.min(100, Math.round(((safeMinutes * 60 - timeLeft) / (safeMinutes * 60)) * 100));
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.completed).length;
-  const roundedStudiedMinutes = Math.round(studiedMinutes);
+  const roundedStudiedMinutes = Math.round(weekTotal);
   const isInitialTime = Math.abs(timeLeft - safeMinutes * 60) < 0.5;
 
   useEffect(() => {
@@ -538,13 +552,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   </Button>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-[#8B8680]">
-                  <span>{sessionsCompleted} sessions terminées</span>
-                  <span>{roundedStudiedMinutes} min étudiées</span>
-                </div>
+              <div className="flex items-center justify-between text-sm text-[#8B8680]">
+                <span>{sessionsCompleted} sessions terminées</span>
+                <span>{roundedStudiedMinutes} min étudiées</span>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
           {/* Tasks */}
           <section className="bg-white rounded-3xl p-6 shadow-sm">
@@ -871,6 +885,69 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 style={{ width: totalTasks === 0 ? '0%' : `${(completedTasks / totalTasks) * 100}%` }}
               />
             </div>
+          </div>
+        </section>
+
+        {/* Graphique des minutes étudiées par jour */}
+        <section className="bg-white rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm text-[#8B8680]">Temps étudié</p>
+              <h2 className="text-xl text-[#2C2C2C]">Minutes par jour</h2>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-[#4169E1]">
+              <button
+                type="button"
+                className="hover:underline"
+                onClick={() => setWeekOffset((w) => w - 1)}
+              >
+                ← semaine précédente
+              </button>
+              <div className="h-4 w-px bg-[#E8E3D6]" />
+              <button
+                type="button"
+                className="hover:underline"
+                onClick={() => setWeekOffset(0)}
+              >
+                semaine courante
+              </button>
+              <div className="h-4 w-px bg-[#E8E3D6]" />
+              <button
+                type="button"
+                className="hover:underline"
+                onClick={() => setWeekOffset((w) => w + 1)}
+              >
+                semaine suivante →
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-7 gap-3">
+            {weekDates.map((date, idx) => {
+              const weekKey = formatDate(weekDates[0]);
+              const minutesForWeek = studyData[weekKey] ?? [0, 0, 0, 0, 0, 0, 0];
+              const value = Math.round(minutesForWeek[idx] || 0);
+              const maxValue = 240; // 4h cap for visual height
+              const height = Math.min(100, (value / maxValue) * 100);
+
+              return (
+                <div key={idx} className="flex flex-col items-center gap-2">
+                  <div className="text-xs text-[#8B8680]">{getDayName(date)}</div>
+                  <div className="relative w-full h-32 bg-[#F5F1E8] rounded-2xl flex items-end">
+                    <div
+                      className="w-full rounded-2xl"
+                      style={{
+                        height: `${height}%`,
+                        backgroundColor: '#4169E1',
+                        transition: 'height 0.2s ease',
+                      }}
+                    />
+                    <div className="absolute inset-0 rounded-2xl border border-[#E8E3D6]" aria-hidden />
+                  </div>
+                  <div className="text-xs text-[#2C2C2C]">{value} min</div>
+                </div>
+              );
+            })}
           </div>
         </section>
       </div>
