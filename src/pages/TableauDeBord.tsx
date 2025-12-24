@@ -575,7 +575,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 className="text-[#4169E1] hover:underline"
                 onClick={() => setWeekOffset((w) => w - 1)}
               >
-                ← Semaine passée
+                ← Semaine précédente
               </button>
               <div className="h-4 w-px bg-[#E8E3D6]" />
               <button
@@ -625,18 +625,18 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
 
           {uploadNotice && (
-            <div className="mt-3 text-xs text-[#8B8680] rounded-2xl px-3 py-2 inline-flex items-center gap-2">
+            <div className="mt-3 text-xs text-[#8B8680] bg-[#F5F1E8] rounded-2xl px-3 py-2 inline-flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#4169E1]" />
               {uploadNotice}
             </div>
           )}
 
           <div className="mt-6">
-            <div className="grid grid-cols-7">
+            <div className="grid grid-cols-7 border-b border-[#F5F1E8]">
               {weekDates.map((date, index) => (
                 <div
                   key={index}
-                  className={`p-3 text-center ${
+                  className={`p-3 text-center border-r border-[#F5F1E8] last:border-r-0 ${
                     isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                   }`}
                 >
@@ -662,7 +662,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 return (
                   <div
                     key={index}
-                    className={`p-3 ${
+                    className={`border-r border-[#F5F1E8] last:border-r-0 p-3 ${
                       isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                     }`}
                   >
@@ -892,7 +892,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm text-[#8B8680]">Temps étudié</p>
-              <h2 className="text-xl text-[#2C2C2C]">Minutes par jour</h2>
             </div>
             <div className="flex items-center gap-2 text-sm text-[#4169E1]">
               <button
