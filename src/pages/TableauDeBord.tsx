@@ -568,7 +568,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Agenda en ligne */}
         <section className="bg-white rounded-3xl p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-sm text-[#8B8680]">Agenda en ligne</p>
             </div>
