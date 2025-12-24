@@ -625,18 +625,18 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
 
           {uploadNotice && (
-            <div className="mt-3 text-xs text-[#8B8680] bg-[#F5F1E8] rounded-2xl px-3 py-2 inline-flex items-center gap-2">
+            <div className="mt-3 text-xs text-[#8B8680] rounded-2xl px-3 py-2 inline-flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#4169E1]" />
               {uploadNotice}
             </div>
           )}
 
           <div className="mt-6">
-            <div className="grid grid-cols-7 border-b border-[#F5F1E8]">
+            <div className="grid grid-cols-7">
               {weekDates.map((date, index) => (
                 <div
                   key={index}
-                  className={`p-3 text-center border-r border-[#F5F1E8] last:border-r-0 ${
+                  className={`p-3 text-center ${
                     isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                   }`}
                 >
@@ -662,7 +662,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 return (
                   <div
                     key={index}
-                    className={`border-r border-[#F5F1E8] last:border-r-0 p-3 ${
+                    className={`p-3 ${
                       isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                     }`}
                   >
