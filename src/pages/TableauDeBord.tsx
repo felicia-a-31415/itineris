@@ -841,65 +841,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
         )}
 
-        {/* Graphique des minutes étudiées par jour */}
-        <section className="bg-white rounded-3xl p-6 shadow-sm space-y-3">
-          <div>
-            <p className="text-sm text-[#8B8680]">Temps étudié</p>
-          </div>
-
-          <div className="flex items-center gap-3 text-base font-semibold text-[#4169E1]">
-            <button
-              type="button"
-              className="hover:underline"
-              onClick={() => setWeekOffset((w) => w - 1)}
-            >
-              ← Semaine précédente
-            </button>
-            <div className="h-4 w-px bg-[#E8E3D6]" />
-            <button
-              type="button"
-              className="hover:underline"
-              onClick={() => setWeekOffset(0)}
-            >
-              Aujourd&apos;hui
-            </button>
-            <div className="h-4 w-px bg-[#E8E3D6]" />
-            <button
-              type="button"
-              className="hover:underline"
-              onClick={() => setWeekOffset((w) => w + 1)}
-            >
-              Semaine suivante →
-            </button>
-          </div>
-
-          <div className="grid grid-cols-7 gap-3">
-            {weekDates.map((date, idx) => {
-              const weekKey = formatDate(weekDates[0]);
-              const minutesForWeek = studyData[weekKey] ?? [0, 0, 0, 0, 0, 0, 0];
-              const value = Math.round(minutesForWeek[idx] || 0);
-              const maxValue = 240; // 4h cap for visual height
-              const height = Math.min(100, (value / maxValue) * 100);
-
-              return (
-                <div key={idx} className="flex flex-col items-center gap-2">
-                  <div className="text-xs text-[#8B8680]">{getDayName(date)}</div>
-                  <div className="relative w-full h-32 flex items-end">
-                    <div
-                      className="w-full rounded-2xl"
-                      style={{
-                        height: `${height}%`,
-                        backgroundColor: '#4169E1',
-                        transition: 'height 0.2s ease',
-                      }}
-                    />
-                  </div>
-                  <div className="text-xs text-[#2C2C2C]">{value} min</div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
       </div>
     </div>
   );
