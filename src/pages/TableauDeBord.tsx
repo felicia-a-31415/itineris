@@ -567,7 +567,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         </div>
 
         {/* Agenda en ligne */}
-        <section className="bg-white rounded-3xl p-6 shadow-sm space-y-4">
+        <section className="bg-white rounded-3xl p-6 shadow-sm space-y-3">
           <div>
             <p className="text-sm text-[#8B8680]">Agenda en ligne</p>
           </div>
@@ -842,7 +842,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         )}
 
         {/* Graphique des minutes étudiées par jour */}
-        <section className="bg-white rounded-3xl p-6 shadow-sm space-y-4">
+        <section className="bg-white rounded-3xl p-6 shadow-sm space-y-3">
           <div>
             <p className="text-sm text-[#8B8680]">Temps étudié</p>
           </div>
