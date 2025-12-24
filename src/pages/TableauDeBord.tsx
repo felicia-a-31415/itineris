@@ -569,6 +569,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         {/* Agenda en ligne */}
         <section className="bg-white rounded-3xl p-6 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-sm text-[#8B8680]">Agenda en ligne</p>
+            </div>
             <div className="flex items-center gap-3 text-sm text-[#2C2C2C]">
               <button
                 type="button"
@@ -852,13 +855,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Graphique des minutes étudiées par jour */}
         <section className="bg-white rounded-3xl p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-sm text-[#8B8680]">Temps étudié</p>
-            </div>
+          <div className="mb-2">
+            <p className="text-sm text-[#8B8680]">Temps étudié</p>
           </div>
 
-          <div className="mb-4 flex items-center gap-2 text-sm text-[#4169E1]">
+          <div className="mb-4 flex items-center gap-3 text-base font-semibold text-[#4169E1]">
             <button
               type="button"
               className="hover:underline"
