@@ -361,6 +361,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.completed).length;
   const roundedStudiedMinutes = Math.round(studiedMinutes);
+  const isInitialTime = Math.abs(timeLeft - safeMinutes * 60) < 0.5;
 
   return (
     <div className="min-h-screen bg-[#F5F1E8] p-6 md:p-10">
@@ -449,7 +450,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     ) : (
                       <>
                         <Play className="w-4 h-4 mr-2" />
-                        Relancer
+                        {isInitialTime ? 'Lancer' : 'Relancer'}
                       </>
                     )}
                   </Button>
