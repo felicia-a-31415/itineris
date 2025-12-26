@@ -187,7 +187,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
   const [selectedTime, setSelectedTime] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [lastTick, setLastTick] = useState<number | null>(null);
+  const lastTickRef = useRef<number | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
@@ -196,9 +196,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
   useEffect(() => {
     if (!isRunning) return;
+    lastTickRef.current = lastTickRef.current ?? Date.now();
     const interval = setInterval(() => {
       const now = Date.now();
-      const deltaSec = Math.max(1, Math.round((now - (lastTick ?? now)) / 1000));
+      const lastTick = lastTickRef.current ?? now;
+      const deltaSec = Math.max(1, Math.floor((now - lastTick) / 1000));
 
       setTimeLeft((prev) => {
         if (prev <= deltaSec) {
@@ -212,7 +214,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               console.error('Lecture du son impossible', err);
             }
           }
-          setLastTick(null);
+          lastTickRef.current = null;
           return safeMinutes * 60;
         }
         return prev - deltaSec;
@@ -230,16 +232,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         next[todayKey] = weekArray;
         return next;
       });
-      setLastTick(now);
+      lastTickRef.current = now;
     }, 1000);
     return () => clearInterval(interval);
-  }, [isRunning, safeMinutes, lastTick]);
-
-  useEffect(() => {
-    if (!isRunning) {
-      setLastTick(null);
-    }
-  }, [safeMinutes, isRunning]);
+  }, [isRunning, safeMinutes]);
 
   // Sauver les tâches à chaque modification
   useEffect(() => {
@@ -314,10 +310,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   useEffect(() => {
     if (isRunning) {
       document.title = `itineris | ${formatTime(timeLeft)}`;
-      setLastTick((t) => t ?? Date.now());
+      if (lastTickRef.current === null) {
+        lastTickRef.current = Date.now();
+      }
     } else {
       document.title = 'itineris';
-      setLastTick(null);
+      lastTickRef.current = null;
     }
     return () => {
       document.title = 'itineris';
