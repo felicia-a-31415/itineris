@@ -831,7 +831,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 style={{ width: `${Math.min(100, Math.max(5, studyProgressRatio * 100))}%` }}
               />
             </div>
-            <p className="text-[11px] text-[#8B8680] mt-1">Objectif : {studyGoalMinutes} min</p>
           </div>
 
           <div className="bg-white rounded-3xl p-5 shadow-sm">
@@ -847,7 +846,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 />
               ))}
             </div>
-            <p className="text-[11px] text-[#8B8680] mt-1">Garde le rythme !</p>
           </div>
 
           <div className="bg-white rounded-3xl p-5 shadow-sm">
@@ -861,7 +859,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 style={{ width: `${Math.min(100, Math.max(5, taskProgressRatio * 100))}%` }}
               />
             </div>
-            <p className="text-[11px] text-[#8B8680] mt-1">Continue d&apos;avancer</p>
           </div>
         </section>
 
