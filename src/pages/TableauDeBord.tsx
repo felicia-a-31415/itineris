@@ -53,6 +53,37 @@ const getDayName = (date: Date) => {
   return days[date.getDay()];
 };
 
+const formatWeekRangeLabel = (dates: Date[]) => {
+  if (!dates.length) return '';
+  const start = dates[0];
+  const end = dates[dates.length - 1];
+  const months = [
+    'janvier',
+    'février',
+    'mars',
+    'avril',
+    'mai',
+    'juin',
+    'juillet',
+    'août',
+    'septembre',
+    'octobre',
+    'novembre',
+    'décembre',
+  ];
+  const startDay = start.getDate();
+  const endDay = end.getDate();
+  const startMonth = months[start.getMonth()];
+  const endMonth = months[end.getMonth()];
+  const startYear = start.getFullYear();
+  const endYear = end.getFullYear();
+
+  if (startMonth === endMonth && startYear === endYear) {
+    return `Semaine du ${startDay} au ${endDay} ${endMonth} ${endYear}`;
+  }
+  return `Semaine du ${startDay} ${startMonth} ${startYear} au ${endDay} ${endMonth} ${endYear}`;
+};
+
 interface TableauDeBordScreenProps {
   userName?: string;
 }
@@ -426,6 +457,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const completedTasks = tasks.filter((t) => t.completed).length;
   const roundedStudiedMinutes = Math.round(weekTotal);
   const isInitialTime = Math.abs(timeLeft - safeMinutes * 60) < 0.5;
+  const activeWeekKey = formatDate(weekDates[0]);
+  const activeWeekMinutesRaw = studyData[activeWeekKey] ?? [];
+  const activeWeekMinutes = Array.from({ length: 7 }, (_, i) => activeWeekMinutesRaw[i] ?? 0);
+  const maxWeekMinutes = Math.max(60, ...activeWeekMinutes);
+  const weekRangeLabel = formatWeekRangeLabel(weekDates);
 
   useEffect(() => {
     alarmRef.current = new Audio(alarmSound);
@@ -571,51 +607,53 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Agenda en ligne */}
         <section className="bg-white rounded-3xl p-6 shadow-sm space-y-2">
-          <div>
+          <div className="flex flex-col gap-1">
             <p className="text-sm text-[#8B8680]">Agenda en ligne</p>
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3 text-base font-semibold text-[#4169E1]">
-              <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w - 1)}>
-                ← Semaine précédente
-              </button>
-              <div className="h-4 w-px bg-[#E8E3D6]" />
-              <button type="button" className="hover:underline" onClick={() => setWeekOffset(0)}>
-                Aujourd&apos;hui
-              </button>
-              <div className="h-4 w-px bg-[#E8E3D6]" />
-              <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w + 1)}>
-                Semaine suivante →
-              </button>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3 text-base font-semibold text-[#4169E1]">
+                <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w - 1)}>
+                  ← Semaine précédente
+                </button>
+                <div className="h-4 w-px bg-[#E8E3D6]" />
+                <button type="button" className="hover:underline" onClick={() => setWeekOffset(0)}>
+                  Aujourd&apos;hui
+                </button>
+                <div className="h-4 w-px bg-[#E8E3D6]" />
+                <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w + 1)}>
+                  Semaine suivante →
+                </button>
+              </div>
+
+              <div className="flex gap-2 items-center">
+                <Button
+                  onClick={() => {
+                    setSelectedDate(formatDate(new Date()));
+                    resetTaskForm();
+                    setShowAddDialog(true);
+                  }}
+                  className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white h-10 px-4"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter une tâche
+                </Button>
+                <label
+                  htmlFor="agendaUpload"
+                  className="flex items-center gap-2 h-10 px-4 rounded-2xl border border-dashed border-[#E8E3D6] text-sm font-medium text-[#2C2C2C] cursor-pointer hover:bg-[#F5F1E8]"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Importer une photo
+                </label>
+                <input
+                  id="agendaUpload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleAgendaImageUpload(e.target.files?.[0])}
+                />
+              </div>
             </div>
 
-            <div className="flex gap-2 items-center">
-              <Button
-                onClick={() => {
-                  setSelectedDate(formatDate(new Date()));
-                  resetTaskForm();
-                  setShowAddDialog(true);
-                }}
-                className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white h-10 px-4"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Ajouter une tâche
-              </Button>
-              <label
-                htmlFor="agendaUpload"
-                className="flex items-center gap-2 h-10 px-4 rounded-2xl border border-dashed border-[#E8E3D6] text-sm font-medium text-[#2C2C2C] cursor-pointer hover:bg-[#F5F1E8]"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Importer une photo
-              </label>
-              <input
-                id="agendaUpload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleAgendaImageUpload(e.target.files?.[0])}
-              />
-            </div>
+            <div className="text-sm text-[#8B8680]">{weekRangeLabel}</div>
           </div>
 
           {uploadNotice && (
@@ -732,6 +770,48 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 );
               })}
             </div>
+          </div>
+        </section>
+
+        {/* Temps étudié */}
+        <section className="bg-white rounded-3xl p-6 shadow-sm space-y-2">
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-[#8B8680]">Temps étudié</p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3 text-base font-semibold text-[#4169E1]">
+                <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w - 1)}>
+                  ← Semaine précédente
+                </button>
+                <div className="h-4 w-px bg-[#E8E3D6]" />
+                <button type="button" className="hover:underline" onClick={() => setWeekOffset(0)}>
+                  Aujourd&apos;hui
+                </button>
+                <div className="h-4 w-px bg-[#E8E3D6]" />
+                <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w + 1)}>
+                  Semaine suivante →
+                </button>
+              </div>
+              <div className="text-sm text-[#8B8680]">{weekRangeLabel}</div>
+            </div>
+          </div>
+
+          <div className="mt-2 grid grid-cols-7 gap-3 items-end">
+            {weekDates.map((date, index) => {
+              const minutes = Math.round(activeWeekMinutes[index] ?? 0);
+              const barHeight = Math.max(8, Math.min(220, (minutes / (maxWeekMinutes || 1)) * 220));
+              return (
+                <div key={index} className="flex flex-col items-center gap-2">
+                  <div className="w-full bg-[#EFF3FF] rounded-2xl h-56 flex items-end">
+                    <div
+                      className="w-full bg-[#4169E1] rounded-2xl transition-all"
+                      style={{ height: `${barHeight}px` }}
+                    />
+                  </div>
+                  <div className="text-xs text-[#2C2C2C] font-medium">{minutes} min</div>
+                  <div className="text-[11px] text-[#8B8680] uppercase">{getDayName(date)}</div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
