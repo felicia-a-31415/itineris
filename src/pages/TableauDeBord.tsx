@@ -462,6 +462,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const activeWeekMinutes = Array.from({ length: 7 }, (_, i) => activeWeekMinutesRaw[i] ?? 0);
   const maxWeekMinutes = Math.max(60, ...activeWeekMinutes);
   const weekRangeLabel = formatWeekRangeLabel(weekDates);
+  const studyGoalMinutes = 240;
+  const studyProgressRatio = Math.min(1, roundedStudiedMinutes / studyGoalMinutes || 0);
+  const streakSegments = 7;
+  const streakFilledSegments = Math.min(streakDays, streakSegments);
+  const taskProgressRatio = totalTasks > 0 ? completedTasks / totalTasks : 0;
 
   useEffect(() => {
     alarmRef.current = new Audio(alarmSound);
@@ -812,6 +817,51 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        {/* Statistiques rapides */}
+        <section className="grid gap-4 md:grid-cols-3">
+          <div className="bg-white rounded-3xl p-5 shadow-sm">
+            <p className="text-sm text-[#8B8680]">Temps total étudié</p>
+            <div className="text-2xl font-semibold text-[#2C2C2C] mt-1">{roundedStudiedMinutes} min</div>
+            <div className="h-2 w-full bg-[#F0EAE0] rounded-full mt-3 overflow-hidden">
+              <div
+                className="h-full bg-[#4169E1] rounded-full transition-all"
+                style={{ width: `${Math.min(100, Math.max(5, studyProgressRatio * 100))}%` }}
+              />
+            </div>
+            <p className="text-[11px] text-[#8B8680] mt-1">Objectif : {studyGoalMinutes} min</p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-5 shadow-sm">
+            <p className="text-sm text-[#8B8680]">Streak</p>
+            <div className="text-2xl font-semibold text-[#2C2C2C] mt-1">{streakDays} jours</div>
+            <div className="flex items-center gap-1 mt-3">
+              {Array.from({ length: streakSegments }).map((_, index) => (
+                <div
+                  key={index}
+                  className={`h-2 flex-1 rounded-full ${
+                    index < streakFilledSegments ? 'bg-[#C96532]' : 'bg-[#F0EAE0]'
+                  }`}
+                />
+              ))}
+            </div>
+            <p className="text-[11px] text-[#8B8680] mt-1">Garde le rythme !</p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-5 shadow-sm">
+            <p className="text-sm text-[#8B8680]">Tâches terminées</p>
+            <div className="text-2xl font-semibold text-[#2C2C2C] mt-1">
+              {completedTasks}/{totalTasks}
+            </div>
+            <div className="h-2 w-full bg-[#F0EAE0] rounded-full mt-3 overflow-hidden">
+              <div
+                className="h-full bg-[#E0D7C8] rounded-full transition-all"
+                style={{ width: `${Math.min(100, Math.max(5, taskProgressRatio * 100))}%` }}
+              />
+            </div>
+            <p className="text-[11px] text-[#8B8680] mt-1">Continue d&apos;avancer</p>
           </div>
         </section>
 
