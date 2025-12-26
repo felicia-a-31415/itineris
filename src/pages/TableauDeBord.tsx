@@ -612,23 +612,24 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Agenda en ligne */}
         <section className="bg-white rounded-3xl p-6 shadow-sm space-y-2">
-          <div className="flex flex-col gap-0">
+          <div className="flex flex-col gap-3">
             <p className="text-sm text-[#8B8680]">Agenda en ligne</p>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3 text-base font-semibold text-[#4169E1]">
-                <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w - 1)}>
-                  ← Semaine précédente
-                </button>
-                <div className="h-4 w-px bg-[#E8E3D6]" />
-                <button type="button" className="hover:underline" onClick={() => setWeekOffset(0)}>
-                  Aujourd&apos;hui
-                </button>
-                <div className="h-4 w-px bg-[#E8E3D6]" />
-                <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w + 1)}>
-                  Semaine suivante →
-                </button>
-              </div>
+            <div className="flex flex-wrap items-center gap-3 text-base font-semibold text-[#4169E1]">
+              <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w - 1)}>
+                ← Semaine précédente
+              </button>
+              <div className="h-4 w-px bg-[#E8E3D6]" />
+              <button type="button" className="hover:underline" onClick={() => setWeekOffset(0)}>
+                Aujourd&apos;hui
+              </button>
+              <div className="h-4 w-px bg-[#E8E3D6]" />
+              <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w + 1)}>
+                Semaine suivante →
+              </button>
+            </div>
 
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="text-2xl font-semibold text-[#2C2C2C]">{weekRangeLabel}</div>
               <div className="flex gap-2 items-center">
                 <Button
                   onClick={() => {
@@ -657,8 +658,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 />
               </div>
             </div>
-
-            <div className="text-2xl font-semibold text-[#2C2C2C] mt-1">{weekRangeLabel}</div>
           </div>
 
           {uploadNotice && (
