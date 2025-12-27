@@ -129,9 +129,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <p className="text-sm text-[#8B8680]">Centre de contrôle</p>
               <h1 className="text-2xl font-semibold text-[#2C2C2C]">Paramètres</h1>
-              <p className="text-[#8B8680] text-sm">Personnalise ton expérience</p>
             </div>
           </div>
           <Button
