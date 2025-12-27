@@ -297,6 +297,41 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     return PRIORITIES.find((p) => p.value === priority)?.label || '!';
   };
 
+  const getMinutesForDate = (targetDate: Date, data: Record<string, number[]>) => {
+    const normalized = new Date(targetDate);
+    normalized.setHours(0, 0, 0, 0);
+
+    const dayOfWeek = normalized.getDay();
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Monday start
+    const weekStart = new Date(normalized);
+    weekStart.setDate(normalized.getDate() + diff);
+
+    const weekKey = formatDate(weekStart);
+    const weekArray = data[weekKey];
+    if (!weekArray) return 0;
+
+    const index = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const value = weekArray[index];
+    return typeof value === 'number' && !Number.isNaN(value) ? value : 0;
+  };
+
+  const computeStreakFromStudyData = (data: Record<string, number[]>) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let streak = 0;
+    for (let i = 0; i < 365; i++) {
+      const day = new Date(today);
+      day.setDate(today.getDate() - i);
+      if (getMinutesForDate(day, data) > 0) {
+        streak += 1;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
   const commitTimerEdit = () => {
     const parsed = Number(editingTimerValue);
     if (Number.isFinite(parsed)) {
@@ -330,49 +365,24 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         if (a.time) return -1;
         if (b.time) return 1;
         return 0;
-  });
+      });
+  };
 
-  // Streak de connexion quotidienne (login)
   useEffect(() => {
-    const today = formatDate(new Date());
-    const todayDate = new Date(today);
-    todayDate.setHours(0, 0, 0, 0);
-
-    const loadAndUpdateStreak = () => {
+    const updateStreak = () => {
+      const nextStreak = computeStreakFromStudyData(studyData);
+      setStreakDays(nextStreak);
       try {
-        const raw = localStorage.getItem(STREAK_STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          const last = parsed?.last as string | undefined;
-          const lastDate = last ? new Date(last) : null;
-          if (lastDate) lastDate.setHours(0, 0, 0, 0);
-
-          const diffDays =
-            lastDate && !Number.isNaN(lastDate.getTime())
-              ? Math.round((todayDate.getTime() - lastDate.getTime()) / 86400000)
-              : null;
-
-          if (diffDays === 0) {
-            setStreakDays(parsed?.streak ?? 1);
-            return;
-          }
-          if (diffDays === 1) {
-            const nextStreak = (parsed?.streak ?? 1) + 1;
-            setStreakDays(nextStreak);
-            localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify({ streak: nextStreak, last: today }));
-            return;
-          }
-        }
-        setStreakDays(1);
-        localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify({ streak: 1, last: today }));
+        localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify({ streak: nextStreak, last: formatDate(new Date()) }));
       } catch (err) {
-        console.error('Impossible de mettre à jour le streak', err);
+        console.error('Impossible de sauvegarder le streak', err);
       }
     };
 
-    loadAndUpdateStreak();
-  }, []);
-  };
+    updateStreak();
+    const interval = setInterval(updateStreak, 60000);
+    return () => clearInterval(interval);
+  }, [studyData]);
 
   const resetTaskForm = () => {
     setNewTaskName('');
@@ -555,19 +565,19 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
               <div className="space-y-3">
                 <div className="flex gap-2">
-                <Button
-                  onClick={() => {
-                    setIsRunning((running) => {
-                      if (running) {
-                        setLastTick(null);
-                        return false;
-                      }
-                      setLastTick(Date.now());
-                      return true;
-                    });
-                  }}
-                  className="flex-1 bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-2xl"
-                >
+                  <Button
+                    onClick={() => {
+                      setIsRunning((running) => {
+                        if (running) {
+                          lastTickRef.current = null;
+                          return false;
+                        }
+                        lastTickRef.current = Date.now();
+                        return true;
+                      });
+                    }}
+                    className="flex-1 bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-2xl"
+                  >
                     {isRunning ? (
                       <>
                         <Pause className="w-4 h-4 mr-2" />
