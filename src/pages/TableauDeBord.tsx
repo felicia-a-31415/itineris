@@ -91,6 +91,7 @@ interface TableauDeBordScreenProps {
 const TASK_STORAGE_KEY = 'itineris_tasks';
 const STUDY_MINUTES_KEY = 'itineris_study_minutes';
 const STREAK_STORAGE_KEY = 'itineris_streak';
+const SESSIONS_STORAGE_KEY = 'itineris_sessions_completed';
 
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
@@ -150,7 +151,20 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [isRunning, setIsRunning] = useState(false);
   const [isEditingTimer, setIsEditingTimer] = useState(false);
   const [editingTimerValue, setEditingTimerValue] = useState('');
-  const [sessionsCompleted, setSessionsCompleted] = useState(0);
+  const [sessionsCompleted, setSessionsCompleted] = useState(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem(SESSIONS_STORAGE_KEY);
+        if (raw) {
+          const parsed = Number(raw);
+          if (!Number.isNaN(parsed) && parsed >= 0) return parsed;
+        }
+      }
+    } catch (err) {
+      console.error('Impossible de charger les sessions terminées', err);
+    }
+    return 0;
+  });
   const [studyData, setStudyData] = useState<Record<string, number[]>>(() => {
     try {
       if (typeof window !== 'undefined') {
@@ -254,6 +268,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       console.error('Impossible de sauvegarder le temps étudié', err);
     }
   }, [studyData]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SESSIONS_STORAGE_KEY, sessionsCompleted.toString());
+    } catch (err) {
+      console.error('Impossible de sauvegarder les sessions terminées', err);
+    }
+  }, [sessionsCompleted]);
 
   // S'assurer qu'une entrée existe pour la semaine courante
   useEffect(() => {
