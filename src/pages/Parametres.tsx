@@ -119,7 +119,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
   return (
     <div className="min-h-screen bg-[#F5F1E8] p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="bg-white rounded-3xl shadow-sm border border-[#E8E3D6] p-4 md:p-6 flex items-center justify-between gap-4">
+        <div className="p-1 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Button
               onClick={onBack}
@@ -136,7 +136,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
           </div>
           <Button
             onClick={handleSave}
-            className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4"
+            className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4 shadow-sm"
           >
             {saved ? (
               <>
@@ -153,16 +153,16 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-white rounded-3xl p-2 border border-[#E8E3D6] shadow-sm min-h-[64px]">
-            <TabsTrigger value="profile" className="rounded-xl h-12 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+          <TabsList className="grid w-full grid-cols-3 mb-6 bg-white rounded-3xl p-2 border border-[#E8E3D6] shadow-sm min-h-[56px]">
+            <TabsTrigger value="profile" className="rounded-xl h-11 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
               <User className="w-4 h-4 mr-2" />
               Profil
             </TabsTrigger>
-            <TabsTrigger value="subjects" className="rounded-xl h-12 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+            <TabsTrigger value="subjects" className="rounded-xl h-11 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
               <BookOpen className="w-4 h-4 mr-2" />
               Matières
             </TabsTrigger>
-            <TabsTrigger value="theme" className="rounded-xl h-12 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+            <TabsTrigger value="theme" className="rounded-xl h-11 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
               <Palette className="w-4 h-4 mr-2" />
               Thème
             </TabsTrigger>
