@@ -804,44 +804,43 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Statistiques rapides */}
         <section className="grid gap-4 md:grid-cols-3">
-          <div className="bg-white rounded-3xl p-5 shadow-sm">
+
+          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
             <p className="text-sm text-[#8B8680]">Temps total étudié</p>
-            <div className="text-2xl font-semibold text-[#2C2C2C] mt-1">{roundedStudiedMinutes} min</div>
-            <div className="h-2 w-full bg-[#F0EAE0] rounded-full mt-3 overflow-hidden">
-              <div
-                className="h-full bg-[#4169E1] rounded-full transition-all"
-                style={{ width: `${Math.min(100, Math.max(5, studyProgressRatio * 100))}%` }}
-              />
+            <p className="text-2xl text-[#2C2C2C]">{roundedStudiedMinutes} min</p>
+            <div className="h-2 bg-[#F5F1E8] rounded-full overflow-hidden">
+              <div className="h-full bg-[#4169E1]" style={{ width: `${Math.min(100, (roundedStudiedMinutes / 240) * 100)}%` }} />
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl p-5 shadow-sm">
+          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
             <p className="text-sm text-[#8B8680]">Streak</p>
-            <div className="text-2xl font-semibold text-[#2C2C2C] mt-1">{streakDays} jours</div>
-            <div className="flex items-center gap-1 mt-3">
-              {Array.from({ length: streakSegments }).map((_, index) => (
+            <p className="text-2xl text-[#2C2C2C]">{streakDays} jours</p>
+            <div className="flex gap-1 mt-1">
+              {Array.from({ length: 7 }).map((_, idx) => (
                 <div
-                  key={index}
-                  className={`h-2 flex-1 rounded-full ${
-                    index < streakFilledSegments ? 'bg-[#C96532]' : 'bg-[#F0EAE0]'
+                  key={idx}
+                  className={`flex-1 h-2 rounded-full ${
+                    idx < Math.min(streakDays, 7) ? 'bg-[#E16941]' : 'bg-[#F5F1E8]'
                   }`}
                 />
               ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl p-5 shadow-sm">
+          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
             <p className="text-sm text-[#8B8680]">Tâches terminées</p>
-            <div className="text-2xl font-semibold text-[#2C2C2C] mt-1">
+            <p className="text-2xl text-[#2C2C2C]">
               {completedTasks}/{totalTasks}
-            </div>
-            <div className="h-2 w-full bg-[#F0EAE0] rounded-full mt-3 overflow-hidden">
+            </p>
+            <div className="h-2 bg-[#F5F1E8] rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#E0D7C8] rounded-full transition-all"
-                style={{ width: `${Math.min(100, Math.max(5, taskProgressRatio * 100))}%` }}
+                className="h-full bg-[#41E169]"
+                style={{ width: totalTasks === 0 ? '0%' : `${(completedTasks / totalTasks) * 100}%` }}
               />
             </div>
           </div>
+          
         </section>
 
         {/* Modal ajout tâche */}
