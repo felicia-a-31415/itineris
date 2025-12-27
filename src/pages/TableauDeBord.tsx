@@ -361,11 +361,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     today.setHours(0, 0, 0, 0);
 
     let streak = 0;
+    let graceDays = 1; // allow a single empty day (e.g., earlier today) before breaking the streak
+
     for (let i = 0; i < 365; i++) {
       const day = new Date(today);
       day.setDate(today.getDate() - i);
       if (getMinutesForDate(day, data) > 0) {
         streak += 1;
+      } else if (graceDays > 0) {
+        graceDays -= 1;
+        continue;
       } else {
         break;
       }
