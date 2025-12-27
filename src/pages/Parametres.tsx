@@ -153,16 +153,16 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-white rounded-3xl p-2 border border-[#E8E3D6] shadow-sm min-h-[56px]">
-            <TabsTrigger value="profile" className="rounded-xl h-11 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+          <TabsList className="w-full max-w-2xl mx-auto flex justify-center gap-2 mb-6 bg-white rounded-3xl p-2 border border-[#E8E3D6] shadow-sm min-h-[56px]">
+            <TabsTrigger value="profile" className="rounded-xl h-11 flex-1 min-w-[140px] data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
               <User className="w-4 h-4 mr-2" />
               Profil
             </TabsTrigger>
-            <TabsTrigger value="subjects" className="rounded-xl h-11 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+            <TabsTrigger value="subjects" className="rounded-xl h-11 flex-1 min-w-[140px] data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
               <BookOpen className="w-4 h-4 mr-2" />
               Matières
             </TabsTrigger>
-            <TabsTrigger value="theme" className="rounded-xl h-11 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+            <TabsTrigger value="theme" className="rounded-xl h-11 flex-1 min-w-[140px] data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
               <Palette className="w-4 h-4 mr-2" />
               Thème
             </TabsTrigger>
