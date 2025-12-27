@@ -650,7 +650,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   <span className="text-sm text-[#8B8680]">
                     {sessionsCompletedToday} sessions terminées aujourd&apos;hui
                   </span>
-                  <span className="text-sm text-[#8B8680]">{roundedStudiedMinutes} min étudiées</span>
                 </div>
               </div>
             </div>
