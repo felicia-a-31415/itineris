@@ -151,19 +151,35 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [isRunning, setIsRunning] = useState(false);
   const [isEditingTimer, setIsEditingTimer] = useState(false);
   const [editingTimerValue, setEditingTimerValue] = useState('');
-  const [sessionsCompleted, setSessionsCompleted] = useState(() => {
+  const [sessionsByDay, setSessionsByDay] = useState<Record<string, number>>(() => {
+    const todayKey = formatDate(new Date());
     try {
       if (typeof window !== 'undefined') {
         const raw = localStorage.getItem(SESSIONS_STORAGE_KEY);
         if (raw) {
-          const parsed = Number(raw);
-          if (!Number.isNaN(parsed) && parsed >= 0) return parsed;
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+              const obj: Record<string, any> = parsed;
+              const cleaned: Record<string, number> = {};
+              Object.entries(obj).forEach(([k, v]) => {
+                const num = Number(v);
+                if (!Number.isNaN(num) && num >= 0) cleaned[k] = num;
+              });
+              if (Object.keys(cleaned).length) return cleaned;
+            }
+          } catch {
+            const parsedNumber = Number(raw);
+            if (!Number.isNaN(parsedNumber) && parsedNumber >= 0) {
+              return { [todayKey]: parsedNumber };
+            }
+          }
         }
       }
     } catch (err) {
       console.error('Impossible de charger les sessions terminées', err);
     }
-    return 0;
+    return { [todayKey]: 0 };
   });
   const [studyData, setStudyData] = useState<Record<string, number[]>>(() => {
     try {
@@ -219,7 +235,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       setTimeLeft((prev) => {
         if (prev <= deltaSec) {
           setIsRunning(false);
-          setSessionsCompleted((s) => s + 1);
+          setSessionsByDay((prevSessions) => {
+            const todayKey = formatDate(new Date());
+            return { ...prevSessions, [todayKey]: (prevSessions[todayKey] ?? 0) + 1 };
+          });
           if (alarmRef.current) {
             try {
               alarmRef.current.currentTime = 0;
@@ -271,11 +290,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
   useEffect(() => {
     try {
-      localStorage.setItem(SESSIONS_STORAGE_KEY, sessionsCompleted.toString());
+      localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessionsByDay));
     } catch (err) {
       console.error('Impossible de sauvegarder les sessions terminées', err);
     }
-  }, [sessionsCompleted]);
+  }, [sessionsByDay]);
 
   // S'assurer qu'une entrée existe pour la semaine courante
   useEffect(() => {
@@ -487,6 +506,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const completedTasks = tasks.filter((t) => t.completed).length;
   const roundedStudiedMinutes = Math.round(weekTotal);
   const isInitialTime = Math.abs(timeLeft - safeMinutes * 60) < 0.5;
+  const todayKey = formatDate(new Date());
+  const sessionsCompletedToday = sessionsByDay[todayKey] ?? 0;
   const activeWeekKey = formatDate(weekDates[0]);
   const activeWeekMinutesRaw = studyData[activeWeekKey] ?? [];
   const activeWeekMinutes = Array.from({ length: 7 }, (_, i) => activeWeekMinutesRaw[i] ?? 0);
@@ -623,11 +644,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Réinitialiser
                   </Button>
-                </div>
-
-              <div className="flex items-center justify-between text-sm text-[#8B8680]">
-                <span>{sessionsCompleted} sessions terminées</span>
-                <span>{roundedStudiedMinutes} min étudiées</span>
+              </div>
+              <div className="mb-2">
+                {sessionsCompletedToday} sessions terminées aujourd'hui
               </div>
             </div>
           </div>
