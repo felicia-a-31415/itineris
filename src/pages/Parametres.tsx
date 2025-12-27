@@ -118,25 +118,25 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
   return (
     <div className="min-h-screen bg-[#F5F1E8] p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8 md:mb-12">
-          <div className="flex items-center">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="bg-white rounded-3xl shadow-sm border border-[#E8E3D6] p-4 md:p-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
             <Button
               onClick={onBack}
               variant="ghost"
-              className="mr-4 text-[#8B8680] hover:text-[#2C2C2C] hover:bg-white/50"
+              className="text-[#8B8680] hover:text-[#2C2C2C] hover:bg-[#F5F1E8] rounded-xl"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-[#2C2C2C]">Paramètres</h1>
+              <p className="text-sm text-[#8B8680]">Centre de contrôle</p>
+              <h1 className="text-2xl font-semibold text-[#2C2C2C]">Paramètres</h1>
               <p className="text-[#8B8680] text-sm">Personnalise ton expérience</p>
             </div>
           </div>
           <Button
             onClick={handleSave}
-            className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl"
+            className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4"
           >
             {saved ? (
               <>
@@ -153,16 +153,16 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-white/50 rounded-2xl p-1">
-            <TabsTrigger value="profile" className="rounded-xl data-[state=active]:bg-white">
+          <TabsList className="grid w-full grid-cols-3 mb-6 bg-white rounded-2xl p-1 border border-[#E8E3D6] shadow-sm">
+            <TabsTrigger value="profile" className="rounded-xl data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
               <User className="w-4 h-4 mr-2" />
               Profil
             </TabsTrigger>
-            <TabsTrigger value="subjects" className="rounded-xl data-[state=active]:bg-white">
+            <TabsTrigger value="subjects" className="rounded-xl data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
               <BookOpen className="w-4 h-4 mr-2" />
               Matières
             </TabsTrigger>
-            <TabsTrigger value="theme" className="rounded-xl data-[state=active]:bg-white">
+            <TabsTrigger value="theme" className="rounded-xl data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
               <Palette className="w-4 h-4 mr-2" />
               Thème
             </TabsTrigger>
@@ -170,7 +170,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
           {/* Profile Tab */}
           <TabsContent value="profile">
-            <Card className="bg-white rounded-2xl p-8 shadow-sm border-0">
+            <Card className="bg-white rounded-3xl p-8 shadow-sm border border-[#E8E3D6]">
               <div className="space-y-6">
                 <div>
                   <Label htmlFor="name" className="text-[#2C2C2C] mb-2">
@@ -224,7 +224,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
           {/* Subjects Tab */}
           <TabsContent value="subjects">
-            <Card className="bg-white rounded-2xl p-8 shadow-sm border-0">
+            <Card className="bg-white rounded-3xl p-8 shadow-sm border border-[#E8E3D6]">
               <div className="space-y-6">
                 <div>
                   <Label className="text-[#2C2C2C] mb-3 block">
@@ -303,13 +303,14 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
           {/* Theme Tab */}
           <TabsContent value="theme">
-            <Card className="bg-white rounded-2xl p-8 shadow-sm border-0">
-              <div className="text-center py-12">
-                <Palette className="w-12 h-12 text-[#8B8680] mx-auto mb-4" />
-                <h3 className="text-xl text-[#2C2C2C] mb-2">Personnalisation du thème</h3>
-                <p className="text-[#8B8680]">
-                  Les options de thème seront bientôt disponibles ! Tu pourras choisir parmi
-                  différents palettes de couleurs et modes d'affichage.
+            <Card className="bg-gradient-to-r from-[#F5F8FF] to-[#FFF7F1] rounded-3xl p-8 shadow-sm border border-[#E8E3D6]">
+              <div className="text-center py-12 space-y-3">
+                <div className="w-14 h-14 rounded-2xl bg-white shadow-inner border border-[#E8E3D6] mx-auto flex items-center justify-center">
+                  <Palette className="w-7 h-7 text-[#4169E1]" />
+                </div>
+                <h3 className="text-xl text-[#2C2C2C]">Personnalisation du thème</h3>
+                <p className="text-[#8B8680] max-w-2xl mx-auto">
+                  Les options de thème seront bientôt disponibles ! Choisis des palettes, des modes d&apos;affichage et des textures qui s&apos;alignent avec ton tableau de bord.
                 </p>
               </div>
             </Card>
