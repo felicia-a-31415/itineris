@@ -644,13 +644,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Réinitialiser
                   </Button>
-              </div>
-              <div className="mb-2">
-                {sessionsCompletedToday} sessions terminées aujourd'hui
+                </div>
+
+                <div className="flex items-center justify-between text-sm text-[#8B8680]">
+                  <span className="text-sm text-[#8B8680]">
+                    {sessionsCompletedToday} sessions terminées aujourd&apos;hui
+                  </span>
+                  <span className="text-sm text-[#8B8680]">{roundedStudiedMinutes} min étudiées</span>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
           {/* Tasks */}
           <section className="bg-white rounded-3xl p-6 shadow-sm">
