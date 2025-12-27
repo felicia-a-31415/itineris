@@ -795,7 +795,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     />
                   </div>
                   <div className="text-xs text-[#2C2C2C] font-medium">{minutes} min</div>
-                  <div className="text-[11px] text-[#8B8680] uppercase">{getDayName(date)}</div>
+                  <div className="text-xs text-[#8B8680] uppercase mb-1">{getDayName(date)}</div>
                 </div>
               );
             })}
