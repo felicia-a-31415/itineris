@@ -122,13 +122,6 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
         <Tabs defaultValue="profile" className="w-full">
           <div className="p-1 flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-3 flex-wrap">
-              <Button
-                onClick={onBack}
-                variant="ghost"
-                className="text-[#8B8680] hover:text-[#2C2C2C] hover:bg-[#F5F1E8] rounded-xl"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
               <TabsList className="flex flex-wrap justify-center gap-2 bg-white rounded-3xl p-2 border border-[#E8E3D6] shadow-sm min-h-[56px]">
                 <TabsTrigger value="profile" className="rounded-xl h-11 min-w-[140px] px-4 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
                   <User className="w-4 h-4 mr-2" />
@@ -144,22 +137,31 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </TabsTrigger>
               </TabsList>
             </div>
-            <Button
-              onClick={handleSave}
-              className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4 shadow-sm"
-            >
-              {saved ? (
-                <>
-                  <Check className="w-4 h-4 mr-2" />
-                  Sauvegardé
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Sauvegarder
-                </>
-              )}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={onBack}
+                variant="outline"
+                className="rounded-xl border-[#E8E3D6] text-[#2C2C2C]"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleSave}
+                className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4 shadow-sm"
+              >
+                {saved ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Sauvegardé
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Sauvegarder
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
           {/* Profile Tab */}
