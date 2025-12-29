@@ -114,6 +114,9 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
     onSave(formData);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+    setTimeout(() => {
+      onBack();
+    }, 1000);
   };
 
   return (
@@ -140,14 +143,14 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             <div className="flex items-center gap-2">
               <Button
                 onClick={onBack}
-                className="rounded-xl bg-[#E16941] hover:bg-[#c95735] text-white px-4 shadow-sm h-11"
+                className="rounded-xl bg-[#E16941] hover:bg-[#c95735] text-white px-4 shadow-sm !h-11"
               >
                 <X className="w-4 h-4 mr-2" />
                 Annuler
               </Button>
               <Button
                 onClick={handleSave}
-                className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4 shadow-sm h-11"
+                className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4 shadow-sm !h-11"
               >
                 {saved ? (
                   <>
