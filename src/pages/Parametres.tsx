@@ -125,7 +125,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
         <Tabs defaultValue="profile" className="w-full">
           <div className="p-1 flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-3 flex-wrap">
-              <TabsList className="flex items-center justify-center gap-2 bg-white rounded-3xl h-10 px-2 border border-[#E8E3D6] shadow-sm">
+              <TabsList className="flex items-center justify-center gap-2 bg-white rounded-3xl h-11 px-2 border border-[#E8E3D6] shadow-sm">
                 <TabsTrigger value="profile" className="rounded-xl h-full min-w-[140px] px-4 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
                   <User className="w-4 h-4 mr-2" />
                   Profil
@@ -143,14 +143,14 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             <div className="flex items-center gap-2">
               <Button
                 onClick={onBack}
-                className="rounded-xl bg-[#E16941] hover:bg-[#c95735] text-white px-4 shadow-sm !h-10"
+                className="rounded-xl bg-[#E16941] hover:bg-[#c95735] text-white px-4 shadow-sm !h-11"
               >
                 <X className="w-4 h-4 mr-2" />
                 Annuler
               </Button>
               <Button
                 onClick={handleSave}
-                className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4 shadow-sm !h-10"
+                className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4 shadow-sm !h-11"
               >
                 {saved ? (
                   <>
