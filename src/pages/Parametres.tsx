@@ -119,52 +119,48 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
   return (
     <div className="min-h-screen bg-[#F5F1E8] p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="p-1 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={onBack}
-              variant="ghost"
-              className="text-[#8B8680] hover:text-[#2C2C2C] hover:bg-[#F5F1E8] rounded-xl"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-semibold text-[#2C2C2C]">Paramètres</h1>
-            </div>
-          </div>
-          <Button
-            onClick={handleSave}
-            className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4 shadow-sm"
-          >
-            {saved ? (
-              <>
-                <Check className="w-4 h-4 mr-2" />
-                Sauvegardé
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4 mr-2" />
-                Sauvegarder
-              </>
-            )}
-          </Button>
-        </div>
-
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="w-full max-w-2xl mx-auto flex justify-center gap-2 mb-6 bg-white rounded-3xl p-2 border border-[#E8E3D6] shadow-sm min-h-[56px]">
-            <TabsTrigger value="profile" className="rounded-xl h-11 flex-1 min-w-[140px] data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
-              <User className="w-4 h-4 mr-2" />
-              Profil
-            </TabsTrigger>
-            <TabsTrigger value="subjects" className="rounded-xl h-11 flex-1 min-w-[140px] data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
-              <BookOpen className="w-4 h-4 mr-2" />
-              Matières
-            </TabsTrigger>
-            <TabsTrigger value="theme" className="rounded-xl h-11 flex-1 min-w-[140px] data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
-              <Palette className="w-4 h-4 mr-2" />
-              Thème
-            </TabsTrigger>
-          </TabsList>
+          <div className="p-1 flex flex-wrap items-center justify-between gap-3 mb-6">
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                onClick={onBack}
+                variant="ghost"
+                className="text-[#8B8680] hover:text-[#2C2C2C] hover:bg-[#F5F1E8] rounded-xl"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <TabsList className="flex flex-wrap justify-center gap-2 bg-white rounded-3xl p-2 border border-[#E8E3D6] shadow-sm min-h-[56px]">
+                <TabsTrigger value="profile" className="rounded-xl h-11 min-w-[140px] px-4 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+                  <User className="w-4 h-4 mr-2" />
+                  Profil
+                </TabsTrigger>
+                <TabsTrigger value="subjects" className="rounded-xl h-11 min-w-[140px] px-4 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Matières
+                </TabsTrigger>
+                <TabsTrigger value="theme" className="rounded-xl h-11 min-w-[140px] px-4 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+                  <Palette className="w-4 h-4 mr-2" />
+                  Thème
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            <Button
+              onClick={handleSave}
+              className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4 shadow-sm"
+            >
+              {saved ? (
+                <>
+                  <Check className="w-4 h-4 mr-2" />
+                  Sauvegardé
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Sauvegarder
+                </>
+              )}
+            </Button>
+          </div>
 
           {/* Profile Tab */}
           <TabsContent value="profile">
