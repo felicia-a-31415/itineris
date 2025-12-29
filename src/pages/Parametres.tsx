@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, User, Palette, BookOpen, Save, Check } from 'lucide-react';
+import { ArrowLeft, User, Palette, BookOpen, Save, Check, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -140,9 +140,9 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             <div className="flex items-center gap-2">
               <Button
                 onClick={onBack}
-                variant="outline"
-                className="rounded-xl border-[#E8E3D6] text-[#2C2C2C]"
+                className="rounded-xl bg-[#E16941] hover:bg-[#c95735] text-white px-4 shadow-sm"
               >
+                <X className="w-4 h-4 mr-2" />
                 Annuler
               </Button>
               <Button
