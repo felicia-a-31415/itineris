@@ -862,7 +862,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             })}
           </div>
 
-          <div className="mt-4 flex items-center justify-between text-sm text-[#8B8680]">
+          <div className="mt-4 flex items-center gap-2 text-sm text-[#8B8680]">
             <span>Temps total étudié sur la semaine</span>
             <span className="text-[#2C2C2C] font-semibold">{activeWeekTotalMinutes} min</span>
           </div>
