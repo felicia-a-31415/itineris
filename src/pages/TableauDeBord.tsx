@@ -862,9 +862,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             })}
           </div>
 
-          <div className="mt-4 px-4 py-3 bg-[#F5F1E8] rounded-2xl flex items-center justify-between">
-            <span className="text-sm text-[#8B8680]">Temps total étudié sur la semaine</span>
-            <span className="text-lg font-semibold text-[#2C2C2C]">{activeWeekTotalMinutes} min</span>
+          <div className="mt-4 flex items-center justify-between text-sm text-[#8B8680]">
+            <span>Temps total étudié sur la semaine</span>
+            <span className="text-[#2C2C2C] font-semibold">{activeWeekTotalMinutes} min</span>
           </div>
         </section>
 
