@@ -865,7 +865,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         <section className="grid gap-4 md:grid-cols-3">
 
           <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
-            <p className="text-sm text-[#8B8680]">Temps total étudié</p>
+            <p className="text-sm text-[#8B8680]">Temps total étudié cette semaine</p>
             <p className="text-2xl text-[#2C2C2C]">{roundedStudiedMinutes} min</p>
             <div className="h-2 bg-[#F5F1E8] rounded-full overflow-hidden">
               <div className="h-full bg-[#4169E1]" style={{ width: `${Math.min(100, (roundedStudiedMinutes / 240) * 100)}%` }} />
