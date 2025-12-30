@@ -518,6 +518,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const activeWeekMinutesRaw = studyData[activeWeekKey] ?? [];
   const activeWeekMinutes = Array.from({ length: 7 }, (_, i) => activeWeekMinutesRaw[i] ?? 0);
   const maxWeekMinutes = Math.max(60, ...activeWeekMinutes);
+  const activeWeekTotalMinutes = Math.round(activeWeekMinutes.reduce((sum, n) => sum + n, 0));
   const weekRangeLabel = formatWeekRangeLabel(weekDates);
   const studyGoalMinutes = 240;
   const studyProgressRatio = Math.min(1, roundedStudiedMinutes / studyGoalMinutes || 0);
@@ -859,6 +860,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
               );
             })}
+          </div>
+
+          <div className="mt-4 px-4 py-3 bg-[#F5F1E8] rounded-2xl flex items-center justify-between">
+            <span className="text-sm text-[#8B8680]">Temps total étudié sur la semaine</span>
+            <span className="text-lg font-semibold text-[#2C2C2C]">{activeWeekTotalMinutes} min</span>
           </div>
         </section>
 
