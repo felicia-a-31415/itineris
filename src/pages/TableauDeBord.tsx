@@ -538,20 +538,20 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] p-6 md:p-10">
+    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-10">
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="flex items-start gap-4">
           <div className="flex-1">
-            <h1 className="text-xl md:text-2xl font-semibold text-[#2C2C2C]">
+            <h1 className="text-xl md:text-2xl font-semibold text-[#ECECF3]">
               {getGreeting()}, {userName} 👋
             </h1>
-            <p className="text-[#8B8680] text-sm mt-1">Prêt(e) à continuer ton voyage d&apos;apprentissage ?</p>
+            <p className="text-[#A9ACBA] text-sm mt-1">Prêt(e) à continuer ton voyage d&apos;apprentissage ?</p>
           </div>
 
           <Button
             onClick={() => navigate('/parametres')}
             variant="ghost"
-            className="text-[#8B8680] hover:text-[#2C2C2C] hover:bg-white rounded-xl"
+            className="text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#1F2230] rounded-xl"
           >
             <Settings className="w-5 h-5" />
           </Button>
@@ -559,19 +559,19 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr,1.4fr] items-start">
           {/* Pomodoro */}
-          <section className="bg-white rounded-3xl p-6 shadow-sm">
+          <section className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-6 shadow-sm">
             <div className="mb-2">
-              <p className="text-sm text-[#8B8680]">Minuteur</p>
+              <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-[1.1fr,1fr] items-center">
               <div className="flex items-center justify-center">
                 <div
                   className="relative w-48 h-48 rounded-full flex items-center justify-center"
                   style={{
-                    background: `conic-gradient(#4169E1 ${progress * 3.6}deg, #E8E3D6 ${progress * 3.6}deg)`,
+                    background: `conic-gradient(#4169E1 ${progress * 3.6}deg, #1F2230 ${progress * 3.6}deg)`,
                   }}
                 >
-                  <div className="absolute inset-3 bg-white rounded-full shadow-inner flex flex-col items-center justify-center">
+                  <div className="absolute inset-3 bg-[#0B0D10] rounded-full shadow-inner flex flex-col items-center justify-center">
                     {isEditingTimer ? (
                       <Input
                         type="number"
@@ -590,14 +590,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             setEditingTimerValue(timerMinutes.toString());
                           }
                         }}
-                        className="w-24 text-center rounded-xl border-[#E8E3D6]"
+                        className="w-24 text-center rounded-xl border-[#1F2230]"
                         autoFocus
                       />
                     ) : (
                       <>
                         <button
                           type="button"
-                          className="text-3xl font-semibold text-[#2C2C2C]"
+                          className="text-3xl font-semibold text-[#ECECF3]"
                           onClick={() => {
                             setIsRunning(false);
                             setIsEditingTimer(true);
@@ -606,7 +606,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         >
                           {formatTime(timeLeft)}
                         </button>
-                        <span className="text-xs text-[#8B8680]">{timerMinutes} min</span>
+                        <span className="text-xs text-[#A9ACBA]">{timerMinutes} min</span>
                       </>
                     )}
                   </div>
@@ -646,15 +646,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       setTimeLeft(safeMinutes * 60);
                     }}
                     variant="outline"
-                    className="flex-1 rounded-2xl border-[#E8E3D6]"
+                    className="flex-1 rounded-2xl border-[#1F2230]"
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Réinitialiser
                   </Button>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-[#8B8680]">
-                  <span className="text-sm text-[#8B8680]">
+                <div className="flex items-center justify-between text-sm text-[#A9ACBA]">
+                  <span className="text-sm text-[#A9ACBA]">
                     {sessionsCompletedToday} sessions terminées aujourd&apos;hui
                   </span>
                 </div>
@@ -663,32 +663,32 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </section>
 
           {/* Tasks */}
-          <section className="bg-white rounded-3xl p-6 shadow-sm">
-            <div className="text-sm text-[#8B8680]">Tâches à faire</div>
-            <div className="mt-2 text-[#2C2C2C] text-lg">Espace réservé</div>
+          <section className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-6 shadow-sm">
+            <div className="text-sm text-[#A9ACBA]">Tâches à faire</div>
+            <div className="mt-2 text-[#ECECF3] text-lg">Espace réservé</div>
           </section>
         </div>
 
         {/* Agenda en ligne */}
-        <section className="bg-white rounded-3xl p-6 shadow-sm space-y-2">
+        <section className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-6 shadow-sm space-y-2">
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-[#8B8680]">Agenda en ligne</p>
+            <p className="text-sm text-[#A9ACBA]">Agenda en ligne</p>
             <div className="flex flex-wrap items-center gap-3 text-base font-semibold text-[#4169E1]">
               <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w - 1)}>
                 ← Semaine précédente
               </button>
-              <div className="h-4 w-px bg-[#E8E3D6]" />
+              <div className="h-4 w-px bg-[#1F2230]" />
               <button type="button" className="hover:underline" onClick={() => setWeekOffset(0)}>
                 Aujourd&apos;hui
               </button>
-              <div className="h-4 w-px bg-[#E8E3D6]" />
+              <div className="h-4 w-px bg-[#1F2230]" />
               <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w + 1)}>
                 Semaine suivante →
               </button>
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="text-2xl font-semibold text-[#2C2C2C]">{weekRangeLabel}</div>
+              <div className="text-2xl font-semibold text-[#ECECF3]">{weekRangeLabel}</div>
               <div className="flex gap-2 items-center">
                 <Button
                   onClick={() => {
@@ -703,7 +703,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </Button>
                 <label
                   htmlFor="agendaUpload"
-                  className="flex items-center gap-2 h-10 px-4 rounded-2xl border border-dashed border-[#E8E3D6] text-sm font-medium text-[#2C2C2C] cursor-pointer hover:bg-[#F5F1E8]"
+                  className="flex items-center gap-2 h-10 px-4 rounded-2xl border border-dashed border-[#1F2230] text-sm font-medium text-[#ECECF3] cursor-pointer hover:bg-[#1A1D26]"
                 >
                   <Upload className="w-4 h-4 mr-2" />
                   Importer une photo
@@ -720,27 +720,27 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
 
           {uploadNotice && (
-            <div className="mt-3 text-xs text-[#8B8680] bg-[#F5F1E8] rounded-2xl px-3 py-2 inline-flex items-center gap-2">
+            <div className="mt-3 text-xs text-[#A9ACBA] bg-[#0F1117] rounded-2xl px-3 py-2 inline-flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#4169E1]" />
               {uploadNotice}
             </div>
           )}
 
           <div className="mt-6">
-            <div className="grid grid-cols-7 border-b border-[#F5F1E8]">
+            <div className="grid grid-cols-7 border-b border-[#1F2230]">
               {weekDates.map((date, index) => (
                 <div
                   key={index}
-                  className={`p-3 text-center border-r border-[#F5F1E8] last:border-r-0 ${
+                  className={`p-3 text-center border-r border-[#1F2230] last:border-r-0 ${
                     isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                   }`}
                 >
-                  <div className="text-xs text-[#8B8680] uppercase mb-1">{getDayName(date)}</div>
+                  <div className="text-xs text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
                   <div
                     className={`text-lg font-semibold ${
                       isToday(date) && weekOffset === 0
                         ? 'text-white bg-[#4169E1] w-10 h-10 rounded-full flex items-center justify-center mx-auto'
-                        : 'text-[#2C2C2C]'
+                        : 'text-[#ECECF3]'
                     }`}
                   >
                     {date.getDate()}
@@ -757,7 +757,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 return (
                   <div
                     key={index}
-                    className={`border-r border-[#F5F1E8] last:border-r-0 p-3 ${
+                    className={`border-r border-[#1F2230] last:border-r-0 p-3 ${
                       isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                     }`}
                   >
@@ -765,7 +765,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       {tasksForDay.map((task) => (
                         <div
                           key={task.id}
-                          className="rounded-2xl p-3 text-xs bg-[#F5F8FF] border border-[#E3EAFD] shadow-[0_4px_12px_rgba(65,105,225,0.06)] cursor-pointer hover:shadow-md transition"
+                          className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)] cursor-pointer hover:shadow-md transition"
                           style={{
                             borderLeft: `4px solid ${task.color}`,
                           }}
@@ -794,7 +794,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   e.stopPropagation();
                                   setTasks((prev) => prev.filter((t) => t.id !== task.id));
                                 }}
-                                className="text-[#8B8680] hover:text-red-500 p-1 text-xs"
+                                className="text-[#A9ACBA] hover:text-red-500 p-1 text-xs"
                                 aria-label="Supprimer la tâche"
                               >
                                 <X className="w-3 h-3" />
@@ -802,17 +802,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1 mb-1">
-                                {task.time && <span className="text-[11px] text-[#8B8680]">{task.time}</span>}
+                                {task.time && <span className="text-[11px] text-[#A9ACBA]">{task.time}</span>}
                                 <span
                                   className="text-[10px] px-2 py-0.5 rounded-full"
-                                  style={{ backgroundColor: `${task.color}20`, color: '#2C2C2C' }}
+                                  style={{ backgroundColor: `${task.color}20`, color: '#ECECF3' }}
                                 >
                                   {getPriorityLabel(task.priority)}
                                 </span>
                               </div>
 
                               <div
-                                className={`text-[#2C2C2C] text-sm break-words ${
+                                className={`text-[#ECECF3] text-sm break-words ${
                                   task.completed ? 'line-through opacity-50' : ''
                                 }`}
                               >
@@ -820,7 +820,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               </div>
 
                               {task.description && (
-                                <div className="text-[11px] text-[#8B8680] mt-1 break-words">
+                                <div className="text-[11px] text-[#A9ACBA] mt-1 break-words">
                                   {task.description}
                                 </div>
                               )}
@@ -837,9 +837,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         </section>
 
         {/* Temps étudié */}
-        <section className="bg-white rounded-3xl p-6 shadow-sm space-y-2">
+        <section className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-6 shadow-sm space-y-2">
           <div className="flex flex-col gap-0">
-            <p className="text-sm text-[#8B8680]">Temps étudié</p>
+            <p className="text-sm text-[#A9ACBA]">Temps étudié</p>
             <div className="flex flex-wrap items-center justify-between gap-3"></div>
           </div>
 
@@ -849,57 +849,57 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               const barHeight = Math.max(8, Math.min(220, (minutes / (maxWeekMinutes || 1)) * 220));
               return (
                 <div key={index} className="flex flex-col items-center gap-2">
-                  <div className="w-full bg-[#EFF3FF] rounded-2xl h-56 flex items-end">
+                  <div className="w-full bg-[#1B2030] rounded-2xl h-56 flex items-end">
                     <div
                       className="w-full bg-[#4169E1] rounded-2xl transition-all"
                       style={{ height: `${barHeight}px` }}
                     />
                   </div>
-                  <div className="text-xs text-[#2C2C2C] font-medium">{minutes} min</div>
-                  <div className="text-xs text-[#8B8680] uppercase mb-1">{getDayName(date)}</div>
+                  <div className="text-xs text-[#ECECF3] font-medium">{minutes} min</div>
+                  <div className="text-xs text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
                 </div>
               );
             })}
           </div>
 
-          <div className="mt-4 flex items-center gap-2 text-sm text-[#8B8680]">
-            <span>Temps total étudié sur la semaine</span>
-            <span className="text-[#2C2C2C] font-semibold">{activeWeekTotalMinutes} min</span>
+          <div className="mt-4 flex items-center gap-2 text-sm text-[#A9ACBA]">
+            <span>Total :</span>
+            <span className="text-[#ECECF3] font-semibold">{activeWeekTotalMinutes} min</span>
           </div>
         </section>
 
         {/* Statistiques rapides */}
         <section className="grid gap-4 md:grid-cols-3">
 
-          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
-            <p className="text-sm text-[#8B8680]">Temps total étudié cette semaine</p>
-            <p className="text-2xl text-[#2C2C2C]">{roundedStudiedMinutes} min</p>
-            <div className="h-2 bg-[#F5F1E8] rounded-full overflow-hidden">
+          <div className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-4 shadow-sm flex flex-col gap-1">
+            <p className="text-sm text-[#A9ACBA]">Temps total étudié cette semaine</p>
+            <p className="text-2xl text-[#ECECF3]">{roundedStudiedMinutes} min</p>
+            <div className="h-2 bg-[#0F1117] rounded-full overflow-hidden">
               <div className="h-full bg-[#4169E1]" style={{ width: `${Math.min(100, (roundedStudiedMinutes / 240) * 100)}%` }} />
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
-            <p className="text-sm text-[#8B8680]">Streak</p>
-            <p className="text-2xl text-[#2C2C2C]">{streakDays} jours</p>
+          <div className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-4 shadow-sm flex flex-col gap-1">
+            <p className="text-sm text-[#A9ACBA]">Streak</p>
+            <p className="text-2xl text-[#ECECF3]">{streakDays} jours</p>
             <div className="flex gap-1 mt-1">
               {Array.from({ length: 7 }).map((_, idx) => (
                 <div
                   key={idx}
                   className={`flex-1 h-2 rounded-full ${
-                    idx < Math.min(streakDays, 7) ? 'bg-[#E16941]' : 'bg-[#F5F1E8]'
+                    idx < Math.min(streakDays, 7) ? 'bg-[#E16941]' : 'bg-[#0F1117]'
                   }`}
                 />
               ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl p-4 shadow-sm flex flex-col gap-1">
-            <p className="text-sm text-[#8B8680]">Tâches terminées</p>
-            <p className="text-2xl text-[#2C2C2C]">
+          <div className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-4 shadow-sm flex flex-col gap-1">
+            <p className="text-sm text-[#A9ACBA]">Tâches terminées</p>
+            <p className="text-2xl text-[#ECECF3]">
               {completedTasks}/{totalTasks}
             </p>
-            <div className="h-2 bg-[#F5F1E8] rounded-full overflow-hidden">
+            <div className="h-2 bg-[#0F1117] rounded-full overflow-hidden">
               <div
                 className="h-full bg-[#41E169]"
                 style={{ width: totalTasks === 0 ? '0%' : `${(completedTasks / totalTasks) * 100}%` }}
@@ -912,44 +912,44 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         {/* Modal ajout tâche */}
         {showAddDialog && (
           <div className="fixed inset-0 z-50 flex min-h-screen w-screen items-center justify-center bg-black/40 px-3 py-4 sm:px-4 sm:py-6">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
-              <h2 className="text-lg font-semibold text-[#2C2C2C] mb-4">
+            <div className="bg-[#13151C] border border-[#1F2230] shadow-2xl max-w-3xl w-full p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg font-semibold text-[#ECECF3] mb-4">
                 {editingTaskId ? 'Modifier une tâche' : 'Créer une tâche'}
               </h2>
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-3 md:col-span-2">
-                  <label className="text-sm text-[#2C2C2C] block">Nom de la tâche</label>
+                  <label className="text-sm text-[#ECECF3] block">Nom de la tâche</label>
                   <Input
                     value={newTaskName}
                     onChange={(e) => setNewTaskName(e.target.value)}
                     placeholder="Ex: Relire chapitre 4"
-                    className="rounded-2xl border-[#E8E3D6]"
+                    className="rounded-2xl border-[#1F2230]"
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-sm text-[#2C2C2C] block">Date</label>
+                  <label className="text-sm text-[#ECECF3] block">Date</label>
                   <Input
                     type="date"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="rounded-2xl border-[#E8E3D6]"
+                    className="rounded-2xl border-[#1F2230]"
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-sm text-[#2C2C2C] block">Heure (optionnel)</label>
+                  <label className="text-sm text-[#ECECF3] block">Heure (optionnel)</label>
                   <Input
                     type="time"
                     value={selectedTime}
                     onChange={(e) => setSelectedTime(e.target.value)}
-                    className="rounded-2xl border-[#E8E3D6]"
+                    className="rounded-2xl border-[#1F2230]"
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-sm text-[#2C2C2C] block">Priorité</label>
+                  <label className="text-sm text-[#ECECF3] block">Priorité</label>
                   <div className="flex gap-2">
                     {PRIORITIES.map((priority) => (
                       <button
@@ -959,7 +959,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         className={`px-3 py-2 rounded-xl text-sm transition-all ${
                           selectedPriority === priority.value
                             ? 'bg-[#4169E1] text-white shadow'
-                            : 'bg-[#F5F1E8] text-[#2C2C2C]'
+                            : 'bg-[#0F1117] text-[#ECECF3]'
                         }`}
                       >
                         {priority.label} {priority.name}
@@ -969,17 +969,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
 
                 <div className="space-y-3 md:col-span-2">
-                  <label className="text-sm text-[#2C2C2C] block">Description</label>
+                  <label className="text-sm text-[#ECECF3] block">Description</label>
                   <Textarea
                     value={newTaskDescription}
                     onChange={(e) => setNewTaskDescription(e.target.value)}
                     placeholder="Ajoute des détails, étapes, liens..."
-                    className="rounded-2xl border-[#E8E3D6] min-h-[90px]"
+                    className="rounded-2xl border-[#1F2230] min-h-[90px]"
                   />
                 </div>
 
                 <div className="space-y-3 md:col-span-2">
-                  <label className="text-sm text-[#2C2C2C] block">Couleur</label>
+                  <label className="text-sm text-[#ECECF3] block">Couleur</label>
                   <div className="flex gap-2 flex-wrap">
                     {TASK_COLORS.map((color) => (
                       <button
@@ -999,7 +999,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               <div className="mt-6 flex justify-end gap-3">
                 <Button
                   variant="outline"
-                  className="rounded-2xl border-[#E8E3D6]"
+                  className="rounded-2xl border-[#1F2230]"
                   onClick={() => {
                     setShowAddDialog(false);
                     resetTaskForm();
