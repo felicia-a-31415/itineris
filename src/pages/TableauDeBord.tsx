@@ -727,11 +727,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           )}
 
           <div className="mt-6">
-            <div className="grid grid-cols-7 border-b border-[#F5F1E8]">
+            <div className="grid grid-cols-7 border-b border-[#1F2230]">
               {weekDates.map((date, index) => (
                 <div
                   key={index}
-                  className={`p-3 text-center border-r border-[#F5F1E8] last:border-r-0 ${
+                  className={`p-3 text-center border-r border-[#1F2230] last:border-r-0 ${
                     isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                   }`}
                 >
@@ -757,7 +757,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 return (
                   <div
                     key={index}
-                    className={`border-r border-[#F5F1E8] last:border-r-0 p-3 ${
+                    className={`border-r border-[#1F2230] last:border-r-0 p-3 ${
                       isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                     }`}
                   >
