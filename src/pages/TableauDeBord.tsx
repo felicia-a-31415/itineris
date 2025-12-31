@@ -569,6 +569,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   className="relative w-48 h-48 rounded-full flex items-center justify-center"
                   style={{
                     background: `conic-gradient(#3B82F6 ${progress * 3.6}deg, #1F2230 ${progress * 3.6}deg)`,
+                    boxShadow: '0 0 16px rgba(59, 130, 246, 0.5), 0 0 32px rgba(59, 130, 246, 0.35)',
                   }}
                 >
                   <div className="absolute inset-3 bg-[#0B0D10] rounded-full shadow-inner flex flex-col items-center justify-center">
