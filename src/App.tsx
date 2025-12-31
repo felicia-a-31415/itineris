@@ -58,14 +58,14 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
-        <div className="text-[#8B8680]">Chargement...</div>
+      <div className="min-h-screen bg-[#0B0D10] flex items-center justify-center">
+        <div className="text-[#A9ACBA]">Chargement...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] text-[#2C2C2C]">
+    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3]">
       <Routes>
         <Route path="/" element={<Bienvenue onGetStarted={() => navigate('/onboarding')} />} />
         <Route path="/onboarding" element={<Onboarding onComplete={handleOnboardingComplete} />} />

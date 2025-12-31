@@ -8,7 +8,6 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       type={type}
       data-slot="input"
       className={cn(
-        // Dark-first styling; readable on black backgrounds.
         "flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-base md:text-sm transition-[color,box-shadow] outline-none",
         "bg-[#1A1D26] border-[#1F2230] text-[#ECECF3] placeholder:text-[#6D7385]",
         "selection:bg-[#4169E1]/80 selection:text-white",

@@ -7,7 +7,7 @@ interface BienvenueProps {
 
 export function Bienvenue({ onGetStarted }: BienvenueProps) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-[#F5F1E8]">
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-[#0B0D10] text-[#ECECF3]">
       <div className="flex flex-col items-center max-w-md text-center space-y-8">
         {/* Logo - Compass */}
         <div className="w-32 h-32 rounded-full bg-[#4169E1] shadow-lg flex items-center justify-center">
@@ -16,8 +16,8 @@ export function Bienvenue({ onGetStarted }: BienvenueProps) {
 
         {/* App Name */}
         <div className="space-y-2">
-          <h1 className="text-5xl text-[#2C2C2C] tracking-tight">Itineris</h1>
-          <p className="text-[#8B8680] text-lg">Votre chemin vers la réussite</p>
+          <h1 className="text-5xl text-[#ECECF3] tracking-tight">Itineris</h1>
+          <p className="text-[#A9ACBA] text-lg">Votre chemin vers la réussite</p>
         </div>
 
         {/* Get Started Button */}
