@@ -120,21 +120,30 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] p-4 md:p-8">
+    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <Tabs defaultValue="profile" className="w-full">
           <div className="p-1 flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-3 flex-wrap">
-              <TabsList className="flex items-center justify-center gap-2 bg-white rounded-3xl h-11 px-2 border border-[#E8E3D6] shadow-sm">
-                <TabsTrigger value="profile" className="rounded-xl h-full min-w-[140px] px-4 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+              <TabsList className="flex items-center justify-center gap-2 bg-[#13151C] border border-[#1F2230] rounded-3xl h-11 px-2 shadow-sm">
+                <TabsTrigger
+                  value="profile"
+                  className="rounded-xl h-full min-w-[140px] px-4 text-[#A9ACBA] data-[state=active]:bg-[#1A1D26] data-[state=active]:text-[#ECECF3]"
+                >
                   <User className="w-4 h-4 mr-2" />
                   Profil
                 </TabsTrigger>
-                <TabsTrigger value="subjects" className="rounded-xl h-full min-w-[140px] px-4 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+                <TabsTrigger
+                  value="subjects"
+                  className="rounded-xl h-full min-w-[140px] px-4 text-[#A9ACBA] data-[state=active]:bg-[#1A1D26] data-[state=active]:text-[#ECECF3]"
+                >
                   <BookOpen className="w-4 h-4 mr-2" />
                   Matières
                 </TabsTrigger>
-                <TabsTrigger value="theme" className="rounded-xl h-full min-w-[140px] px-4 data-[state=active]:bg-[#F5F8FF] data-[state=active]:text-[#2C2C2C]">
+                <TabsTrigger
+                  value="theme"
+                  className="rounded-xl h-full min-w-[140px] px-4 text-[#A9ACBA] data-[state=active]:bg-[#1A1D26] data-[state=active]:text-[#ECECF3]"
+                >
                   <Palette className="w-4 h-4 mr-2" />
                   Thème
                 </TabsTrigger>
@@ -169,10 +178,10 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
           {/* Profile Tab */}
           <TabsContent value="profile">
-            <Card className="bg-white rounded-3xl p-8 shadow-sm border border-[#E8E3D6]">
+            <Card className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-8 shadow-sm">
               <div className="space-y-6">
                 <div>
-                  <Label htmlFor="name" className="text-[#2C2C2C] mb-2">
+                  <Label htmlFor="name" className="text-[#ECECF3] mb-2">
                     Comment t'appelles-tu ?
                   </Label>
                   <Input
@@ -180,19 +189,19 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Ton prénom..."
-                    className="mt-2 border-[#F5F1E8] rounded-xl"
+                    className="mt-2 rounded-xl"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="year" className="text-[#2C2C2C] mb-2">
+                  <Label htmlFor="year" className="text-[#ECECF3] mb-2">
                     Tu es en quelle année ?
                   </Label>
                   <Select 
                     value={formData.year} 
                     onValueChange={(value) => setFormData({ ...formData, year: value })}
                   >
-                    <SelectTrigger className="mt-2 border-[#F5F1E8] rounded-xl">
+                    <SelectTrigger className="mt-2 rounded-xl">
                       <SelectValue placeholder="Sélectionne ton niveau..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -206,7 +215,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </div>
 
                 <div>
-                  <Label htmlFor="goals" className="text-[#2C2C2C] mb-2">
+                  <Label htmlFor="goals" className="text-[#ECECF3] mb-2">
                     Quels sont tes objectifs dans la vie ?
                   </Label>
                   <Textarea
@@ -214,7 +223,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                     value={formData.lifeGoals}
                     onChange={(e) => setFormData({ ...formData, lifeGoals: e.target.value })}
                     placeholder="Partage tes rêves et aspirations... (ex: devenir médecin, créer mon entreprise, voyager autour du monde...)"
-                    className="mt-2 border-[#F5F1E8] rounded-xl min-h-[150px]"
+                    className="mt-2 rounded-xl min-h-[150px]"
                   />
                 </div>
               </div>
@@ -223,10 +232,10 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
           {/* Subjects Tab */}
           <TabsContent value="subjects">
-            <Card className="bg-white rounded-3xl p-8 shadow-sm border border-[#E8E3D6]">
+            <Card className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-8 shadow-sm">
               <div className="space-y-6">
                 <div>
-                  <Label className="text-[#2C2C2C] mb-3 block">
+                  <Label className="text-[#ECECF3] mb-3 block">
                     Quelles sont tes matières préférées ?
                   </Label>
                   <div className="flex flex-wrap gap-2">
@@ -237,7 +246,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                         className={`cursor-pointer rounded-lg px-3 py-2 transition-all ${
                           formData.favoriteSubjects.includes(subject)
                             ? 'bg-[#4169E1] text-white hover:bg-[#3557C1]'
-                            : 'bg-white text-[#2C2C2C] border border-[#F5F1E8] hover:border-[#4169E1]'
+                            : 'bg-[#1A1D26] text-[#ECECF3] border border-[#1F2230] hover:border-[#4169E1]'
                         }`}
                       >
                         {formData.favoriteSubjects.includes(subject) && (
@@ -250,7 +259,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </div>
 
                 <div>
-                  <Label className="text-[#2C2C2C] mb-3 block">
+                  <Label className="text-[#ECECF3] mb-3 block">
                     Dans quelles matières es-tu fort(e) ?
                   </Label>
                   <div className="flex flex-wrap gap-2">
@@ -261,7 +270,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                         className={`cursor-pointer rounded-lg px-3 py-2 transition-all ${
                           formData.strongSubjects.includes(subject)
                             ? 'bg-[#6B9AC4] text-white hover:bg-[#5A89B3]'
-                            : 'bg-white text-[#2C2C2C] border border-[#F5F1E8] hover:border-[#6B9AC4]'
+                            : 'bg-[#1A1D26] text-[#ECECF3] border border-[#1F2230] hover:border-[#6B9AC4]'
                         }`}
                       >
                         {formData.strongSubjects.includes(subject) && (
@@ -274,7 +283,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </div>
 
                 <div>
-                  <Label className="text-[#2C2C2C] mb-3 block">
+                  <Label className="text-[#ECECF3] mb-3 block">
                     Quelles matières aimerais-tu améliorer ?
                   </Label>
                   <div className="flex flex-wrap gap-2">
@@ -285,7 +294,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                         className={`cursor-pointer rounded-lg px-3 py-2 transition-all ${
                           formData.weakSubjects.includes(subject)
                             ? 'bg-[#8B8680] text-white hover:bg-[#7A756F]'
-                            : 'bg-white text-[#2C2C2C] border border-[#F5F1E8] hover:border-[#8B8680]'
+                            : 'bg-[#1A1D26] text-[#ECECF3] border border-[#1F2230] hover:border-[#8B8680]'
                         }`}
                       >
                         {formData.weakSubjects.includes(subject) && (
@@ -302,13 +311,13 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
           {/* Theme Tab */}
           <TabsContent value="theme">
-            <Card className="bg-gradient-to-r from-[#F5F8FF] to-[#FFF7F1] rounded-3xl p-8 shadow-sm border border-[#E8E3D6]">
+            <Card className="bg-gradient-to-r from-[#0F1117] via-[#13151C] to-[#0F1117] rounded-3xl p-8 shadow-sm border border-[#1F2230]">
               <div className="text-center py-12 space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-white shadow-inner border border-[#E8E3D6] mx-auto flex items-center justify-center">
+                <div className="w-14 h-14 rounded-2xl bg-[#1A1D26] shadow-inner border border-[#1F2230] mx-auto flex items-center justify-center">
                   <Palette className="w-7 h-7 text-[#4169E1]" />
                 </div>
-                <h3 className="text-xl text-[#2C2C2C]">Personnalisation du thème</h3>
-                <p className="text-[#8B8680] max-w-2xl mx-auto">
+                <h3 className="text-xl text-[#ECECF3]">Personnalisation du thème</h3>
+                <p className="text-[#A9ACBA] max-w-2xl mx-auto">
                   Les options de thème seront bientôt disponibles ! Choisis des palettes, des modes d&apos;affichage et des textures qui s&apos;alignent avec ton tableau de bord.
                 </p>
               </div>
