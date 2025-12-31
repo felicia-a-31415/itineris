@@ -864,8 +864,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
 
           <div className="mt-4 flex items-center gap-2 text-sm text-[#A9ACBA]">
-            <span>Total :</span>
-            <span className="text-[#ECECF3] font-semibold">{activeWeekTotalMinutes} min</span>
+            <span>Total : {activeWeekTotalMinutes} min</span>
           </div>
         </section>
 
