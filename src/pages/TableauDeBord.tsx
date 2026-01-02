@@ -243,10 +243,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       setTimeLeft((prev) => {
         if (prev <= deltaSec) {
           setIsRunning(false);
-          setSessionsByDay((prevSessions) => {
-            const todayKey = formatDate(new Date());
-            return { ...prevSessions, [todayKey]: (prevSessions[todayKey] ?? 0) + 1 };
-          });
+          if (timerMode === 'focus') {
+            setSessionsByDay((prevSessions) => {
+              const todayKey = formatDate(new Date());
+              return { ...prevSessions, [todayKey]: (prevSessions[todayKey] ?? 0) + 1 };
+            });
+          }
           if (alarmRef.current) {
             try {
               alarmRef.current.currentTime = 0;
@@ -265,18 +267,20 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       const todayKey = formatDate(todayDates[0]);
       const todayIndex = todayDates.findIndex((d) => formatDate(d) === formatDate(new Date()));
 
-      setStudyData((prev) => {
-        const next = { ...prev };
-        const weekArray = [...(next[todayKey] ?? [0, 0, 0, 0, 0, 0, 0])];
-        const idx = todayIndex >= 0 ? todayIndex : 0;
-        weekArray[idx] = (weekArray[idx] ?? 0) + deltaSec / 60;
-        next[todayKey] = weekArray;
-        return next;
-      });
+      if (timerMode === 'focus') {
+        setStudyData((prev) => {
+          const next = { ...prev };
+          const weekArray = [...(next[todayKey] ?? [0, 0, 0, 0, 0, 0, 0])];
+          const idx = todayIndex >= 0 ? todayIndex : 0;
+          weekArray[idx] = (weekArray[idx] ?? 0) + deltaSec / 60;
+          next[todayKey] = weekArray;
+          return next;
+        });
+      }
       lastTickRef.current = now;
     }, 1000);
     return () => clearInterval(interval);
-  }, [isRunning, safeMinutes]);
+  }, [isRunning, safeMinutes, timerMode]);
 
   // Sauver les tâches à chaque modification
   useEffect(() => {
