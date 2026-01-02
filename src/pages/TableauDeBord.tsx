@@ -93,6 +93,12 @@ const STUDY_MINUTES_KEY = 'itineris_study_minutes';
 const STREAK_STORAGE_KEY = 'itineris_streak';
 const SESSIONS_STORAGE_KEY = 'itineris_sessions_completed';
 
+const TIMER_MODES = {
+  focus: { label: 'Focus', minutes: 25, color: '#F97316' },
+  short: { label: 'Courte pause', minutes: 5, color: '#8B5CF6' },
+  long: { label: 'Longue pause', minutes: 15, color: '#EC4899' },
+} as const;
+
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
   const [weekOffset, setWeekOffset] = useState(0);
@@ -148,6 +154,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
   const [timerMinutes, setTimerMinutes] = useState(25);
   const [timeLeft, setTimeLeft] = useState(timerMinutes * 60);
+  const [timerMode, setTimerMode] = useState<keyof typeof TIMER_MODES>('focus');
   const [isRunning, setIsRunning] = useState(false);
   const [isEditingTimer, setIsEditingTimer] = useState(false);
   const [editingTimerValue, setEditingTimerValue] = useState('');
@@ -221,6 +228,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const alarmRef = useRef<HTMLAudioElement | null>(null);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
+  const ringColor = TIMER_MODES[timerMode].color;
   const currentWeekKey = currentWeekStart;
   const weekTotal = (studyData[currentWeekKey] || []).reduce((sum, n) => sum + n, 0);
 
@@ -564,12 +572,57 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-[1.1fr,1fr] items-center">
-              <div className="flex items-center justify-center">
+              <div className="flex flex-col items-center justify-center gap-4">
+                <div className="flex gap-2">
+                  {(
+                    [
+                      { key: 'focus', label: 'Focus' },
+                      { key: 'short', label: 'Courte pause' },
+                      { key: 'long', label: 'Longue pause' },
+                    ] as const
+                  ).map(({ key, label }) => {
+                    const isActive = timerMode === key;
+                    const color = TIMER_MODES[key].color;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => {
+                          const next = TIMER_MODES[key];
+                          setTimerMode(key);
+                          setIsRunning(false);
+                          setIsEditingTimer(false);
+                          setTimerMinutes(next.minutes);
+                          setTimeLeft(next.minutes * 60);
+                          setEditingTimerValue(next.minutes.toString());
+                        }}
+                        className="px-3 py-2 rounded-xl text-sm font-semibold transition shadow-sm border"
+                        style={
+                          isActive
+                            ? {
+                                backgroundColor: color,
+                                color: '#0B0D10',
+                                borderColor: color,
+                                boxShadow: `0 0 12px ${color}80`,
+                              }
+                            : {
+                                backgroundColor: '#1A1D26',
+                                color: '#ECECF3',
+                                borderColor: '#1F2230',
+                              }
+                        }
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 <div
                   className="relative w-48 h-48 rounded-full flex items-center justify-center"
                   style={{
-                    background: `conic-gradient(#3B82F6 ${progress * 3.6}deg, #1F2230 ${progress * 3.6}deg)`,
-                    boxShadow: '0 0 16px rgba(59, 130, 246, 0.5), 0 0 32px rgba(59, 130, 246, 0.35)',
+                    background: `conic-gradient(${ringColor} ${progress * 3.6}deg, #1F2230 ${progress * 3.6}deg)`,
+                    boxShadow: `0 0 16px ${ringColor}80, 0 0 32px ${ringColor}59`,
                   }}
                 >
                   <div className="absolute inset-3 bg-[#0B0D10] rounded-full shadow-inner flex flex-col items-center justify-center">
