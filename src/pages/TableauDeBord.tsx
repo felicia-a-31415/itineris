@@ -94,9 +94,9 @@ const STREAK_STORAGE_KEY = 'itineris_streak';
 const SESSIONS_STORAGE_KEY = 'itineris_sessions_completed';
 
 const TIMER_MODES = {
-  focus: { label: 'Focus', minutes: 25, color: '#F97316' },
-  short: { label: 'Courte pause', minutes: 5, color: '#8B5CF6' },
-  long: { label: 'Longue pause', minutes: 15, color: '#EC4899' },
+  focus: { label: 'Focus', minutes: 25, color: '#3B82F6' },
+  short: { label: 'Courte pause', minutes: 5, color: '#22C55E' },
+  long: { label: 'Longue pause', minutes: 15, color: '#8B5CF6' },
 } as const;
 
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
