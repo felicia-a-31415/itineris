@@ -671,7 +671,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-3 pt-8">
                 <div className="flex gap-2">
                   <Button
                     onClick={() => {
