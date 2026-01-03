@@ -571,7 +571,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr,1.4fr] items-start">
           {/* Pomodoro */}
-          <section className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
+          <section className="bg-gradient-to-br from-[#161b27] via-[#0f1218] to-[#0c0f14] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
             <div className="mb-2">
               <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
@@ -721,14 +721,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </section>
 
           {/* Tasks */}
-          <section className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
+          <section className="bg-gradient-to-br from-[#161b27] via-[#0f1218] to-[#0c0f14] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
             <div className="text-sm text-[#A9ACBA]">Tâches à faire</div>
             <div className="mt-2 text-[#ECECF3] text-lg">Espace réservé</div>
           </section>
         </div>
 
         {/* Agenda en ligne */}
-        <section className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
+        <section className="bg-gradient-to-br from-[#161b27] via-[#0f1218] to-[#0c0f14] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
           <div className="flex flex-col gap-3">
             <p className="text-sm text-[#A9ACBA]">Agenda en ligne</p>
             <div className="flex flex-wrap items-center gap-3 text-base font-semibold text-[#4169E1]">
@@ -895,7 +895,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         </section>
 
         {/* Temps étudié */}
-        <section className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
+        <section className="bg-gradient-to-br from-[#161b27] via-[#0f1218] to-[#0c0f14] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
           <div className="flex flex-col gap-0">
             <p className="text-sm text-[#A9ACBA]">Temps étudié</p>
             <div className="flex flex-wrap items-center justify-between gap-3"></div>
@@ -928,7 +928,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         {/* Statistiques rapides */}
         <section className="grid gap-4 md:grid-cols-3">
 
-          <div className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] flex flex-col gap-1">
+          <div className="bg-gradient-to-br from-[#161b27] via-[#0f1218] to-[#0c0f14] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] flex flex-col gap-1">
             <p className="text-sm text-[#A9ACBA]">Temps total étudié cette semaine</p>
             <p className="text-2xl text-[#ECECF3]">{roundedStudiedMinutes} min</p>
             <div className="h-2 bg-[#0F1117] rounded-full overflow-hidden">
@@ -936,7 +936,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             </div>
           </div>
 
-          <div className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] flex flex-col gap-1">
+          <div className="bg-gradient-to-br from-[#161b27] via-[#0f1218] to-[#0c0f14] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] flex flex-col gap-1">
             <p className="text-sm text-[#A9ACBA]">Streak</p>
             <p className="text-2xl text-[#ECECF3]">{streakDays} jours</p>
             <div className="flex gap-1 mt-1">
@@ -951,7 +951,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             </div>
           </div>
 
-          <div className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] flex flex-col gap-1">
+          <div className="bg-gradient-to-br from-[#161b27] via-[#0f1218] to-[#0c0f14] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] flex flex-col gap-1">
             <p className="text-sm text-[#A9ACBA]">Tâches terminées</p>
             <p className="text-2xl text-[#ECECF3]">
               {completedTasks}/{totalTasks}
@@ -969,7 +969,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         {/* Modal ajout tâche */}
         {showAddDialog && (
           <div className="fixed inset-0 z-50 flex min-h-screen w-screen items-center justify-center bg-black/40 px-3 py-4 sm:px-4 sm:py-6">
-            <div className="bg-[#13151C] border border-[#1F2230] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] max-w-3xl w-full p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
+            <div className="bg-gradient-to-br from-[#161b27] via-[#0f1218] to-[#0c0f14] border border-[#1F2230] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] max-w-3xl w-full p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
               <h2 className="text-lg font-semibold text-[#ECECF3] mb-4">
                 {editingTaskId ? 'Modifier une tâche' : 'Créer une tâche'}
               </h2>
