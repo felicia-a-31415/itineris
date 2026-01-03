@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
+import { Flame, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
@@ -554,9 +554,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="flex items-start gap-4">
           <div className="flex-1">
-            <h1 className="text-xl md:text-2xl font-semibold text-[#ECECF3]">
-              {getGreeting()}, {userName} 👋
-            </h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-xl md:text-2xl font-semibold text-[#ECECF3]">
+                {getGreeting()}, {userName} 👋
+              </h1>
+              <div className="flex items-center gap-1 rounded-full bg-[#1F2230] px-3 py-1 text-sm font-semibold text-[#F97316] shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
+                <Flame className="w-4 h-4" />
+                <span>{streakDays}</span>
+              </div>
+            </div>
             <p className="text-[#A9ACBA] text-sm mt-1">Prêt(e) à continuer ton voyage d&apos;apprentissage ?</p>
           </div>
 
