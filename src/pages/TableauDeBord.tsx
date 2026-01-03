@@ -552,7 +552,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-10">
       <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex items-start gap-4">
+        <div className="flex items-center gap-4">
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex flex-col gap-1">
@@ -577,9 +577,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </Button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr,1.4fr] items-start">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr,1.4fr] items-stretch">
           {/* Pomodoro */}
-          <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
+          <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
             <div className="mb-2">
               <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
@@ -729,7 +729,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </section>
 
           {/* Tasks */}
-          <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
+          <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
             <div className="text-sm text-[#A9ACBA]">Tâches à faire</div>
             <div className="mt-2 text-[#ECECF3] text-lg">Espace réservé</div>
           </section>
