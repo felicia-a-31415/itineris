@@ -576,7 +576,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-[1.1fr,1fr] items-center">
-              <div className="flex flex-col items-center justify-center gap-8">
+              <div className="flex flex-col items-center justify-center gap-9">
                 <div className="flex gap-2">
                   {(
                     [
@@ -671,7 +671,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
               </div>
 
-              <div className="space-y-3 pt-8">
+              <div className="space-y-3 pt-9">
                 <div className="flex gap-2">
                   <Button
                     onClick={() => {
