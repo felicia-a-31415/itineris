@@ -928,8 +928,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             })}
           </div>
 
-          <div className="mt-4 flex items-center gap-2 text-sm text-[#A9ACBA]">
-            <span>Total : {activeWeekTotalMinutes} min</span>
+          <div className="mt-6 space-y-2">
+            <p className="text-sm text-[#A9ACBA]">Temps total étudié cette semaine</p>
+            <p className="text-2xl font-semibold text-[#ECECF3]">{activeWeekTotalMinutes} min</p>
+            <div className="h-2 bg-[#0F1117] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[#4169E1]"
+                style={{ width: `${Math.min(100, (activeWeekTotalMinutes / 240) * 100)}%` }}
+              />
+            </div>
           </div>
         </section>
 
