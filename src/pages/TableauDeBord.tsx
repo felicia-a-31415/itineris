@@ -969,7 +969,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         {/* Modal ajout tâche */}
         {showAddDialog && (
           <div className="fixed inset-0 z-50 flex min-h-screen w-screen items-center justify-center bg-black/40 px-3 py-4 sm:px-4 sm:py-6">
-            <div className="bg-[#161924] border border-[#1F2230] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] max-w-3xl w-full p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
+            <div className="bg-[#161924] border border-[#1F2230] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] rounded-3xl max-w-3xl w-full p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
               <h2 className="text-lg font-semibold text-[#ECECF3] mb-4">
                 {editingTaskId ? 'Modifier une tâche' : 'Créer une tâche'}
               </h2>
