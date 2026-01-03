@@ -576,7 +576,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-[1.1fr,1fr] items-center">
-              <div className="flex flex-col items-center justify-center gap-4">
+              <div className="flex flex-col items-center justify-center gap-6">
                 <div className="flex gap-2">
                   {(
                     [
