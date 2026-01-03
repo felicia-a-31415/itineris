@@ -561,9 +561,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </h1>
                 <p className="text-[#A9ACBA] text-sm">Prêt(e) à continuer ton voyage d&apos;apprentissage ?</p>
               </div>
-              <div className="flex items-center gap-1 text-base font-bold text-[#F97316]">
-                <Flame className="w-10 h-10" />
-                <span className="text-lg">{streakDays}</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1F2230] text-[#F97316] text-sm font-bold shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
+                <Flame className="w-7 h-7" />
+                <span className="text-base">{streakDays}</span>
               </div>
             </div>
           </div>
