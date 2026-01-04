@@ -562,9 +562,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </h1>
                 <p className="text-[#A9ACBA] text-sm">Prêt(e) à continuer ton voyage d&apos;apprentissage ?</p>
               </div>
-              <div className="flex items-center gap-2 text-base font-bold" style={{ color: streakColor }}>
-                <Flame className="w-8 h-8" />
-                <span className="text-base">{streakDays}</span>
+              <div className="flex items-center gap-2 text-sm font-bold" style={{ color: streakColor }}>
+                <Flame className="w-7 h-7" />
+                <span className="text-sm">{streakDays}</span>
               </div>
             </div>
           </div>
