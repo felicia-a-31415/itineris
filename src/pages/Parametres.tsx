@@ -125,7 +125,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
         <Tabs defaultValue="profile" className="w-full">
           <div className="p-1 flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-3 flex-wrap">
-              <TabsList className="flex items-center justify-center gap-2 bg-[#13151C] border border-[#1F2230] rounded-3xl h-11 px-2 shadow-sm">
+              <TabsList className="flex items-center justify-center gap-2 bg-[#161924] border border-[#1F2230] rounded-3xl h-11 px-2 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_8px_18px_rgba(0,0,0,0.25),0_1px_0_rgba(255,255,255,0.04)]">
                 <TabsTrigger
                   value="profile"
                   className="rounded-xl h-full min-w-[140px] px-4 text-[#A9ACBA] data-[state=active]:bg-[#1A1D26] data-[state=active]:text-[#ECECF3]"
@@ -178,7 +178,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
           {/* Profile Tab */}
           <TabsContent value="profile">
-            <Card className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-8 shadow-sm">
+            <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-8 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
               <div className="space-y-6">
                 <div>
                   <Label htmlFor="name" className="text-[#ECECF3] mb-2">
@@ -232,7 +232,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
           {/* Subjects Tab */}
           <TabsContent value="subjects">
-            <Card className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-8 shadow-sm">
+            <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-8 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
               <div className="space-y-6">
                 <div>
                   <Label className="text-[#ECECF3] mb-3 block">
@@ -311,7 +311,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
           {/* Theme Tab */}
           <TabsContent value="theme">
-            <Card className="bg-gradient-to-r from-[#0F1117] via-[#13151C] to-[#0F1117] rounded-3xl p-8 shadow-sm border border-[#1F2230]">
+            <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-8 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
               <div className="text-center py-12 space-y-3">
                 <div className="w-14 h-14 rounded-2xl bg-[#1A1D26] shadow-inner border border-[#1F2230] mx-auto flex items-center justify-center">
                   <Palette className="w-7 h-7 text-[#4169E1]" />
