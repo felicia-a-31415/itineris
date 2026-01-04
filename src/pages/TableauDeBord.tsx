@@ -537,6 +537,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const streakSegments = 7;
   const streakFilledSegments = Math.min(streakDays, streakSegments);
   const taskProgressRatio = totalTasks > 0 ? completedTasks / totalTasks : 0;
+  const streakColor = streakDays > 0 ? '#F97316' : '#6B7280';
 
   useEffect(() => {
     alarmRef.current = new Audio(alarmSound);
@@ -561,7 +562,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </h1>
                 <p className="text-[#A9ACBA] text-sm">Prêt(e) à continuer ton voyage d&apos;apprentissage ?</p>
               </div>
-              <div className="flex items-center gap-2 text-base font-bold text-[#F97316]">
+              <div className="flex items-center gap-2 text-base font-bold" style={{ color: streakColor }}>
                 <Flame className="w-8 h-8" />
                 <span className="text-base">{streakDays}</span>
               </div>
