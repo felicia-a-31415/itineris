@@ -229,6 +229,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [streakBump, setStreakBump] = useState(false);
   const prevStreakRef = useRef<number | null>(null);
   const hasInitializedStreakRef = useRef(false);
+  const hasHydratedStreakRef = useRef(false);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
   const ringColor = TIMER_MODES[timerMode].color;
@@ -557,7 +558,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     if (!hasInitializedStreakRef.current) {
       prevStreakRef.current = streakDays;
       hasInitializedStreakRef.current = true;
-    } else if (prevStreakRef.current !== null && streakDays > prevStreakRef.current) {
+      return;
+    }
+
+    if (!hasHydratedStreakRef.current) {
+      prevStreakRef.current = streakDays;
+      hasHydratedStreakRef.current = true;
+      return;
+    }
+
+    if (prevStreakRef.current !== null && streakDays > prevStreakRef.current) {
       setStreakBump(true);
       setTimeout(() => setStreakBump(false), 240);
     }
