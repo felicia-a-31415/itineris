@@ -228,6 +228,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const alarmRef = useRef<HTMLAudioElement | null>(null);
   const [streakBump, setStreakBump] = useState(false);
   const prevStreakRef = useRef<number | null>(null);
+  const hasInitializedStreakRef = useRef(false);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
   const ringColor = TIMER_MODES[timerMode].color;
@@ -553,11 +554,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   }, []);
 
   useEffect(() => {
-    if (prevStreakRef.current === null) {
+    if (!hasInitializedStreakRef.current) {
       prevStreakRef.current = streakDays;
-      return;
-    }
-    if (streakDays > prevStreakRef.current) {
+      hasInitializedStreakRef.current = true;
+    } else if (prevStreakRef.current !== null && streakDays > prevStreakRef.current) {
       setStreakBump(true);
       setTimeout(() => setStreakBump(false), 240);
     }
