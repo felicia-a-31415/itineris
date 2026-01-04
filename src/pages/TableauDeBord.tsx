@@ -226,6 +226,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const lastTickRef = useRef<number | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
+  const [streakBump, setStreakBump] = useState(false);
+  const prevStreakRef = useRef<number>(streakDays);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
   const ringColor = TIMER_MODES[timerMode].color;
@@ -550,8 +552,49 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     };
   }, []);
 
+  useEffect(() => {
+    if (streakDays > prevStreakRef.current) {
+      setStreakBump(true);
+      setTimeout(() => setStreakBump(false), 240);
+    }
+    prevStreakRef.current = streakDays;
+  }, [streakDays]);
+
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-10">
+      <style>{`
+        .streak {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .streak__icon {
+          width: 1.6rem;
+          height: 1.6rem;
+          line-height: 1;
+        }
+        .streak__num {
+          font-size: 0.95rem;
+          font-weight: 700;
+        }
+        .streak--bump {
+          animation: streakBump 220ms ease-out;
+        }
+        @keyframes streakBump {
+          0% {
+            transform: scale(1);
+            filter: drop-shadow(0 0 0 rgba(249, 115, 22, 0));
+          }
+          60% {
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 16px rgba(249, 115, 22, 0.55));
+          }
+          100% {
+            transform: scale(1);
+            filter: drop-shadow(0 0 0 rgba(249, 115, 22, 0));
+          }
+        }
+      `}</style>
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="flex items-center gap-4">
           <div className="flex-1">
@@ -562,9 +605,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </h1>
                 <p className="text-[#A9ACBA] text-sm">Prêt(e) à continuer ton voyage d&apos;apprentissage ?</p>
               </div>
-              <div className="flex items-center gap-2 text-sm font-bold" style={{ color: streakColor }}>
-                <Flame className="w-7 h-7" />
-                <span className="text-sm">{streakDays}</span>
+              <div
+                className={`streak text-sm font-bold ${streakBump ? 'streak--bump' : ''}`}
+                style={{ color: streakColor }}
+              >
+                <Flame className="streak__icon" />
+                <span className="streak__num">{streakDays}</span>
               </div>
             </div>
           </div>
