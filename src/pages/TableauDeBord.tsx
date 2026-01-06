@@ -225,6 +225,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [selectedTime, setSelectedTime] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const lastTickRef = useRef<number | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
   const [streakBump, setStreakBump] = useState(false);
   const prevStreakRef = useRef<number | null>(null);
@@ -238,14 +239,34 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
   useEffect(() => {
     if (!isRunning) return;
-    lastTickRef.current = lastTickRef.current ?? Date.now();
-    const interval = setInterval(() => {
-      const now = Date.now();
+    lastTickRef.current = lastTickRef.current ?? performance.now();
+
+    const tick = () => {
+      const now = performance.now();
       const lastTick = lastTickRef.current ?? now;
-      const deltaSec = Math.max(1, Math.floor((now - lastTick) / 1000));
+      const deltaSec = (now - lastTick) / 1000;
+      lastTickRef.current = now;
 
       setTimeLeft((prev) => {
-        if (prev <= deltaSec) {
+        const remaining = prev - deltaSec;
+        const effectiveDelta = Math.min(prev, deltaSec);
+
+        const todayDates = getCurrentWeekDates(0);
+        const todayKey = formatDate(todayDates[0]);
+        const todayIndex = todayDates.findIndex((d) => formatDate(d) === formatDate(new Date()));
+
+        if (timerMode === 'focus' && effectiveDelta > 0) {
+          setStudyData((prevData) => {
+            const next = { ...prevData };
+            const weekArray = [...(next[todayKey] ?? [0, 0, 0, 0, 0, 0, 0])];
+            const idx = todayIndex >= 0 ? todayIndex : 0;
+            weekArray[idx] = (weekArray[idx] ?? 0) + effectiveDelta / 60;
+            next[todayKey] = weekArray;
+            return next;
+          });
+        }
+
+        if (remaining <= 0) {
           setIsRunning(false);
           if (timerMode === 'focus') {
             setSessionsByDay((prevSessions) => {
@@ -264,26 +285,19 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           lastTickRef.current = null;
           return safeMinutes * 60;
         }
-        return prev - deltaSec;
+        return remaining;
       });
 
-      const todayDates = getCurrentWeekDates(0);
-      const todayKey = formatDate(todayDates[0]);
-      const todayIndex = todayDates.findIndex((d) => formatDate(d) === formatDate(new Date()));
+      animationFrameRef.current = requestAnimationFrame(tick);
+    };
 
-      if (timerMode === 'focus') {
-        setStudyData((prev) => {
-          const next = { ...prev };
-          const weekArray = [...(next[todayKey] ?? [0, 0, 0, 0, 0, 0, 0])];
-          const idx = todayIndex >= 0 ? todayIndex : 0;
-          weekArray[idx] = (weekArray[idx] ?? 0) + deltaSec / 60;
-          next[todayKey] = weekArray;
-          return next;
-        });
+    animationFrameRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
-      lastTickRef.current = now;
-    }, 1000);
-    return () => clearInterval(interval);
+    };
   }, [isRunning, safeMinutes, timerMode]);
 
   // Sauver les tâches à chaque modification
@@ -523,7 +537,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setUploadNotice(`Photo importée et analysée (mock) : ${file.name}`);
   };
 
-  const progress = Math.min(100, Math.round(((safeMinutes * 60 - timeLeft) / (safeMinutes * 60)) * 100));
+  const progress = Math.min(100, Math.max(0, ((safeMinutes * 60 - timeLeft) / (safeMinutes * 60)) * 100));
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.completed).length;
   const roundedStudiedMinutes = Math.round(weekTotal);
@@ -749,7 +763,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           lastTickRef.current = null;
                           return false;
                         }
-                        lastTickRef.current = Date.now();
+                        lastTickRef.current = performance.now();
                         return true;
                       });
                     }}
