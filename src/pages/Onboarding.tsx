@@ -85,7 +85,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     }
 
     return [];
-}
+  };
 
   const subjects = getSubjectsForYear(formData.year);
 
@@ -134,8 +134,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-4 md:p-8 flex items-center justify-center">
-      <div className="max-w-2xl w-full">
+    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-10 flex items-center">
+      <div className="max-w-4xl mx-auto w-full">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-full bg-[#4169E1] mx-auto mb-4 flex items-center justify-center">
@@ -158,7 +158,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         </div>
 
         {/* Form Card */}
-        <div className="bg-[#13151C] border border-[#1F2230] rounded-3xl p-8 md:p-12 shadow-sm">
+        <div className="bg-[#161924] border border-[#1F2230] rounded-3xl p-8 md:p-12 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
           {step === 1 && (
             <div className="space-y-6">
               <div>
