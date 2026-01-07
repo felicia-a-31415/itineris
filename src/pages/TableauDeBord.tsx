@@ -423,16 +423,19 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     if (isRunning) {
       document.title = `itineris | ${formatTime(timeLeft)}`;
       if (lastTickRef.current === null) {
-        lastTickRef.current = Date.now();
+        lastTickRef.current = performance.now();
       }
     } else {
       document.title = 'itineris';
       lastTickRef.current = null;
     }
+  }, [isRunning, timeLeft]);
+
+  useEffect(() => {
     return () => {
       document.title = 'itineris';
     };
-  }, [isRunning, timeLeft]);
+  }, []);
 
   const getTasksForDate = (date: string) => {
     return tasks
