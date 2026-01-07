@@ -241,12 +241,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     if (!isRunning) return;
     lastTickRef.current = lastTickRef.current ?? performance.now();
 
-    const tick = () => {
-      const now = performance.now();
-      const lastTick = lastTickRef.current ?? now;
-      const deltaSec = (now - lastTick) / 1000;
-      lastTickRef.current = now;
-
+    const applyDelta = (deltaSec: number) => {
       setTimeLeft((prev) => {
         const remaining = prev - deltaSec;
         const effectiveDelta = Math.min(prev, deltaSec);
@@ -287,9 +282,26 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         }
         return remaining;
       });
+    };
 
+    const tick = () => {
+      const now = performance.now();
+      const lastTick = lastTickRef.current ?? now;
+      const deltaSec = (now - lastTick) / 1000;
+      lastTickRef.current = now;
+
+      applyDelta(deltaSec);
       animationFrameRef.current = requestAnimationFrame(tick);
     };
+
+    const hiddenInterval = setInterval(() => {
+      if (!document.hidden) return;
+      const now = performance.now();
+      const lastTick = lastTickRef.current ?? now;
+      const deltaSec = (now - lastTick) / 1000;
+      lastTickRef.current = now;
+      applyDelta(deltaSec);
+    }, 1000);
 
     animationFrameRef.current = requestAnimationFrame(tick);
     return () => {
@@ -297,6 +309,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
+      clearInterval(hiddenInterval);
     };
   }, [isRunning, safeMinutes, timerMode]);
 
