@@ -92,6 +92,7 @@ const TASK_STORAGE_KEY = 'itineris_tasks';
 const STUDY_MINUTES_KEY = 'itineris_study_minutes';
 const STREAK_STORAGE_KEY = 'itineris_streak';
 const SESSIONS_STORAGE_KEY = 'itineris_sessions_completed';
+const MINIMUM_STREAK_MINUTES = 1;
 
 const TIMER_MODES = {
   focus: { label: 'Focus', minutes: 25, color: '#3B82F6' },
@@ -410,7 +411,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       day.setDate(today.getDate() - i);
       const minutes = getMinutesForDate(day, data);
 
-      if (minutes > 0) {
+      if (minutes >= MINIMUM_STREAK_MINUTES) {
         streak += 1;
         continue;
       }
