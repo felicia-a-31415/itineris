@@ -6,6 +6,7 @@ import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { useAuth } from '../lib/auth';
+import { loadUserData } from '../lib/storage';
 
 type LocationState = {
   from?: Location;
@@ -23,7 +24,9 @@ export function Login() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const fromPath = (location.state as LocationState | null)?.from?.pathname ?? '/tableaudebord';
+  const requestedPath = (location.state as LocationState | null)?.from?.pathname ?? null;
+  const hasOnboardingData = Boolean(loadUserData());
+  const defaultPath = hasOnboardingData ? '/tableaudebord' : '/onboarding';
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -47,7 +50,8 @@ export function Login() {
       return;
     }
 
-    navigate(fromPath, { replace: true });
+    const redirectPath = hasOnboardingData ? requestedPath ?? defaultPath : '/onboarding';
+    navigate(redirectPath, { replace: true });
   };
 
   return (
