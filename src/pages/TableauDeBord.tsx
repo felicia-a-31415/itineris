@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
+import { Flame, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
@@ -103,7 +103,7 @@ const TIMER_MODES = {
 
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const [weekOffset, setWeekOffset] = useState(0);
   const weekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
   const currentWeekStart = formatDate(getCurrentWeekDates(0)[0]);
@@ -675,20 +675,30 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              onClick={async () => {
-                const { error } = await signOut();
-                if (error) {
-                  console.error('Supabase sign out error:', error);
-                  return;
-                }
-                navigate('/login');
-              }}
-              variant="ghost"
-              className="text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#1F2230] rounded-xl"
-            >
-              <LogOut className="w-5 h-5" />
-            </Button>
+            {user ? (
+              <Button
+                onClick={async () => {
+                  const { error } = await signOut();
+                  if (error) {
+                    console.error('Supabase sign out error:', error);
+                    return;
+                  }
+                  navigate('/login');
+                }}
+                variant="ghost"
+                className="text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#1F2230] rounded-xl"
+              >
+                <LogOut className="w-5 h-5" />
+              </Button>
+            ) : (
+              <Button
+                onClick={() => navigate('/login')}
+                variant="ghost"
+                className="text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#1F2230] rounded-xl"
+              >
+                <LogIn className="w-5 h-5" />
+              </Button>
+            )}
             <Button
               onClick={() => navigate('/parametres')}
               variant="ghost"
@@ -698,6 +708,22 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             </Button>
           </div>
         </div>
+        {!user ? (
+          <div className="bg-[#161924] border border-[#1F2230] rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3 shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+            <div>
+              <p className="text-sm text-[#A9ACBA]">Mode invité</p>
+              <p className="text-base text-[#ECECF3]">
+                Crée un compte pour sauvegarder et synchroniser tes progrès.
+              </p>
+            </div>
+            <Button
+              onClick={() => navigate('/login')}
+              className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4"
+            >
+              Se connecter
+            </Button>
+          </div>
+        ) : null}
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr,1.4fr] items-stretch">
           {/* Pomodoro */}

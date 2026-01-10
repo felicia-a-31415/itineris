@@ -11,7 +11,7 @@ import { TableauDeBord } from './pages/TableauDeBord';
 import Erreur from './pages/Erreur';
 
 import { loadUserData, saveUserData, type UserData } from './lib/storage';
-import { RequireAuth, useAuth } from './lib/auth';
+import { useAuth } from './lib/auth';
 
 export default function App() {
   const [userData, setUserData] = useState<UserData | null>(() => loadUserData() ?? null);
@@ -52,35 +52,21 @@ export default function App() {
       <Routes>
         <Route
           path="/"
-          element={user ? <Navigate to="/tableaudebord" replace /> : <Bienvenue onGetStarted={() => navigate('/login')} />}
+          element={
+            user ? <Navigate to="/tableaudebord" replace /> : <Bienvenue onGetStarted={() => navigate('/onboarding')} />
+          }
         />
         <Route path="/login" element={<Login />} />
-        <Route
-          path="/onboarding"
-          element={
-            <RequireAuth>
-              <Onboarding onComplete={handleOnboardingComplete} />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/tableaudebord"
-          element={
-            <RequireAuth>
-              <TableauDeBord userName={userData?.name} />
-            </RequireAuth>
-          }
-        />
+        <Route path="/onboarding" element={<Onboarding onComplete={handleOnboardingComplete} />} />
+        <Route path="/tableaudebord" element={<TableauDeBord userName={userData?.name} />} />
         <Route
           path="/parametres"
           element={
-            <RequireAuth>
-              <Parametres
-                onBack={() => navigate('/tableaudebord')}
-                userData={userData ?? defaultUserData}
-                onSave={handleSettingsSave}
-              />
-            </RequireAuth>
+            <Parametres
+              onBack={() => navigate('/tableaudebord')}
+              userData={userData ?? defaultUserData}
+              onSave={handleSettingsSave}
+            />
           }
         />
         <Route path="/*" element={<Erreur />} />
