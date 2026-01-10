@@ -566,7 +566,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const activeWeekMinutes = Array.from({ length: 7 }, (_, i) => activeWeekMinutesRaw[i] ?? 0);
   const maxWeekMinutes = Math.max(60, ...activeWeekMinutes);
   const activeWeekTotalMinutes = Math.round(activeWeekMinutes.reduce((sum, n) => sum + n, 0));
-  const averageDailyMinutes = Math.round(activeWeekTotalMinutes / Math.max(1, activeWeekMinutes.length));
+  const todayDay = new Date().getDay();
+  const daysElapsedThisWeek = todayDay === 0 ? 7 : todayDay;
+  const elapsedWeekTotalMinutes = Math.round(
+    activeWeekMinutes.slice(0, daysElapsedThisWeek).reduce((sum, n) => sum + n, 0)
+  );
+  const averageDailyMinutes = Math.round(elapsedWeekTotalMinutes / Math.max(1, daysElapsedThisWeek));
   const weekRangeLabel = formatWeekRangeLabel(weekDates);
   const studyGoalMinutes = 240;
   const studyProgressRatio = Math.min(1, roundedStudiedMinutes / studyGoalMinutes || 0);
@@ -1035,7 +1040,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <div className="space-y-2">
               <p className="text-sm text-[#A9ACBA]">Moyenne par jour</p>
               <p className="text-2xl text-[#ECECF3]">{averageDailyMinutes} min</p>
-              <p className="text-xs text-[#A9ACBA]">Basé sur 7 jours</p>
+              <p className="text-xs text-[#A9ACBA]">Basé sur {daysElapsedThisWeek} jour(s)</p>
             </div>
           </div>
         </section>
