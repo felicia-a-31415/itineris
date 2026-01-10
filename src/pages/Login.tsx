@@ -54,20 +54,20 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-12">
-      <div className="max-w-5xl mx-auto">
-        <div className="grid gap-10 md:grid-cols-[1.1fr,1fr] items-start">
-          <div className="space-y-4">
-            <p className="text-sm uppercase tracking-[0.3em] text-[#A9ACBA]">Itineris</p>
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Connexion</h1>
-            <p className="text-[#A9ACBA] text-base md:text-lg max-w-md">
-              {isSigningUp ? 'Crée ton compte pour continuer.' : 'Connecte-toi pour retrouver ton tableau.'}
-            </p>
-          </div>
+    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-4 md:p-8">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="space-y-2">
+          <p className="text-sm uppercase tracking-[0.3em] text-[#A9ACBA]">Itineris</p>
+          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Connexion</h1>
+          <p className="text-[#A9ACBA] text-sm md:text-base max-w-2xl">
+            {isSigningUp ? 'Crée ton compte pour continuer.' : 'Connecte-toi pour retrouver ton tableau.'}
+          </p>
+        </div>
 
-          <div className="bg-[#161924] border border-[#1F2230] rounded-3xl p-8 md:p-10 shadow-[0_18px_50px_rgba(0,0,0,0.45),0_8px_24px_rgba(0,0,0,0.28),0_1px_0_rgba(255,255,255,0.08)]">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-3">
+        <div className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 md:p-8 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
+          <div className="max-w-xl space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
                 <Label htmlFor="email" className="text-[#ECECF3]">
                   Email
                 </Label>
@@ -77,12 +77,12 @@ export function Login() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="toi@email.com"
-                  className="rounded-2xl h-12"
+                  className="rounded-xl h-11"
                   required
                 />
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="password" className="text-[#ECECF3]">
                   Mot de passe
                 </Label>
@@ -92,7 +92,7 @@ export function Login() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="••••••••"
-                  className="rounded-2xl h-12"
+                  className="rounded-xl h-11"
                   required
                 />
               </div>
@@ -102,14 +102,14 @@ export function Login() {
 
               <Button
                 type="submit"
-                className="w-full bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-2xl h-12 text-base"
+                className="w-full bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl h-11 text-sm"
                 disabled={isSubmitting}
               >
                 {isSigningUp ? 'Créer un compte' : 'Se connecter'}
               </Button>
             </form>
 
-            <div className="text-base text-[#A9ACBA] mt-6">
+            <div className="text-sm text-[#A9ACBA]">
               {isSigningUp ? 'Déjà un compte ?' : "Pas encore de compte ?"}{' '}
               <button
                 type="button"
