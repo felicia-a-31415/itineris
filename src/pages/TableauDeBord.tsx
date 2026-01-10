@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
+import { Flame, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import alarmSound from '../assets/Christmas-jingle-bells-notification-melody.mp3';
+import { useAuth } from '../lib/auth';
 
 interface Task {
   id: string;
@@ -102,6 +103,7 @@ const TIMER_MODES = {
 
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [weekOffset, setWeekOffset] = useState(0);
   const weekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
   const currentWeekStart = formatDate(getCurrentWeekDates(0)[0]);
@@ -672,13 +674,29 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             </div>
           </div>
 
-          <Button
-            onClick={() => navigate('/parametres')}
-            variant="ghost"
-            className="text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#1F2230] rounded-xl"
-          >
-            <Settings className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={async () => {
+                const { error } = await signOut();
+                if (error) {
+                  console.error('Supabase sign out error:', error);
+                  return;
+                }
+                navigate('/login');
+              }}
+              variant="ghost"
+              className="text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#1F2230] rounded-xl"
+            >
+              <LogOut className="w-5 h-5" />
+            </Button>
+            <Button
+              onClick={() => navigate('/parametres')}
+              variant="ghost"
+              className="text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#1F2230] rounded-xl"
+            >
+              <Settings className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr,1.4fr] items-stretch">
