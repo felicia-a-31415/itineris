@@ -1,6 +1,6 @@
 import './styles/globals.css';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 
 import { Bienvenue } from './pages/Bienvenue';
@@ -10,13 +10,21 @@ import { Parametres } from './pages/Parametres';
 import { TableauDeBord } from './pages/TableauDeBord';
 import Erreur from './pages/Erreur';
 
-import { loadUserData, saveUserData, type UserData } from './lib/storage';
+import {
+  loadUserData,
+  loadUserDataFromSupabase,
+  saveUserData,
+  saveUserDataToSupabase,
+  type UserData,
+} from './lib/storage';
 import { useAuth } from './lib/auth';
 
 export default function App() {
   const [userData, setUserData] = useState<UserData | null>(() => loadUserData() ?? null);
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const [hasOnboardingData, setHasOnboardingData] = useState(Boolean(loadUserData()));
+  const [isUserDataLoading, setIsUserDataLoading] = useState(true);
 
   const defaultUserData: UserData = {
     name: '',
@@ -28,19 +36,70 @@ export default function App() {
   };
   const hasOnboardingData = Boolean(loadUserData());
 
+  useEffect(() => {
+    if (loading) return;
+    let isMounted = true;
+
+    const syncUserData = async () => {
+      setIsUserDataLoading(true);
+      const localData = loadUserData();
+
+      if (user) {
+        const remoteData = await loadUserDataFromSupabase(user.id);
+        if (!isMounted) return;
+        if (remoteData) {
+          setUserData(remoteData);
+          setHasOnboardingData(true);
+        } else if (localData) {
+          await saveUserDataToSupabase(user.id, localData);
+          if (!isMounted) return;
+          setUserData(localData);
+          setHasOnboardingData(true);
+        } else {
+          setUserData(null);
+          setHasOnboardingData(false);
+        }
+      } else {
+        setUserData(localData);
+        setHasOnboardingData(Boolean(localData));
+      }
+
+      if (isMounted) {
+        setIsUserDataLoading(false);
+      }
+    };
+
+    syncUserData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, loading]);
+
   // 2) Quand l’onboarding est terminé: sauver + rediriger
-  const handleOnboardingComplete = (data: UserData) => {
+  const handleOnboardingComplete = async (data: UserData) => {
     setUserData(data);
-    saveUserData(data);
+    setHasOnboardingData(true);
+    if (user) {
+      await saveUserDataToSupabase(user.id, data);
+    } else {
+      saveUserData(data);
+    }
     navigate('/tableaudebord');
   };
 
-  const handleSettingsSave = (data: UserData) => {
+  const handleSettingsSave = async (data: UserData) => {
     setUserData(data);
-    saveUserData(data);
+    if (user) {
+      await saveUserDataToSupabase(user.id, data);
+    } else {
+      saveUserData(data);
+    }
   };
 
-  if (loading) {
+  const isLoading = loading || isUserDataLoading;
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0B0D10] flex items-center justify-center">
         <div className="text-[#A9ACBA]">Chargement...</div>
@@ -54,25 +113,34 @@ export default function App() {
         <Route
           path="/"
           element={
-            user ? <Navigate to="/tableaudebord" replace /> : <Bienvenue onGetStarted={() => navigate('/onboarding')} />
+            hasOnboardingData ? (
+              <Navigate to="/tableaudebord" replace />
+            ) : (
+              <Bienvenue onGetStarted={() => navigate('/onboarding')} />
+            )
           }
         />
         <Route path="/login" element={<Login />} />
         <Route
           path="/onboarding"
-          element={
-            hasOnboardingData ? <Navigate to="/tableaudebord" replace /> : <Onboarding onComplete={handleOnboardingComplete} />
-          }
+          element={hasOnboardingData ? <Navigate to="/tableaudebord" replace /> : <Onboarding onComplete={handleOnboardingComplete} />}
         />
-        <Route path="/tableaudebord" element={<TableauDeBord userName={userData?.name} />} />
+        <Route
+          path="/tableaudebord"
+          element={hasOnboardingData ? <TableauDeBord userName={userData?.name} /> : <Navigate to="/onboarding" replace />}
+        />
         <Route
           path="/parametres"
           element={
-            <Parametres
-              onBack={() => navigate('/tableaudebord')}
-              userData={userData ?? defaultUserData}
-              onSave={handleSettingsSave}
-            />
+            hasOnboardingData ? (
+              <Parametres
+                onBack={() => navigate('/tableaudebord')}
+                userData={userData ?? defaultUserData}
+                onSave={handleSettingsSave}
+              />
+            ) : (
+              <Navigate to="/onboarding" replace />
+            )
           }
         />
         <Route path="/*" element={<Erreur />} />

@@ -5,7 +5,6 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { useAuth } from '../lib/auth';
-import { loadUserData } from '../lib/storage';
 
 type LocationState = {
   from?: Location;
@@ -24,8 +23,6 @@ export function Login() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const requestedPath = (location.state as LocationState | null)?.from?.pathname ?? null;
-  const hasOnboardingData = Boolean(loadUserData());
-  const defaultPath = hasOnboardingData ? '/tableaudebord' : '/onboarding';
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -49,7 +46,7 @@ export function Login() {
       return;
     }
 
-    const redirectPath = hasOnboardingData ? requestedPath ?? defaultPath : '/onboarding';
+    const redirectPath = requestedPath ?? '/tableaudebord';
     navigate(redirectPath, { replace: true });
   };
 
