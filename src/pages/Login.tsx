@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '../ui/button';
-import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { useAuth } from '../lib/auth';
@@ -55,17 +54,18 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-12 flex items-center">
-      <div className="max-w-lg w-full mx-auto">
-        <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-10 md:p-12 shadow-[0_18px_50px_rgba(0,0,0,0.5),0_8px_24px_rgba(0,0,0,0.3),0_1px_0_rgba(255,255,255,0.08)]">
-          <div className="space-y-8">
-            <div className="space-y-3">
-              <h1 className="text-4xl font-semibold tracking-tight">Connexion</h1>
-              <p className="text-[#A9ACBA] text-base">
-                {isSigningUp ? 'Crée ton compte pour continuer.' : 'Connecte-toi pour retrouver ton tableau.'}
-              </p>
-            </div>
+    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-12">
+      <div className="max-w-5xl mx-auto">
+        <div className="grid gap-10 md:grid-cols-[1.1fr,1fr] items-start">
+          <div className="space-y-4">
+            <p className="text-sm uppercase tracking-[0.3em] text-[#A9ACBA]">Itineris</p>
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Connexion</h1>
+            <p className="text-[#A9ACBA] text-base md:text-lg max-w-md">
+              {isSigningUp ? 'Crée ton compte pour continuer.' : 'Connecte-toi pour retrouver ton tableau.'}
+            </p>
+          </div>
 
+          <div className="bg-[#161924] border border-[#1F2230] rounded-3xl p-8 md:p-10 shadow-[0_18px_50px_rgba(0,0,0,0.45),0_8px_24px_rgba(0,0,0,0.28),0_1px_0_rgba(255,255,255,0.08)]">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-3">
                 <Label htmlFor="email" className="text-[#ECECF3]">
@@ -109,7 +109,7 @@ export function Login() {
               </Button>
             </form>
 
-            <div className="text-base text-[#A9ACBA]">
+            <div className="text-base text-[#A9ACBA] mt-6">
               {isSigningUp ? 'Déjà un compte ?' : "Pas encore de compte ?"}{' '}
               <button
                 type="button"
@@ -120,7 +120,7 @@ export function Login() {
               </button>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );
