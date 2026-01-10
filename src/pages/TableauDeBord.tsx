@@ -572,6 +572,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     activeWeekMinutes.slice(0, daysElapsedThisWeek).reduce((sum, n) => sum + n, 0)
   );
   const averageDailyMinutes = Math.round(elapsedWeekTotalMinutes / Math.max(1, daysElapsedThisWeek));
+  const previousWeekStart = new Date(weekDates[0]);
+  previousWeekStart.setDate(previousWeekStart.getDate() - 7);
+  const previousWeekKey = formatDate(previousWeekStart);
+  const previousWeekMinutes = studyData[previousWeekKey] ?? [];
+  const previousWeekTotalMinutes = Math.round(previousWeekMinutes.reduce((sum, n) => sum + (n || 0), 0));
+  const weekDeltaMinutes = activeWeekTotalMinutes - previousWeekTotalMinutes;
   const weekRangeLabel = formatWeekRangeLabel(weekDates);
   const studyGoalMinutes = 240;
   const studyProgressRatio = Math.min(1, roundedStudiedMinutes / studyGoalMinutes || 0);
@@ -1026,14 +1032,29 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             })}
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <p className="text-sm text-[#A9ACBA]">Temps total étudié cette semaine</p>
               <p className="text-2xl text-[#ECECF3]">{activeWeekTotalMinutes} min</p>
+              <div className="h-2 bg-[#0F1117] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#4169E1]"
+                  style={{ width: `${Math.min(100, (activeWeekTotalMinutes / 240) * 100)}%` }}
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <p className="text-sm text-[#A9ACBA]">Moyenne par jour</p>
               <p className="text-2xl text-[#ECECF3]">{averageDailyMinutes} min</p>
+              <p className="text-xs text-[#A9ACBA]">Basé sur {daysElapsedThisWeek} jour(s)</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-[#A9ACBA]">Écart depuis la semaine passée</p>
+              <p className="text-2xl text-[#ECECF3]">
+                {weekDeltaMinutes >= 0 ? '+' : '-'}
+                {Math.abs(weekDeltaMinutes)} min
+              </p>
+              <p className="text-xs text-[#A9ACBA]">Comparé à {previousWeekTotalMinutes} min</p>
             </div>
           </div>
         </section>
