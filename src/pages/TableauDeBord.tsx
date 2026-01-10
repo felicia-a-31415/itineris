@@ -1033,15 +1033,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
+            <div className="space-y-1">
               <p className="text-sm text-[#A9ACBA]">Temps total étudié cette semaine</p>
               <p className="text-2xl text-[#ECECF3]">{activeWeekTotalMinutes} min</p>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <p className="text-sm text-[#A9ACBA]">Moyenne par jour</p>
               <p className="text-2xl text-[#ECECF3]">{averageDailyMinutes} min</p>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <p className="text-sm text-[#A9ACBA]">Écart depuis la semaine passée</p>
               <p className="text-2xl text-[#ECECF3]">
                 {weekDeltaMinutes >= 0 ? '+' : '-'}
