@@ -96,16 +96,6 @@ export default function App() {
     }
   };
 
-  const isLoading = loading || isUserDataLoading;
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#0B0D10] flex items-center justify-center">
-        <div className="text-[#A9ACBA]">Chargement...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3]">
       <Routes>
