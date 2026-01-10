@@ -110,7 +110,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => setIsSigningUp((prev) => !prev)}
-                className="text-[#ECECF3] underline underline-offset-4 font-normal"
+                className="text-sm text-[#ECECF3] underline underline-offset-4 font-normal"
               >
                 {isSigningUp ? 'Se connecter' : 'Créer un compte'}
               </button>
