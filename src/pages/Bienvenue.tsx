@@ -9,7 +9,7 @@ export function Bienvenue({ onGetStarted }: BienvenueProps) {
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-10 flex items-center">
       <div className="max-w-3xl mx-auto w-full">
-        <div className="bg-[#161924] border border-[#1F2230] rounded-3xl p-8 md:p-12 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] flex flex-col items-center text-center space-y-8">
+        <div className="flex flex-col items-center text-center space-y-8">
           {/* Logo - Compass */}
           <div className="w-32 h-32 rounded-full bg-[#4169E1] shadow-lg flex items-center justify-center">
             <Compass className="w-16 h-16 text-white" strokeWidth={2} />
