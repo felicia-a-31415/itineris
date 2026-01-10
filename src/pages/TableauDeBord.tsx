@@ -1016,14 +1016,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           <div className="mt-2 grid grid-cols-7 gap-3 items-end">
             {weekDates.map((date, index) => {
               const minutes = Math.round(activeWeekMinutes[index] ?? 0);
+              const showBar = minutes > 0;
               const barHeight = Math.max(8, Math.min(220, (minutes / (maxWeekMinutes || 1)) * 220));
               return (
                 <div key={index} className="flex flex-col items-center gap-2">
                   <div className="w-full bg-[#1B2030] rounded-2xl h-56 flex items-end">
-                    <div
-                      className="w-full bg-[#4169E1] rounded-2xl transition-all"
-                      style={{ height: `${barHeight}px` }}
-                    />
+                    {showBar && (
+                      <div
+                        className="w-full bg-[#4169E1] rounded-2xl transition-all"
+                        style={{ height: `${barHeight}px` }}
+                      />
+                    )}
                   </div>
                   <div className="text-xs text-[#ECECF3] font-medium">{minutes} min</div>
                   <div className="text-xs text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
