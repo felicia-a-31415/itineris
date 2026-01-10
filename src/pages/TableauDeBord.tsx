@@ -566,6 +566,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const activeWeekMinutes = Array.from({ length: 7 }, (_, i) => activeWeekMinutesRaw[i] ?? 0);
   const maxWeekMinutes = Math.max(60, ...activeWeekMinutes);
   const activeWeekTotalMinutes = Math.round(activeWeekMinutes.reduce((sum, n) => sum + n, 0));
+  const averageDailyMinutes = Math.round(activeWeekTotalMinutes / Math.max(1, activeWeekMinutes.length));
   const weekRangeLabel = formatWeekRangeLabel(weekDates);
   const studyGoalMinutes = 240;
   const studyProgressRatio = Math.min(1, roundedStudiedMinutes / studyGoalMinutes || 0);
@@ -1020,14 +1021,21 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             })}
           </div>
 
-          <div className="mt-6 space-y-2">
-            <p className="text-sm text-[#A9ACBA]">Temps total étudié cette semaine</p>
-            <p className="text-2xl text-[#ECECF3]">{activeWeekTotalMinutes} min</p>
-            <div className="h-2 bg-[#0F1117] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#4169E1]"
-                style={{ width: `${Math.min(100, (activeWeekTotalMinutes / 240) * 100)}%` }}
-              />
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <p className="text-sm text-[#A9ACBA]">Temps total étudié cette semaine</p>
+              <p className="text-2xl text-[#ECECF3]">{activeWeekTotalMinutes} min</p>
+              <div className="h-2 bg-[#0F1117] rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#4169E1]"
+                  style={{ width: `${Math.min(100, (activeWeekTotalMinutes / 240) * 100)}%` }}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-[#A9ACBA]">Moyenne par jour</p>
+              <p className="text-2xl text-[#ECECF3]">{averageDailyMinutes} min</p>
+              <p className="text-xs text-[#A9ACBA]">Basé sur 7 jours</p>
             </div>
           </div>
         </section>
