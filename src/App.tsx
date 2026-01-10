@@ -26,6 +26,7 @@ export default function App() {
     weakSubjects: [],
     lifeGoals: '',
   };
+  const hasOnboardingData = Boolean(loadUserData());
 
   // 2) Quand l’onboarding est terminé: sauver + rediriger
   const handleOnboardingComplete = (data: UserData) => {
@@ -57,7 +58,12 @@ export default function App() {
           }
         />
         <Route path="/login" element={<Login />} />
-        <Route path="/onboarding" element={<Onboarding onComplete={handleOnboardingComplete} />} />
+        <Route
+          path="/onboarding"
+          element={
+            hasOnboardingData ? <Navigate to="/tableaudebord" replace /> : <Onboarding onComplete={handleOnboardingComplete} />
+          }
+        />
         <Route path="/tableaudebord" element={<TableauDeBord userName={userData?.name} />} />
         <Route
           path="/parametres"

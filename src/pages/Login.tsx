@@ -56,16 +56,21 @@ export function Login() {
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="space-y-2">
-          <p className="text-sm uppercase tracking-[0.3em] text-[#A9ACBA]">Itineris</p>
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Connexion</h1>
-          <p className="text-[#A9ACBA] text-sm md:text-base max-w-2xl">
-            {isSigningUp ? 'Crée ton compte pour continuer.' : 'Connecte-toi pour retrouver ton tableau.'}
-          </p>
-        </div>
-
         <div className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 md:p-8 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
-          <div className="max-w-xl space-y-6">
+          <div className="grid gap-8 lg:grid-cols-[0.9fr,1fr] items-start">
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#1F2230] border border-[#2A2F3E] flex items-center justify-center">
+                <span className="text-[#ECECF3] text-xl font-semibold">I</span>
+              </div>
+              <div className="space-y-2">
+                <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Connexion</h1>
+                <p className="text-[#A9ACBA] text-sm md:text-base">
+                  {isSigningUp ? 'Crée ton compte pour continuer.' : 'Connecte-toi pour retrouver ton tableau.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-[#ECECF3]">
