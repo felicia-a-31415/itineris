@@ -34,7 +34,6 @@ export default function App() {
     weakSubjects: [],
     lifeGoals: '',
   };
-  const hasOnboardingData = Boolean(loadUserData());
 
   useEffect(() => {
     if (loading) return;
