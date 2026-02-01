@@ -31,7 +31,7 @@ export function Bienvenue({ onGetStarted, onLogin, onContinueWithoutAccount }: B
           <Button
             onClick={onLogin}
             variant="outline"
-            className="w-full border-2 border-[#4169E1] text-[#ECECF3] hover:bg-[#4169E1] hover:text-white px-8 py-6 rounded-2xl transition-all"
+            className="w-full border border-[#1F2230] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26] hover:text-[#ECECF3] px-8 py-6 rounded-2xl transition-all"
           >
             Se connecter
           </Button>

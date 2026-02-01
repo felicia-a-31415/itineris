@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Compass, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Label } from '../ui/label';
 import { useAuth } from '../lib/auth';
 
 type LocationState = {
@@ -21,6 +21,7 @@ export function Login() {
   const initialMode = (location.state as LocationState | null)?.mode;
   const [isSigningUp, setIsSigningUp] = useState(initialMode === 'signup');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -53,78 +54,127 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 md:p-8 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]">
-          <div className="grid gap-8 lg:grid-cols-[0.9fr,1fr] items-start">
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#1F2230] border border-[#2A2F3E] flex items-center justify-center">
-                <span className="text-[#ECECF3] text-xl font-semibold">I</span>
-              </div>
-              <div className="space-y-2">
-                <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Connexion</h1>
-                <p className="text-[#A9ACBA] text-sm md:text-base">
-                  {isSigningUp ? 'Crée ton compte pour continuer.' : 'Connecte-toi pour retrouver ton tableau.'}
-                </p>
-              </div>
-            </div>
+    <div className="flex flex-col min-h-screen p-6 bg-[#0B0D10] text-[#ECECF3]">
+      <Button
+        onClick={() => navigate(-1)}
+        variant="ghost"
+        className="self-start mb-4 text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#161924]"
+        disabled={isSubmitting}
+      >
+        <ArrowLeft className="w-5 h-5 mr-2" />
+        Retour
+      </Button>
 
-            <div className="space-y-6">
+      <div className="flex flex-col items-center justify-center flex-1">
+        <div className="w-full max-w-md">
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-20 h-20 rounded-full bg-[#4169E1] shadow-lg flex items-center justify-center mb-4">
+              <Compass className="w-10 h-10 text-white" strokeWidth={2} />
+            </div>
+            <h1 className="text-4xl text-[#ECECF3] tracking-tight mb-2">Itineris</h1>
+            <p className="text-[#A9ACBA]">
+              {isSigningUp ? 'Crée ton compte pour continuer.' : 'Bienvenue ! Connecte-toi pour continuer'}
+            </p>
+          </div>
+
+          <div className="bg-[#161924] border border-[#1F2230] rounded-2xl shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] p-8 space-y-6">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[#ECECF3]">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="toi@email.com"
-                  className="rounded-xl h-11"
-                  required
-                />
+                <label htmlFor="email" className="text-[#ECECF3] block">
+                  Adresse email
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A9ACBA]" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="votre@email.com"
+                    className="pl-11 bg-[#0F1117] border border-[#1F2230] focus:border-[#4169E1] rounded-xl h-12"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-[#ECECF3]">
+                <label htmlFor="password" className="text-[#ECECF3] block">
                   Mot de passe
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="••••••••"
-                  className="rounded-xl h-11"
-                  required
-                />
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A9ACBA]" />
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="••••••••"
+                    className="pl-11 pr-11 bg-[#0F1117] border border-[#1F2230] focus:border-[#4169E1] rounded-xl h-12"
+                    required
+                    disabled={isSubmitting}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A9ACBA] hover:text-[#ECECF3] transition-colors"
+                    disabled={isSubmitting}
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
 
-              {error ? <div className="text-sm text-[#E16941]">{error}</div> : null}
+              {error ? (
+                <div className="bg-[#2A1B1B] border border-[#4C2A2A] text-[#E16941] px-4 py-3 rounded-xl text-sm">
+                  {error}
+                </div>
+              ) : null}
               {notice ? <div className="text-sm text-[#A9ACBA]">{notice}</div> : null}
+
+              <div className="flex justify-end">
+                <button type="button" className="text-sm text-[#A9ACBA] hover:text-[#ECECF3]" disabled={isSubmitting}>
+                  Mot de passe oublie ?
+                </button>
+              </div>
 
               <Button
                 type="submit"
-                className="w-full bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl h-11 text-sm"
                 disabled={isSubmitting}
+                className="w-full bg-[#4169E1] hover:bg-[#3557C1] text-white py-6 rounded-xl shadow-md transition-all"
               >
-                {isSigningUp ? 'Créer un compte' : 'Se connecter'}
+                {isSubmitting ? 'Connexion...' : isSigningUp ? 'Créer un compte' : 'Se connecter'}
               </Button>
             </form>
 
-            <div className="text-sm text-[#A9ACBA]">
-              {isSigningUp ? 'Déjà un compte ?' : "Pas encore de compte ?"}{' '}
-              <button
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#1F2230]"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-[#161924] text-[#A9ACBA]">ou</span>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <p className="text-[#A9ACBA] mb-3">
+                {isSigningUp ? 'Déjà un compte ?' : "Vous n'avez pas de compte ?"}
+              </p>
+              <Button
                 type="button"
                 onClick={() => setIsSigningUp((prev) => !prev)}
-                className="text-sm text-[#ECECF3] underline underline-offset-4 font-normal"
+                disabled={isSubmitting}
+                variant="outline"
+                className="w-full border-[#4169E1] text-[#4169E1] hover:bg-[#4169E1] hover:text-white py-6 rounded-xl transition-all"
               >
                 {isSigningUp ? 'Se connecter' : 'Créer un compte'}
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
+
+          <p className="text-center text-xs text-[#A9ACBA] mt-6 max-w-sm mx-auto">
+            En vous connectant, vous acceptez nos conditions d'utilisation et notre politique de confidentialité.
+          </p>
         </div>
       </div>
     </div>
