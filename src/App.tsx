@@ -105,7 +105,11 @@ export default function App() {
             hasOnboardingData ? (
               <Navigate to="/tableaudebord" replace />
             ) : (
-              <Bienvenue onGetStarted={() => navigate('/onboarding')} />
+              <Bienvenue
+                onGetStarted={() => navigate('/login', { state: { mode: 'signup' } })}
+                onLogin={() => navigate('/login')}
+                onContinueWithoutAccount={() => navigate('/onboarding')}
+              />
             )
           }
         />

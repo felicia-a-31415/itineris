@@ -8,6 +8,7 @@ import { useAuth } from '../lib/auth';
 
 type LocationState = {
   from?: Location;
+  mode?: 'signup' | 'login';
 };
 
 export function Login() {
@@ -17,7 +18,8 @@ export function Login() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSigningUp, setIsSigningUp] = useState(false);
+  const initialMode = (location.state as LocationState | null)?.mode;
+  const [isSigningUp, setIsSigningUp] = useState(initialMode === 'signup');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
