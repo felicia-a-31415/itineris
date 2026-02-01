@@ -116,11 +116,23 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route
           path="/onboarding"
-          element={hasOnboardingData ? <Navigate to="/tableaudebord" replace /> : <Onboarding onComplete={handleOnboardingComplete} />}
+          element={
+            hasOnboardingData || user ? (
+              <Navigate to="/tableaudebord" replace />
+            ) : (
+              <Onboarding onComplete={handleOnboardingComplete} />
+            )
+          }
         />
         <Route
           path="/tableaudebord"
-          element={hasOnboardingData ? <TableauDeBord userName={userData?.name} /> : <Navigate to="/onboarding" replace />}
+          element={
+            hasOnboardingData || user ? (
+              <TableauDeBord userName={userData?.name ?? user?.email ?? undefined} />
+            ) : (
+              <Navigate to="/onboarding" replace />
+            )
+          }
         />
         <Route
           path="/parametres"
