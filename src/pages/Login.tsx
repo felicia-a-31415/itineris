@@ -134,7 +134,7 @@ export function Login() {
 
               <div className="flex justify-end">
                 <button type="button" className="text-sm text-[#A9ACBA] hover:text-[#ECECF3]" disabled={isSubmitting}>
-                  Mot de passe oublie ?
+                  Mot de passe oublié ?
                 </button>
               </div>
 
@@ -154,21 +154,6 @@ export function Login() {
               <div className="relative flex justify-center text-sm">
                 <span className="px-4 bg-[#161924] text-[#A9ACBA]">ou</span>
               </div>
-            </div>
-
-            <div className="text-center">
-              <p className="text-[#A9ACBA] mb-3">
-                {isSigningUp ? 'Déjà un compte ?' : "Vous n'avez pas de compte ?"}
-              </p>
-              <Button
-                type="button"
-                onClick={() => setIsSigningUp((prev) => !prev)}
-                disabled={isSubmitting}
-                variant="outline"
-                className="w-full border-[#4169E1] text-[#4169E1] hover:bg-[#4169E1] hover:text-white py-6 rounded-xl transition-all"
-              >
-                {isSigningUp ? 'Se connecter' : 'Créer un compte'}
-              </Button>
             </div>
           </div>
 
