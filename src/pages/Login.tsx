@@ -146,15 +146,6 @@ export function Login() {
                 {isSubmitting ? 'Connexion...' : isSigningUp ? 'Créer un compte' : 'Se connecter'}
               </Button>
             </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#1F2230]"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-[#161924] text-[#A9ACBA]">ou</span>
-              </div>
-            </div>
           </div>
 
           <p className="text-center text-xs text-[#A9ACBA] mt-6 max-w-sm mx-auto">
