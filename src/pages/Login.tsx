@@ -23,14 +23,12 @@ export function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
 
   const requestedPath = (location.state as LocationState | null)?.from?.pathname ?? null;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
-    setNotice(null);
     setIsSubmitting(true);
 
     const { error: authError } = isSigningUp
@@ -39,12 +37,6 @@ export function Login() {
 
     if (authError) {
       setError(authError.message);
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (isSigningUp) {
-      setNotice('Compte créé. Vérifie ton email si la confirmation est requise.');
       setIsSubmitting(false);
       return;
     }
@@ -58,7 +50,7 @@ export function Login() {
       <Button
         onClick={() => navigate(-1)}
         variant="ghost"
-        className="self-start mb-4 text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#161924]"
+        className="self-start mb-2 text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#161924]"
         disabled={isSubmitting}
       >
         <ArrowLeft className="w-5 h-5 mr-2" />
@@ -130,8 +122,6 @@ export function Login() {
                   {error}
                 </div>
               ) : null}
-              {notice ? <div className="text-sm text-[#A9ACBA]">{notice}</div> : null}
-
               <div className="flex justify-end">
                 <button type="button" className="text-sm text-[#A9ACBA] hover:text-[#ECECF3]" disabled={isSubmitting}>
                   Mot de passe oublié ?
