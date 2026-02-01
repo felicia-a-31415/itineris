@@ -711,7 +711,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         {!user ? (
           <div className="bg-[#161924] border border-[#1F2230] rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3 shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
             <div>
-              <p className="text-sm text-[#A9ACBA]">Mode invité</p>
               <p className="text-base text-[#ECECF3]">
                 Crée un compte pour sauvegarder et synchroniser tes progrès.
               </p>
