@@ -50,11 +50,6 @@ export default function App() {
           setUserData(remoteData);
           setHasOnboardingData(true);
           saveUserData(remoteData);
-        } else if (localData) {
-          await saveUserDataToSupabase(user.id, localData);
-          if (!isMounted) return;
-          setUserData(localData);
-          setHasOnboardingData(true);
         } else {
           setUserData(null);
           setHasOnboardingData(false);

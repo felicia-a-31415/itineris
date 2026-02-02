@@ -41,6 +41,12 @@ export function Login() {
       return;
     }
 
+    if (isSigningUp) {
+      setIsSubmitting(false);
+      navigate('/onboarding', { replace: true });
+      return;
+    }
+
     const redirectPath = requestedPath ?? '/tableaudebord';
     navigate(redirectPath, { replace: true });
   };
