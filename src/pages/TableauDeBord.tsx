@@ -7,7 +7,12 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import alarmSound from '../assets/Christmas-jingle-bells-notification-melody.mp3';
 import { useAuth } from '../lib/auth';
-import { loadDashboardDataFromSupabase, saveDashboardDataToSupabase, type DashboardTask } from '../lib/storage';
+import {
+  clearUserData,
+  loadDashboardDataFromSupabase,
+  saveDashboardDataToSupabase,
+  type DashboardTask,
+} from '../lib/storage';
 
 type Task = DashboardTask;
 
@@ -618,6 +623,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     console.error('Supabase sign out error:', error);
                     return;
                   }
+                  clearUserData();
                   navigate('/');
                 }}
                 variant="ghost"
