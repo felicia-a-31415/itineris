@@ -120,7 +120,7 @@ export default function App() {
             ) : user ? (
               <Navigate to="/onboarding" replace />
             ) : (
-              <Navigate to="/onboarding" replace />
+              <Navigate to="/" replace />
             )
           }
         />
