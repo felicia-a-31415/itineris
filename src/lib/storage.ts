@@ -11,6 +11,24 @@ export type UserData = {
 
 const KEY = 'itineris:user:v1';
 const USER_DATA_TABLE = 'user_data';
+const DASHBOARD_DATA_TABLE = 'dashboard_data';
+
+export type DashboardTask = {
+  id: string;
+  name: string;
+  description: string;
+  completed: boolean;
+  color: string;
+  priority: 1 | 2 | 3;
+  date?: string;
+  time?: string;
+};
+
+export type DashboardData = {
+  tasks: DashboardTask[];
+  studyData: Record<string, number[]>;
+  sessionsByDay: Record<string, number>;
+};
 
 export function loadUserData(): UserData | null {
   try {
@@ -61,5 +79,36 @@ export async function saveUserDataToSupabase(userId: string, data: UserData): Pr
     }
   } catch (error) {
     console.error('Supabase save user data error:', error);
+  }
+}
+
+export async function loadDashboardDataFromSupabase(userId: string): Promise<DashboardData | null> {
+  try {
+    const { data, error } = await supabase
+      .from(DASHBOARD_DATA_TABLE)
+      .select('data')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Supabase load dashboard data error:', error);
+      return null;
+    }
+
+    return (data?.data as DashboardData) ?? null;
+  } catch (error) {
+    console.error('Supabase load dashboard data error:', error);
+    return null;
+  }
+}
+
+export async function saveDashboardDataToSupabase(userId: string, data: DashboardData): Promise<void> {
+  try {
+    const { error } = await supabase.from(DASHBOARD_DATA_TABLE).upsert({ id: userId, data });
+    if (error) {
+      console.error('Supabase save dashboard data error:', error);
+    }
+  } catch (error) {
+    console.error('Supabase save dashboard data error:', error);
   }
 }

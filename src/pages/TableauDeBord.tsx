@@ -7,17 +7,9 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import alarmSound from '../assets/Christmas-jingle-bells-notification-melody.mp3';
 import { useAuth } from '../lib/auth';
+import { loadDashboardDataFromSupabase, saveDashboardDataToSupabase, type DashboardTask } from '../lib/storage';
 
-interface Task {
-  id: string;
-  name: string;
-  description: string;
-  completed: boolean;
-  color: string;
-  priority: 1 | 2 | 3;
-  date?: string;
-  time?: string;
-}
+type Task = DashboardTask;
 
 const TASK_COLORS = ['#6B9AC4', '#4169E1', '#8B8680', '#E16941', '#41E169', '#9B59B6', '#F39C12', '#E91E63'];
 
@@ -89,10 +81,6 @@ interface TableauDeBordScreenProps {
   userName?: string;
 }
 
-const TASK_STORAGE_KEY = 'itineris_tasks';
-const STUDY_MINUTES_KEY = 'itineris_study_minutes';
-const STREAK_STORAGE_KEY = 'itineris_streak';
-const SESSIONS_STORAGE_KEY = 'itineris_sessions_completed';
 const MINIMUM_STREAK_MINUTES = 1;
 
 const TIMER_MODES = {
@@ -101,6 +89,50 @@ const TIMER_MODES = {
   long: { label: 'Longue pause', minutes: 15, color: '#8B5CF6' },
 } as const;
 
+const createDefaultTasks = () => {
+  const initialWeek = getCurrentWeekDates();
+  return [
+    {
+      id: '1',
+      name: 'Réviser les notes de mathématiques',
+      description: 'Chapitres 3-5',
+      completed: false,
+      color: '#6B9AC4',
+      priority: 2,
+      date: formatDate(new Date()),
+    },
+    {
+      id: '2',
+      name: 'Terminer le devoir de chimie',
+      description: 'Exercices page 45-48',
+      completed: false,
+      color: '#4169E1',
+      priority: 3,
+      date: formatDate(initialWeek[2]),
+      time: '09:00',
+    },
+    {
+      id: '3',
+      name: "Réunion d'équipe",
+      description: 'Discuter du projet final',
+      completed: false,
+      color: '#6B9AC4',
+      priority: 1,
+      date: formatDate(initialWeek[3]),
+      time: '14:00',
+    },
+  ];
+};
+
+const createDefaultStudyData = (weekStart: string) => ({
+  [weekStart]: [0, 0, 0, 0, 0, 0, 0],
+});
+
+const createDefaultSessionsByDay = () => {
+  const todayKey = formatDate(new Date());
+  return { [todayKey]: 0 };
+};
+
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
@@ -108,52 +140,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const weekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
   const currentWeekStart = formatDate(getCurrentWeekDates(0)[0]);
 
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const raw = localStorage.getItem(TASK_STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) return parsed;
-        }
-      }
-    } catch (err) {
-      console.error('Impossible de charger les tâches', err);
-    }
-
-    const initialWeek = getCurrentWeekDates();
-    return [
-      {
-        id: '1',
-        name: 'Réviser les notes de mathématiques',
-        description: 'Chapitres 3-5',
-        completed: false,
-        color: '#6B9AC4',
-        priority: 2,
-        date: formatDate(new Date()),
-      },
-      {
-        id: '2',
-        name: 'Terminer le devoir de chimie',
-        description: 'Exercices page 45-48',
-        completed: false,
-        color: '#4169E1',
-        priority: 3,
-        date: formatDate(initialWeek[2]),
-        time: '09:00',
-      },
-      {
-        id: '3',
-        name: "Réunion d'équipe",
-        description: 'Discuter du projet final',
-        completed: false,
-        color: '#6B9AC4',
-        priority: 1,
-        date: formatDate(initialWeek[3]),
-        time: '14:00',
-      },
-    ];
-  });
+  const [tasks, setTasks] = useState<Task[]>(() => createDefaultTasks());
 
   const [timerMinutes, setTimerMinutes] = useState(25);
   const [timeLeft, setTimeLeft] = useState(timerMinutes * 60);
@@ -161,62 +148,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [isRunning, setIsRunning] = useState(false);
   const [isEditingTimer, setIsEditingTimer] = useState(false);
   const [editingTimerValue, setEditingTimerValue] = useState('');
-  const [sessionsByDay, setSessionsByDay] = useState<Record<string, number>>(() => {
-    const todayKey = formatDate(new Date());
-    try {
-      if (typeof window !== 'undefined') {
-        const raw = localStorage.getItem(SESSIONS_STORAGE_KEY);
-        if (raw) {
-          try {
-            const parsed = JSON.parse(raw);
-            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-              const obj: Record<string, any> = parsed;
-              const cleaned: Record<string, number> = {};
-              Object.entries(obj).forEach(([k, v]) => {
-                const num = Number(v);
-                if (!Number.isNaN(num) && num >= 0) cleaned[k] = num;
-              });
-              if (Object.keys(cleaned).length) return cleaned;
-            }
-          } catch {
-            const parsedNumber = Number(raw);
-            if (!Number.isNaN(parsedNumber) && parsedNumber >= 0) {
-              return { [todayKey]: parsedNumber };
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Impossible de charger les sessions terminées', err);
-    }
-    return { [todayKey]: 0 };
-  });
-  const [studyData, setStudyData] = useState<Record<string, number[]>>(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const raw = localStorage.getItem(STUDY_MINUTES_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-            const obj = parsed as Record<string, any>;
-            if ('weekStart' in obj && 'minutes' in obj && typeof obj.weekStart === 'string') {
-              return { [obj.weekStart]: [Number(obj.minutes) || 0, 0, 0, 0, 0, 0, 0] };
-            }
-            const cleaned: Record<string, number[]> = {};
-            Object.entries(obj).forEach(([k, v]) => {
-              if (Array.isArray(v)) {
-                cleaned[k] = v.map((n) => (typeof n === 'number' && !Number.isNaN(n) ? n : 0));
-              }
-            });
-            return cleaned;
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Impossible de charger les minutes étudiées', err);
-    }
-    return { [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] };
-  });
+  const [sessionsByDay, setSessionsByDay] = useState<Record<string, number>>(() => createDefaultSessionsByDay());
+  const [studyData, setStudyData] = useState<Record<string, number[]>>(() =>
+    createDefaultStudyData(currentWeekStart)
+  );
   const [streakDays, setStreakDays] = useState(1);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -234,11 +169,56 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const prevStreakRef = useRef<number | null>(null);
   const hasInitializedStreakRef = useRef(false);
   const hasHydratedStreakRef = useRef(false);
+  const [isDashboardHydrated, setIsDashboardHydrated] = useState(false);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
   const ringColor = TIMER_MODES[timerMode].color;
   const currentWeekKey = currentWeekStart;
   const weekTotal = (studyData[currentWeekKey] || []).reduce((sum, n) => sum + n, 0);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const hydrateDashboardData = async () => {
+      if (!user) {
+        setTasks(createDefaultTasks());
+        setStudyData(createDefaultStudyData(currentWeekStart));
+        setSessionsByDay(createDefaultSessionsByDay());
+        setIsDashboardHydrated(true);
+        return;
+      }
+
+      const remoteData = await loadDashboardDataFromSupabase(user.id);
+      if (!isMounted) return;
+
+      if (remoteData) {
+        setTasks(Array.isArray(remoteData.tasks) ? remoteData.tasks : createDefaultTasks());
+        setStudyData(
+          remoteData.studyData && typeof remoteData.studyData === 'object'
+            ? remoteData.studyData
+            : createDefaultStudyData(currentWeekStart)
+        );
+        setSessionsByDay(
+          remoteData.sessionsByDay && typeof remoteData.sessionsByDay === 'object'
+            ? remoteData.sessionsByDay
+            : createDefaultSessionsByDay()
+        );
+      }
+
+      setIsDashboardHydrated(true);
+    };
+
+    hydrateDashboardData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, currentWeekStart]);
+
+  useEffect(() => {
+    if (!user || !isDashboardHydrated) return;
+    saveDashboardDataToSupabase(user.id, { tasks, studyData, sessionsByDay });
+  }, [user, tasks, studyData, sessionsByDay, isDashboardHydrated]);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -316,51 +296,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     };
   }, [isRunning, safeMinutes, timerMode]);
 
-  // Sauver les tâches à chaque modification
   useEffect(() => {
-    try {
-      localStorage.setItem(TASK_STORAGE_KEY, JSON.stringify(tasks));
-    } catch (err) {
-      console.error('Impossible de sauvegarder les tâches', err);
-    }
-  }, [tasks]);
-
-  // Sauver le temps étudié
-  useEffect(() => {
-    try {
-      localStorage.setItem(STUDY_MINUTES_KEY, JSON.stringify(studyData));
-    } catch (err) {
-      console.error('Impossible de sauvegarder le temps étudié', err);
-    }
-  }, [studyData]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessionsByDay));
-    } catch (err) {
-      console.error('Impossible de sauvegarder les sessions terminées', err);
-    }
-  }, [sessionsByDay]);
-
-  // S'assurer qu'une entrée existe pour la semaine courante
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STUDY_MINUTES_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-          setStudyData({ [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] });
-          return;
-        }
-        if (!parsed[currentWeekStart]) {
-          setStudyData({ ...parsed, [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] });
-        }
-      } else {
-        setStudyData({ [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] });
-      }
-    } catch {
-      setStudyData({ [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] });
-    }
+    setStudyData((prev) => {
+      if (prev[currentWeekStart]) return prev;
+      return { ...prev, [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] };
+    });
   }, [currentWeekStart]);
 
   const getGreeting = () => {
@@ -468,11 +408,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     const updateStreak = () => {
       const nextStreak = computeStreakFromStudyData(studyData);
       setStreakDays(nextStreak);
-      try {
-        localStorage.setItem(STREAK_STORAGE_KEY, JSON.stringify({ streak: nextStreak, last: formatDate(new Date()) }));
-      } catch (err) {
-        console.error('Impossible de sauvegarder le streak', err);
-      }
     };
 
     updateStreak();
