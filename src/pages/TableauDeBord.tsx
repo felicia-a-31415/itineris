@@ -640,7 +640,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <div>
               <p className="text-sm text-[#A9ACBA]">Mode invité</p>
               <p className="text-base text-[#ECECF3]">
-                Crée un compte pour sauvegarder et synchroniser tes progrès.
+                Connecte-toi pour sauvegarder et synchroniser tes progrès.
               </p>
             </div>
             <Button
