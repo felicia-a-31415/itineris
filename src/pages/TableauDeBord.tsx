@@ -140,7 +140,7 @@ const createDefaultSessionsByDay = () => {
 
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
-  const { signOut, user } = useAuth();
+  const { signOut, user, loading } = useAuth();
   const [weekOffset, setWeekOffset] = useState(0);
   const weekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
   const currentWeekStart = formatDate(getCurrentWeekDates(0)[0]);
@@ -185,6 +185,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     let isMounted = true;
 
     const hydrateDashboardData = async () => {
+      if (loading) return;
       if (!user) {
         setTasks(createDefaultTasks());
         setStudyData(createDefaultStudyData(currentWeekStart));
@@ -218,12 +219,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     return () => {
       isMounted = false;
     };
-  }, [user, currentWeekStart]);
+  }, [user, currentWeekStart, loading]);
 
   useEffect(() => {
-    if (!user || !isDashboardHydrated) return;
+    if (loading || !user || !isDashboardHydrated) return;
     saveDashboardDataToSupabase(user.id, { tasks, studyData, sessionsByDay });
-  }, [user, tasks, studyData, sessionsByDay, isDashboardHydrated]);
+  }, [user, tasks, studyData, sessionsByDay, isDashboardHydrated, loading]);
 
   useEffect(() => {
     if (!isRunning) return;
