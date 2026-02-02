@@ -12,6 +12,7 @@ export type UserData = {
 const KEY = 'itineris:user:v1';
 const USER_DATA_TABLE = 'user_data';
 const DASHBOARD_DATA_TABLE = 'dashboard_data';
+const DASHBOARD_CACHE_PREFIX = 'itineris:dashboard:v1';
 
 export type DashboardTask = {
   id: string;
@@ -110,5 +111,24 @@ export async function saveDashboardDataToSupabase(userId: string, data: Dashboar
     }
   } catch (error) {
     console.error('Supabase save dashboard data error:', error);
+  }
+}
+
+export function loadDashboardDataFromLocal(userId?: string): DashboardData | null {
+  const key = `${DASHBOARD_CACHE_PREFIX}:${userId ?? 'guest'}`;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as DashboardData) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveDashboardDataToLocal(userId: string | undefined, data: DashboardData) {
+  const key = `${DASHBOARD_CACHE_PREFIX}:${userId ?? 'guest'}`;
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch {
+    // storage full or disabled — ignore
   }
 }

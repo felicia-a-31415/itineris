@@ -9,7 +9,9 @@ import alarmSound from '../assets/Christmas-jingle-bells-notification-melody.mp3
 import { useAuth } from '../lib/auth';
 import {
   clearUserData,
+  loadDashboardDataFromLocal,
   loadDashboardDataFromSupabase,
+  saveDashboardDataToLocal,
   saveDashboardDataToSupabase,
   type DashboardTask,
 } from '../lib/storage';
@@ -186,6 +188,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
     const hydrateDashboardData = async () => {
       if (loading) return;
+      const cached = loadDashboardDataFromLocal(user?.id);
+      if (cached && isMounted) {
+        if (Array.isArray(cached.tasks)) setTasks(cached.tasks);
+        if (cached.studyData && typeof cached.studyData === 'object') setStudyData(cached.studyData);
+        if (cached.sessionsByDay && typeof cached.sessionsByDay === 'object') setSessionsByDay(cached.sessionsByDay);
+        setIsDashboardHydrated(true);
+      }
       if (!user) {
         setTasks(createDefaultTasks());
         setStudyData(createDefaultStudyData(currentWeekStart));
@@ -209,6 +218,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             ? remoteData.sessionsByDay
             : createDefaultSessionsByDay()
         );
+        saveDashboardDataToLocal(user.id, remoteData);
       }
 
       setIsDashboardHydrated(true);
@@ -223,7 +233,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
   useEffect(() => {
     if (loading || !user || !isDashboardHydrated) return;
-    saveDashboardDataToSupabase(user.id, { tasks, studyData, sessionsByDay });
+    const payload = { tasks, studyData, sessionsByDay };
+    saveDashboardDataToSupabase(user.id, payload);
+    saveDashboardDataToLocal(user.id, payload);
   }, [user, tasks, studyData, sessionsByDay, isDashboardHydrated, loading]);
 
   useEffect(() => {
