@@ -625,15 +625,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               >
                 <LogOut className="w-5 h-5" />
               </Button>
-            ) : (
-              <Button
-                onClick={() => navigate('/login')}
-                variant="ghost"
-                className="text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#1F2230] rounded-xl"
-              >
-                <LogIn className="w-5 h-5" />
-              </Button>
-            )}
+            ) : null}
             <Button
               onClick={() => navigate('/parametres')}
               variant="ghost"
