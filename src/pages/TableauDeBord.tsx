@@ -618,7 +618,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     console.error('Supabase sign out error:', error);
                     return;
                   }
-                  navigate('/login');
+                  navigate('/');
                 }}
                 variant="ghost"
                 className="text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#1F2230] rounded-xl"
