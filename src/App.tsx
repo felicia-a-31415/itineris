@@ -49,6 +49,7 @@ export default function App() {
         if (remoteData) {
           setUserData(remoteData);
           setHasOnboardingData(true);
+          saveUserData(remoteData);
         } else if (localData) {
           await saveUserDataToSupabase(user.id, localData);
           if (!isMounted) return;
@@ -81,9 +82,8 @@ export default function App() {
     setHasOnboardingData(true);
     if (user) {
       await saveUserDataToSupabase(user.id, data);
-    } else {
-      saveUserData(data);
     }
+    saveUserData(data);
     navigate('/tableaudebord');
   };
 
@@ -91,9 +91,8 @@ export default function App() {
     setUserData(data);
     if (user) {
       await saveUserDataToSupabase(user.id, data);
-    } else {
-      saveUserData(data);
     }
+    saveUserData(data);
   };
 
   return (
@@ -128,7 +127,7 @@ export default function App() {
           path="/tableaudebord"
           element={
             hasOnboardingData || user ? (
-              <TableauDeBord userName={userData?.name ?? user?.email ?? undefined} />
+              <TableauDeBord userName={userData?.name} />
             ) : (
               <Navigate to="/onboarding" replace />
             )
