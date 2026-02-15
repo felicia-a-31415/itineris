@@ -886,112 +886,114 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             </div>
           )}
 
-          <div className="mt-6">
-            <div className="grid grid-cols-7 border-b border-[#1F2230]">
-              {weekDates.map((date, index) => (
-                <div
-                  key={index}
-                  className={`p-3 text-center border-r border-[#1F2230] last:border-r-0 ${
-                    isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
-                  }`}
-                >
-                  <div className="text-xs text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
-                  <div
-                    className={`text-lg font-semibold ${
-                      isToday(date) && weekOffset === 0
-                        ? 'text-white bg-[#4169E1] w-10 h-10 rounded-full flex items-center justify-center mx-auto'
-                        : 'text-[#ECECF3]'
-                    }`}
-                  >
-                    {date.getDate()}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-7 min-h-[380px]">
-              {weekDates.map((date, index) => {
-                const dateString = formatDate(date);
-                const tasksForDay = getTasksForDate(dateString);
-
-                return (
+          <div className="mt-6 overflow-x-auto">
+            <div className="min-w-[720px]">
+              <div className="grid grid-cols-7 border-b border-[#1F2230]">
+                {weekDates.map((date, index) => (
                   <div
                     key={index}
-                    className={`border-r border-[#1F2230] last:border-r-0 p-3 ${
+                    className={`p-3 text-center border-r border-[#1F2230] last:border-r-0 ${
                       isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                     }`}
                   >
-                    <div className="space-y-3">
-                      {tasksForDay.map((task) => (
-                        <div
-                          key={task.id}
-                          className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)] cursor-pointer hover:shadow-md transition"
-                          style={{
-                            borderLeft: `4px solid ${task.color}`,
-                          }}
-                          onClick={() => {
-                            setEditingTaskId(task.id);
-                            setNewTaskName(task.name || '');
-                            setNewTaskDescription(task.description || '');
-                            setSelectedColor(task.color || TASK_COLORS[0]);
-                            setSelectedPriority(task.priority || 1);
-                            setSelectedDate(task.date || formatDate(new Date()));
-                            setSelectedTime(task.time || '');
-                            setShowAddDialog(true);
-                          }}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="flex flex-col items-center gap-2 mt-0.5">
-                              <Checkbox
-                                checked={task.completed}
-                                onClick={(e) => e.stopPropagation()}
-                                onCheckedChange={() => toggleTask(task.id)}
-                                className="rounded-sm h-4 w-4"
-                              />
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setTasks((prev) => prev.filter((t) => t.id !== task.id));
-                                }}
-                                className="text-[#A9ACBA] hover:text-red-500 p-1 text-xs"
-                                aria-label="Supprimer la tâche"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-1 mb-1">
-                                {task.time && <span className="text-[11px] text-[#A9ACBA]">{task.time}</span>}
-                                <span
-                                  className="text-[10px] px-2 py-0.5 rounded-full"
-                                  style={{ backgroundColor: `${task.color}20`, color: '#ECECF3' }}
-                                >
-                                  {getPriorityLabel(task.priority)}
-                                </span>
-                              </div>
-
-                              <div
-                                className={`text-[#ECECF3] text-sm break-words ${
-                                  task.completed ? 'line-through opacity-50' : ''
-                                }`}
-                              >
-                                {task.name}
-                              </div>
-
-                              {task.description && (
-                                <div className="text-[11px] text-[#A9ACBA] mt-1 break-words">
-                                  {task.description}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="text-xs text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
+                    <div
+                      className={`text-lg font-semibold ${
+                        isToday(date) && weekOffset === 0
+                          ? 'text-white bg-[#4169E1] w-10 h-10 rounded-full flex items-center justify-center mx-auto'
+                          : 'text-[#ECECF3]'
+                      }`}
+                    >
+                      {date.getDate()}
                     </div>
                   </div>
-                );
-              })}
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 min-h-[380px]">
+                {weekDates.map((date, index) => {
+                  const dateString = formatDate(date);
+                  const tasksForDay = getTasksForDate(dateString);
+
+                  return (
+                    <div
+                      key={index}
+                      className={`border-r border-[#1F2230] last:border-r-0 p-3 ${
+                        isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
+                      }`}
+                    >
+                      <div className="space-y-3">
+                        {tasksForDay.map((task) => (
+                          <div
+                            key={task.id}
+                            className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)] cursor-pointer hover:shadow-md transition"
+                            style={{
+                              borderLeft: `4px solid ${task.color}`,
+                            }}
+                            onClick={() => {
+                              setEditingTaskId(task.id);
+                              setNewTaskName(task.name || '');
+                              setNewTaskDescription(task.description || '');
+                              setSelectedColor(task.color || TASK_COLORS[0]);
+                              setSelectedPriority(task.priority || 1);
+                              setSelectedDate(task.date || formatDate(new Date()));
+                              setSelectedTime(task.time || '');
+                              setShowAddDialog(true);
+                            }}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex flex-col items-center gap-2 mt-0.5">
+                                <Checkbox
+                                  checked={task.completed}
+                                  onClick={(e) => e.stopPropagation()}
+                                  onCheckedChange={() => toggleTask(task.id)}
+                                  className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTasks((prev) => prev.filter((t) => t.id !== task.id));
+                                  }}
+                                  className="text-[#A9ACBA] hover:text-red-500 p-1 text-xs"
+                                  aria-label="Supprimer la tâche"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1 mb-1">
+                                  {task.time && <span className="text-[11px] text-[#A9ACBA]">{task.time}</span>}
+                                  <span
+                                    className="text-[10px] px-2 py-0.5 rounded-full"
+                                    style={{ backgroundColor: `${task.color}20`, color: '#ECECF3' }}
+                                  >
+                                    {getPriorityLabel(task.priority)}
+                                  </span>
+                                </div>
+
+                                <div
+                                  className={`text-[#ECECF3] text-sm break-words ${
+                                    task.completed ? 'line-through opacity-50' : ''
+                                  }`}
+                                >
+                                  {task.name}
+                                </div>
+
+                                {task.description && (
+                                  <div className="text-[11px] text-[#A9ACBA] mt-1 break-words">
+                                    {task.description}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </section>
@@ -1003,43 +1005,47 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <div className="flex flex-wrap items-center justify-between gap-3"></div>
           </div>
 
-          <div className="mt-2 grid grid-cols-7 gap-3 items-end">
-            {weekDates.map((date, index) => {
-              const minutes = Math.round(activeWeekMinutes[index] ?? 0);
-              const showBar = minutes > 0;
-              const barHeight = Math.max(8, Math.min(220, (minutes / (maxWeekMinutes || 1)) * 220));
-              return (
-                <div key={index} className="flex flex-col items-center gap-2">
-                  <div className="w-full bg-[#1B2030] rounded-2xl h-56 flex items-end">
-                    {showBar && (
-                      <div
-                        className="w-full bg-[#4169E1] rounded-2xl transition-all"
-                        style={{ height: `${barHeight}px` }}
-                      />
-                    )}
+          <div className="mt-2 overflow-x-auto">
+            <div className="min-w-[720px] grid grid-cols-7 gap-3 items-end">
+              {weekDates.map((date, index) => {
+                const minutes = Math.round(activeWeekMinutes[index] ?? 0);
+                const showBar = minutes > 0;
+                const barHeight = Math.max(8, Math.min(220, (minutes / (maxWeekMinutes || 1)) * 220));
+                return (
+                  <div key={index} className="flex flex-col items-center gap-2">
+                    <div className="w-full bg-[#1B2030] rounded-2xl h-56 flex items-end">
+                      {showBar && (
+                        <div
+                          className="w-full bg-[#4169E1] rounded-2xl transition-all"
+                          style={{ height: `${barHeight}px` }}
+                        />
+                      )}
+                    </div>
+                    <div className="text-xs text-[#ECECF3] font-medium">{minutes} min</div>
+                    <div className="text-xs text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
                   </div>
-                  <div className="text-xs text-[#ECECF3] font-medium">{minutes} min</div>
-                  <div className="text-xs text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="space-y-1">
-              <p className="text-sm text-[#A9ACBA]">Total de cette semaine</p>
-              <p className="text-2xl text-[#ECECF3]">{activeWeekTotalMinutes} min</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-[#A9ACBA]">Moyenne quotidienne</p>
-              <p className="text-2xl text-[#ECECF3]">{averageDailyMinutes} min</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-[#A9ACBA]">Écart depuis la semaine passée</p>
-              <p className="text-2xl text-[#ECECF3]">
-                {weekDeltaMinutes >= 0 ? '+' : '-'}
-                {Math.abs(weekDeltaMinutes)} min
-              </p>
+          <div className="mt-6 overflow-x-auto">
+            <div className="min-w-[560px] grid gap-4 md:grid-cols-3">
+              <div className="space-y-1">
+                <p className="text-sm text-[#A9ACBA]">Total de cette semaine</p>
+                <p className="text-2xl text-[#ECECF3]">{activeWeekTotalMinutes} min</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-[#A9ACBA]">Moyenne quotidienne</p>
+                <p className="text-2xl text-[#ECECF3]">{averageDailyMinutes} min</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-[#A9ACBA]">Écart depuis la semaine passée</p>
+                <p className="text-2xl text-[#ECECF3]">
+                  {weekDeltaMinutes >= 0 ? '+' : '-'}
+                  {Math.abs(weekDeltaMinutes)} min
+                </p>
+              </div>
             </div>
           </div>
         </section>
