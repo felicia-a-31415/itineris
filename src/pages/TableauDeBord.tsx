@@ -428,6 +428,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setEditingTaskId(null);
   };
 
+  const openEditTask = (task: Task) => {
+    setEditingTaskId(task.id);
+    setNewTaskName(task.name || '');
+    setNewTaskDescription(task.description || '');
+    setSelectedColor(task.color || TASK_COLORS[0]);
+    setSelectedDate(task.date || formatDate(new Date()));
+    setSelectedTime(task.time || '');
+    setShowAddDialog(true);
+  };
+
   const saveTask = () => {
     if (!newTaskName.trim()) return;
 
@@ -829,10 +839,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       className={`flex items-start gap-3 py-2 ${
                         task.completed ? 'opacity-60' : ''
                       }`}
+                      onClick={() => openEditTask(task)}
                     >
                       <div className="mt-0.5">
                         <Checkbox
                           checked={task.completed}
+                          onClick={(e) => e.stopPropagation()}
                           onCheckedChange={() => toggleTask(task.id)}
                           className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
                         />
@@ -971,15 +983,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             style={{
                               borderLeft: `4px solid ${task.color}`,
                             }}
-                            onClick={() => {
-                              setEditingTaskId(task.id);
-                              setNewTaskName(task.name || '');
-                              setNewTaskDescription(task.description || '');
-                              setSelectedColor(task.color || TASK_COLORS[0]);
-                              setSelectedDate(task.date || formatDate(new Date()));
-                              setSelectedTime(task.time || '');
-                              setShowAddDialog(true);
-                            }}
+                            onClick={() => openEditTask(task)}
                           >
                             <div className="flex items-start gap-3">
                               <div className="flex flex-col items-center gap-2 mt-0.5">
@@ -989,17 +993,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   onCheckedChange={() => toggleTask(task.id)}
                                   className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
                                 />
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setTasks((prev) => prev.filter((t) => t.id !== task.id));
-                                  }}
-                                  className="text-[#A9ACBA] hover:text-red-500 p-1 text-xs"
-                                  aria-label="Supprimer la tâche"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
                               </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1 mb-1">
@@ -1152,6 +1145,19 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               </div>
 
               <div className="mt-6 flex justify-end gap-3">
+                {editingTaskId && (
+                  <Button
+                    variant="outline"
+                    className="rounded-2xl border-red-500 text-red-400 hover:text-red-200 hover:border-red-400"
+                    onClick={() => {
+                      setTasks((prev) => prev.filter((task) => task.id !== editingTaskId));
+                      setShowAddDialog(false);
+                      resetTaskForm();
+                    }}
+                  >
+                    Supprimer la tâche
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   className="rounded-2xl border-[#1F2230]"
