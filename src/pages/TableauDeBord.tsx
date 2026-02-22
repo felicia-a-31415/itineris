@@ -887,7 +887,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           )}
 
           <div className="mt-6 overflow-x-auto">
-            <div className="min-w-[720px]">
+            <div className="w-[980px] min-w-[980px] shrink-0">
               <div className="grid grid-cols-7 border-b border-[#1F2230]">
                 {weekDates.map((date, index) => (
                   <div
@@ -896,9 +896,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
                     }`}
                   >
-                    <div className="text-xs text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
+                    <div className="text-[10px] text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
                     <div
-                      className={`text-lg font-semibold ${
+                      className={`text-base font-semibold ${
                         isToday(date) && weekOffset === 0
                           ? 'text-white bg-[#4169E1] w-10 h-10 rounded-full flex items-center justify-center mx-auto'
                           : 'text-[#ECECF3]'
@@ -961,32 +961,32 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   <X className="w-3 h-3" />
                                 </button>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1 mb-1">
-                                  {task.time && <span className="text-[11px] text-[#A9ACBA]">{task.time}</span>}
-                                  <span
-                                    className="text-[10px] px-2 py-0.5 rounded-full"
-                                    style={{ backgroundColor: `${task.color}20`, color: '#ECECF3' }}
-                                  >
-                                    {getPriorityLabel(task.priority)}
-                                  </span>
-                                </div>
-
-                                <div
-                                  className={`text-[#ECECF3] text-sm break-words ${
-                                    task.completed ? 'line-through opacity-50' : ''
-                                  }`}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1 mb-1">
+                                {task.time && <span className="text-[10px] text-[#A9ACBA]">{task.time}</span>}
+                                <span
+                                  className="text-[9px] px-2 py-0.5 rounded-full"
+                                  style={{ backgroundColor: `${task.color}20`, color: '#ECECF3' }}
                                 >
-                                  {task.name}
-                                </div>
-
-                                {task.description && (
-                                  <div className="text-[11px] text-[#A9ACBA] mt-1 break-words">
-                                    {task.description}
-                                  </div>
-                                )}
+                                  {getPriorityLabel(task.priority)}
+                                </span>
                               </div>
+
+                              <div
+                                className={`text-[#ECECF3] text-xs break-words ${
+                                  task.completed ? 'line-through opacity-50' : ''
+                                }`}
+                              >
+                                {task.name}
+                              </div>
+
+                              {task.description && (
+                                <div className="text-[10px] text-[#A9ACBA] mt-1 break-words">
+                                  {task.description}
+                                </div>
+                              )}
                             </div>
+                          </div>
                           </div>
                         ))}
                       </div>
