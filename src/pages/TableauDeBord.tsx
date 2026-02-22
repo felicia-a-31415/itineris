@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Flame, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
+import { Check, Flame, Info, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
@@ -159,6 +159,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
   const [selectedTime, setSelectedTime] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [infoTaskId, setInfoTaskId] = useState<string | null>(null);
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
@@ -429,6 +430,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   };
 
   const openEditTask = (task: Task) => {
+    setInfoTaskId(null);
     setEditingTaskId(task.id);
     setNewTaskName(task.name || '');
     setNewTaskDescription(task.description || '');
@@ -436,6 +438,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setSelectedDate(task.date || formatDate(new Date()));
     setSelectedTime(task.time || '');
     setShowAddDialog(true);
+  };
+
+  const toggleInfoTask = (id: string) => {
+    setInfoTaskId((prev) => (prev === id ? null : id));
   };
 
   const saveTask = () => {
@@ -827,7 +833,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             {agendaTasks.length === 0 ? (
               <div className="mt-2 text-[#ECECF3] text-lg">Aucune tâche pour l’instant</div>
             ) : (
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 divide-y divide-[#25293A]">
                 {agendaTasks.map((task) => {
                   const taskDate = task.date ? new Date(task.date) : null;
                   const displayDate = taskDate
@@ -836,10 +842,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   return (
                     <div
                       key={task.id}
-                      className={`flex items-start gap-3 py-2 ${
+                      className={`group relative flex items-start gap-3 py-3 ${
                         task.completed ? 'opacity-60' : ''
                       }`}
-                      onClick={() => openEditTask(task)}
                     >
                       <div className="mt-0.5">
                         <Checkbox
@@ -851,22 +856,23 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <div
-                            className={`text-xs font-medium text-[#ECECF3] break-words ${
-                              task.completed ? 'line-through' : ''
-                            }`}
-                          >
-                            {task.name || 'Tâche sans titre'}
-                          </div>
-                          <div className="text-[10px] text-[#A9ACBA] uppercase text-right shrink-0">
-                            {displayDate} {task.time ? `· ${task.time}` : ''}
-                          </div>
+                        <div
+                          className={`text-sm font-medium text-[#ECECF3] break-words ${
+                            task.completed ? 'line-through' : ''
+                          }`}
+                        >
+                          {task.name || 'Tâche sans titre'}
                         </div>
-
+                        <div
+                          className={`mt-0.5 text-xs text-[#A9ACBA] ${
+                            task.completed ? 'line-through' : ''
+                          }`}
+                        >
+                          {displayDate} {task.time ? `· ${task.time}` : ''}
+                        </div>
                         {task.description && (
                           <div
-                            className={`text-[10px] text-[#A9ACBA] mt-1 break-words ${
+                            className={`mt-1 text-[10px] text-[#7F869A] break-words ${
                               task.completed ? 'line-through' : ''
                             }`}
                           >
@@ -874,6 +880,55 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           </div>
                         )}
                       </div>
+
+                      <div className="ml-auto flex items-start">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleInfoTask(task.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition text-[#A9ACBA] hover:text-[#ECECF3] rounded-full border border-[#3B4154] h-6 w-6 flex items-center justify-center"
+                          aria-label="Détails de la tâche"
+                        >
+                          <Info className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      {infoTaskId === task.id && (
+                        <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#2B3550] bg-[#161924] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-4 z-20">
+                          <div className="text-base font-semibold text-[#ECECF3]">
+                            {task.name || 'Tâche sans titre'}
+                          </div>
+                          {task.description && (
+                            <div className="mt-1 text-sm text-[#A9ACBA]">{task.description}</div>
+                          )}
+                          <div className="mt-3 text-xs text-[#A9ACBA] uppercase">
+                            {displayDate} {task.time ? `· ${task.time}` : ''}
+                          </div>
+                          <div className="mt-4 flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              className="rounded-2xl border-[#1F2230]"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setInfoTaskId(null);
+                              }}
+                            >
+                              Fermer
+                            </Button>
+                            <Button
+                              className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEditTask(task);
+                              }}
+                            >
+                              Modifier
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
