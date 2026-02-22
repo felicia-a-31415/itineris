@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
+import { Check, Flame, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
@@ -844,32 +844,49 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   return (
                     <div
                       key={task.id}
-                      className="rounded-2xl p-3 text-sm bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
-                      style={{ borderLeft: `4px solid ${task.color}` }}
+                      className={`rounded-2xl p-3 bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)] ${
+                        task.completed ? 'opacity-60' : ''
+                      }`}
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="text-[#ECECF3] font-semibold truncate">
-                          {task.name || 'Tâche sans titre'}
-                        </div>
-                        <div className="text-[10px] text-[#A9ACBA] uppercase">
-                          {displayDate} {task.time ? `· ${task.time}` : ''}
-                        </div>
-                      </div>
-                      {task.description && (
-                        <div className="text-xs text-[#A9ACBA] mt-1 break-words">{task.description}</div>
-                      )}
-                      <div className="mt-2 flex items-center gap-2">
-                        <span
-                          className="text-[9px] px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: `${task.color}20`, color: '#ECECF3' }}
+                      <div className="flex items-start gap-3">
+                        <button
+                          type="button"
+                          role="checkbox"
+                          aria-checked={task.completed}
+                          onClick={() => toggleTask(task.id)}
+                          className="mt-0.5 h-5 w-5 rounded-full border border-[#7C8DB5] flex items-center justify-center transition hover:shadow-[0_0_0_3px_rgba(65,105,225,0.2)]"
+                          style={{
+                            borderColor: task.completed ? '#A5C4FF' : task.color,
+                            backgroundColor: task.completed ? '#4169E1' : 'transparent',
+                          }}
                         >
-                          {getPriorityLabel(task.priority)}
-                        </span>
-                        {task.completed ? (
-                          <span className="text-[10px] text-[#A9ACBA]">Terminée</span>
-                        ) : (
-                          <span className="text-[10px] text-[#A9ACBA]">À faire</span>
-                        )}
+                          {task.completed && <Check className="w-3 h-3 text-white" />}
+                        </button>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div
+                              className={`text-xs font-medium text-[#ECECF3] break-words ${
+                                task.completed ? 'line-through' : ''
+                              }`}
+                            >
+                              {task.name || 'Tâche sans titre'}
+                            </div>
+                            <div className="text-[10px] text-[#A9ACBA] uppercase text-right shrink-0">
+                              {displayDate} {task.time ? `· ${task.time}` : ''}
+                            </div>
+                          </div>
+
+                          {task.description && (
+                            <div
+                              className={`text-[10px] text-[#A9ACBA] mt-1 break-words ${
+                                task.completed ? 'line-through' : ''
+                              }`}
+                            >
+                              {task.description}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
