@@ -4,6 +4,7 @@ import { Flame, Info, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Spa
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
+import { Switch } from '../ui/switch';
 import alarmSound from '../assets/Christmas-jingle-bells-notification-melody.mp3';
 import { useAuth } from '../lib/auth';
 import {
@@ -905,8 +906,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       </div>
 
                       {infoTaskId === task.id && (
-                        <div className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-4 z-20">
-                          <div className="flex items-start justify-between gap-3">
+                        <div className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20">
+                          <div className="flex items-center justify-between gap-3">
                             <div className="min-w-0">
                               <div className="text-base font-semibold text-[#ECECF3] break-words">
                                 {task.name || 'Tâche sans titre'}
@@ -918,37 +919,38 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                 e.stopPropagation();
                                 setInfoTaskId(null);
                               }}
-                              className="text-xs text-[#A9ACBA] hover:text-[#ECECF3]"
+                              className="text-[#A9ACBA] hover:text-[#ECECF3] h-8 w-8 flex items-center justify-center rounded-full border border-[#2B3550]"
+                              aria-label="Fermer"
                             >
-                              Fermer
+                              ×
                             </button>
                           </div>
 
-                          <div className="mt-4 space-y-3">
-                            <div className="rounded-2xl border border-[#2B3550] bg-[#161924] px-3 py-2">
+                          <div className="mt-3 space-y-3">
+                            <div className="rounded-2xl border border-[#2B3550] bg-[#161924] px-3 py-2 flex flex-col gap-1">
                               <label className="text-[10px] uppercase text-[#7F869A]">URL</label>
                               <input
                                 value={task.url ?? ''}
                                 onChange={(e) => updateTask(task.id, { url: e.target.value })}
                                 placeholder="https://"
-                                className="mt-1 w-full bg-transparent text-sm text-[#ECECF3] outline-none"
+                                className="w-full bg-transparent text-sm text-[#ECECF3] outline-none"
                               />
                             </div>
 
                             <div className="rounded-2xl border border-[#2B3550] bg-[#161924]">
-                              <div className="flex items-center justify-between px-3 py-2 border-b border-[#2B3550]">
+                              <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
                                 <div>
                                   <div className="text-sm text-[#ECECF3]">Date</div>
-                              <div className="text-xs text-[#7F869A]">Définir une date</div>
-                            </div>
-                            <input
-                              type="date"
+                                  <div className="text-xs text-[#7F869A]">Définir une date</div>
+                                </div>
+                                <input
+                                  type="date"
                                   value={task.date ?? ''}
                                   onChange={(e) => updateTask(task.id, { date: e.target.value })}
-                                  className="bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 py-1"
+                                  className="h-8 w-36 bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2"
                                 />
                               </div>
-                              <div className="flex items-center justify-between px-3 py-2 border-b border-[#2B3550]">
+                              <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
                                 <div>
                                   <div className="text-sm text-[#ECECF3]">Heure</div>
                                   <div className="text-xs text-[#7F869A]">Optionnel</div>
@@ -957,27 +959,18 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   type="time"
                                   value={task.time ?? ''}
                                   onChange={(e) => updateTask(task.id, { time: e.target.value })}
-                                  className="bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 py-1"
+                                  className="h-8 w-36 bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2"
                                 />
                               </div>
-                              <div className="flex items-center justify-between px-3 py-2">
+                              <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
                                 <div>
-                              <div className="text-sm text-[#ECECF3]">Urgent</div>
-                              <div className="text-xs text-[#7F869A]">Met le titre en rouge</div>
-                            </div>
-                                <button
-                                  type="button"
-                                  onClick={() => updateTask(task.id, { urgent: !task.urgent })}
-                                  className={`h-6 w-12 rounded-full border border-[#2B3550] transition ${
-                                    task.urgent ? 'bg-[#F43F5E]' : 'bg-[#101524]'
-                                  }`}
-                                >
-                                  <span
-                                    className={`block h-5 w-5 rounded-full bg-white transition ${
-                                      task.urgent ? 'translate-x-6' : 'translate-x-1'
-                                    }`}
-                                  />
-                                </button>
+                                  <div className="text-sm text-[#ECECF3]">Urgent</div>
+                                  <div className="text-xs text-[#7F869A]">Met le titre en rouge</div>
+                                </div>
+                                <Switch
+                                  checked={!!task.urgent}
+                                  onCheckedChange={(checked) => updateTask(task.id, { urgent: checked })}
+                                />
                               </div>
                             </div>
 
