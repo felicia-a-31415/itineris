@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Flame, Info, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
+import { Flame, Info, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
@@ -99,6 +99,8 @@ const createDefaultTasks = () => {
       description: 'Chapitres 3-5',
       completed: false,
       color: '#6B9AC4',
+      urgent: false,
+      url: '',
       date: formatDate(new Date()),
     },
     {
@@ -107,6 +109,8 @@ const createDefaultTasks = () => {
       description: 'Exercices page 45-48',
       completed: false,
       color: '#4169E1',
+      urgent: false,
+      url: '',
       date: formatDate(initialWeek[2]),
       time: '09:00',
     },
@@ -116,6 +120,8 @@ const createDefaultTasks = () => {
       description: 'Discuter du projet final',
       completed: false,
       color: '#6B9AC4',
+      urgent: false,
+      url: '',
       date: formatDate(initialWeek[3]),
       time: '14:00',
     },
@@ -158,7 +164,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0]);
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
   const [selectedTime, setSelectedTime] = useState('');
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [infoTaskId, setInfoTaskId] = useState<string | null>(null);
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -426,54 +431,31 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setSelectedColor(TASK_COLORS[0]);
     setSelectedDate(formatDate(new Date()));
     setSelectedTime('');
-    setEditingTaskId(null);
-  };
-
-  const openEditTask = (task: Task) => {
-    setInfoTaskId(null);
-    setEditingTaskId(task.id);
-    setNewTaskName(task.name || '');
-    setNewTaskDescription(task.description || '');
-    setSelectedColor(task.color || TASK_COLORS[0]);
-    setSelectedDate(task.date || formatDate(new Date()));
-    setSelectedTime(task.time || '');
-    setShowAddDialog(true);
   };
 
   const toggleInfoTask = (id: string) => {
     setInfoTaskId((prev) => (prev === id ? null : id));
   };
 
+  const updateTask = (id: string, updates: Partial<Task>) => {
+    setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, ...updates } : task)));
+  };
+
   const saveTask = () => {
     if (!newTaskName.trim()) return;
 
-    if (editingTaskId) {
-      setTasks((prev) =>
-        prev.map((task) =>
-          task.id === editingTaskId
-            ? {
-                ...task,
-                name: newTaskName.trim(),
-                description: newTaskDescription.trim(),
-                color: selectedColor,
-                date: selectedDate || undefined,
-                time: selectedTime || undefined,
-              }
-            : task
-        )
-      );
-    } else {
-      const newTask: Task = {
-        id: Date.now().toString(),
-        name: newTaskName.trim(),
-        description: newTaskDescription.trim(),
-        completed: false,
-        color: selectedColor,
-        date: selectedDate || undefined,
-        time: selectedTime || undefined,
-      };
-      setTasks((prev) => [...prev, newTask]);
-    }
+    const newTask: Task = {
+      id: Date.now().toString(),
+      name: newTaskName.trim(),
+      description: newTaskDescription.trim(),
+      completed: false,
+      color: selectedColor,
+      urgent: false,
+      url: '',
+      date: selectedDate || undefined,
+      time: selectedTime || undefined,
+    };
+    setTasks((prev) => [...prev, newTask]);
 
     setShowAddDialog(false);
     resetTaskForm();
@@ -499,6 +481,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         description: `IA: extrait depuis ${file.name}`,
         completed: false,
         color: '#F39C12',
+        urgent: false,
+        url: '',
         date: formatDate(weekDates[2]),
         time: '12:00',
       },
@@ -857,9 +841,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
                       <div className="min-w-0 flex-1">
                         <div
-                          className={`text-sm font-medium text-[#ECECF3] break-words ${
+                          className={`text-sm font-medium break-words ${
                             task.completed ? 'line-through' : ''
-                          }`}
+                          } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
                         >
                           {task.name || 'Tâche sans titre'}
                         </div>
@@ -896,36 +880,115 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       </div>
 
                       {infoTaskId === task.id && (
-                        <div className="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-[#2B3550] bg-[#161924] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-4 z-20">
-                          <div className="text-base font-semibold text-[#ECECF3]">
-                            {task.name || 'Tâche sans titre'}
-                          </div>
-                          {task.description && (
-                            <div className="mt-1 text-sm text-[#A9ACBA]">{task.description}</div>
-                          )}
-                          <div className="mt-3 text-xs text-[#A9ACBA] uppercase">
-                            {displayDate} {task.time ? `· ${task.time}` : ''}
-                          </div>
-                          <div className="mt-4 flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              className="rounded-2xl border-[#1F2230]"
+                        <div className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-4 z-20">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="text-base font-semibold text-[#ECECF3] break-words">
+                                {task.name || 'Tâche sans titre'}
+                              </div>
+                              {task.description && (
+                                <div className="mt-1 text-sm text-[#A9ACBA] break-words">{task.description}</div>
+                              )}
+                            </div>
+                            <button
+                              type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setInfoTaskId(null);
                               }}
+                              className="text-xs text-[#A9ACBA] hover:text-[#ECECF3]"
                             >
                               Fermer
-                            </Button>
-                            <Button
-                              className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openEditTask(task);
-                              }}
-                            >
-                              Modifier
-                            </Button>
+                            </button>
+                          </div>
+
+                          <div className="mt-4 space-y-3">
+                            <div className="rounded-2xl border border-[#2B3550] bg-[#161924] px-3 py-2">
+                              <label className="text-[10px] uppercase text-[#7F869A]">URL</label>
+                              <input
+                                value={task.url ?? ''}
+                                onChange={(e) => updateTask(task.id, { url: e.target.value })}
+                                placeholder="https://"
+                                className="mt-1 w-full bg-transparent text-sm text-[#ECECF3] outline-none"
+                              />
+                            </div>
+
+                            <div className="rounded-2xl border border-[#2B3550] bg-[#161924]">
+                              <div className="flex items-center justify-between px-3 py-2 border-b border-[#2B3550]">
+                                <div>
+                                  <div className="text-sm text-[#ECECF3]">Date</div>
+                                  <div className="text-xs text-[#7F869A]">Définir une date</div>
+                                </div>
+                                <input
+                                  type="date"
+                                  value={task.date ?? ''}
+                                  onChange={(e) => updateTask(task.id, { date: e.target.value })}
+                                  className="bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 py-1"
+                                />
+                              </div>
+                              <div className="flex items-center justify-between px-3 py-2 border-b border-[#2B3550]">
+                                <div>
+                                  <div className="text-sm text-[#ECECF3]">Heure</div>
+                                  <div className="text-xs text-[#7F869A]">Optionnel</div>
+                                </div>
+                                <input
+                                  type="time"
+                                  value={task.time ?? ''}
+                                  onChange={(e) => updateTask(task.id, { time: e.target.value })}
+                                  className="bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 py-1"
+                                />
+                              </div>
+                              <div className="flex items-center justify-between px-3 py-2">
+                                <div>
+                                  <div className="text-sm text-[#ECECF3]">Urgent</div>
+                                  <div className="text-xs text-[#7F869A]">Met le titre en rouge</div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => updateTask(task.id, { urgent: !task.urgent })}
+                                  className={`h-6 w-12 rounded-full border border-[#2B3550] transition ${
+                                    task.urgent ? 'bg-[#F43F5E]' : 'bg-[#101524]'
+                                  }`}
+                                >
+                                  <span
+                                    className={`block h-5 w-5 rounded-full bg-white transition ${
+                                      task.urgent ? 'translate-x-6' : 'translate-x-1'
+                                    }`}
+                                  />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="rounded-2xl border border-[#2B3550] bg-[#161924] px-3 py-2">
+                              <label className="text-[10px] uppercase text-[#7F869A]">Couleur</label>
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {TASK_COLORS.map((color) => (
+                                  <button
+                                    key={color}
+                                    type="button"
+                                    onClick={() => updateTask(task.id, { color })}
+                                    className={`h-6 w-6 rounded-full border ${
+                                      task.color === color ? 'border-white' : 'border-transparent'
+                                    }`}
+                                    style={{ backgroundColor: color }}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="flex justify-end">
+                              <Button
+                                variant="outline"
+                                className="rounded-2xl border-red-500 text-red-400 hover:text-red-200 hover:border-red-400"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setTasks((prev) => prev.filter((t) => t.id !== task.id));
+                                  setInfoTaskId(null);
+                                }}
+                              >
+                                Supprimer la tâche
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -1034,11 +1097,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         {tasksForDay.map((task) => (
                           <div
                             key={task.id}
-                            className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)] cursor-pointer hover:shadow-md transition"
+                            className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
                             style={{
                               borderLeft: `4px solid ${task.color}`,
                             }}
-                            onClick={() => openEditTask(task)}
                           >
                             <div className="flex items-start gap-3">
                               <div className="flex flex-col items-center gap-2 mt-0.5">
@@ -1055,9 +1117,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               </div>
 
                               <div
-                                className={`text-[#ECECF3] text-xs break-words ${
+                                className={`text-xs break-words ${
                                   task.completed ? 'line-through opacity-50' : ''
-                                }`}
+                                } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
                               >
                                 {task.name}
                               </div>
@@ -1136,9 +1198,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         {showAddDialog && (
           <div className="fixed inset-0 z-50 flex min-h-screen w-screen items-center justify-center bg-black/40 px-3 py-4 sm:px-4 sm:py-6">
             <div className="bg-[#161924] border border-[#1F2230] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] rounded-3xl max-w-3xl w-full p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
-              <h2 className="text-lg font-semibold text-[#ECECF3] mb-4">
-                {editingTaskId ? 'Modifier une tâche' : 'Créer une tâche'}
-              </h2>
+              <h2 className="text-lg font-semibold text-[#ECECF3] mb-4">Créer une tâche</h2>
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-3 md:col-span-2">
@@ -1200,19 +1260,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               </div>
 
               <div className="mt-6 flex justify-end gap-3">
-                {editingTaskId && (
-                  <Button
-                    variant="outline"
-                    className="rounded-2xl border-red-500 text-red-400 hover:text-red-200 hover:border-red-400"
-                    onClick={() => {
-                      setTasks((prev) => prev.filter((task) => task.id !== editingTaskId));
-                      setShowAddDialog(false);
-                      resetTaskForm();
-                    }}
-                  >
-                    Supprimer la tâche
-                  </Button>
-                )}
                 <Button
                   variant="outline"
                   className="rounded-2xl border-[#1F2230]"
