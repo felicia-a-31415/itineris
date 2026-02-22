@@ -160,6 +160,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [infoTaskId, setInfoTaskId] = useState<string | null>(null);
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
+  const [showCompletedTasks, setShowCompletedTasks] = useState(true);
   const infoPopoverRef = useRef<HTMLDivElement | null>(null);
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -552,6 +553,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const streakSegments = 7;
   const streakFilledSegments = Math.min(streakDays, streakSegments);
   const taskProgressRatio = totalTasks > 0 ? completedTasks / totalTasks : 0;
+  const completedTasksCount = completedTasks;
+  const visibleTasks = showCompletedTasks ? agendaTasks : agendaTasks.filter((task) => !task.completed);
   const streakColor = streakDays > 0 ? '#F97316' : '#6B7280';
   const agendaTasks = useMemo(() => {
     return [...tasks].sort((a, b) => {
@@ -848,8 +851,30 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             {agendaTasks.length === 0 ? (
               <div className="mt-2 text-[#ECECF3] text-lg">Aucune tâche pour l’instant</div>
             ) : (
-              <div className="mt-4 divide-y divide-[#25293A]">
-                {agendaTasks.map((task) => {
+              <>
+                <div className="mt-3 flex items-center justify-between text-sm text-[#A9ACBA]">
+                  <div className="flex items-center gap-2">
+                    <span>{completedTasksCount} terminées</span>
+                    <span>•</span>
+                    <button
+                      type="button"
+                      onClick={() => setTasks((prev) => prev.filter((task) => !task.completed))}
+                      className="text-[#F43F5E] hover:text-[#FF5E7A]"
+                    >
+                      Effacer
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowCompletedTasks((prev) => !prev)}
+                    className="text-[#F43F5E] hover:text-[#FF5E7A]"
+                  >
+                    {showCompletedTasks ? 'Masquer' : 'Afficher'}
+                  </button>
+                </div>
+
+                <div className="mt-3 divide-y divide-[#25293A]">
+                  {visibleTasks.map((task) => {
                   const taskDate = task.date ? new Date(task.date) : null;
                   const displayDate = taskDate
                     ? taskDate.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })
@@ -965,7 +990,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                 <button
                                   type="button"
                                   onClick={() => startEditingName(task)}
-                                  className="mt-1 text-base font-semibold text-left text-[#ECECF3] break-words"
+                                  className="mt-1 text-base font-semibold text-left text-[#ECECF3] break-words cursor-text"
                                 >
                                   {task.name || 'Tâche sans titre'}
                                 </button>
@@ -982,11 +1007,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                 </div>
                                 <input
                                   type="date"
-                                  value={task.date ?? ''}
+                                  value={task.date ?? 'yyyy-mm-dd'}
                                   onChange={(e) => updateTask(task.id, { date: e.target.value })}
                                   className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
                                   style={{
-                                    width: `${Math.max(1, (task.date ?? '').length) + 2}ch`,
+                                    width: `${Math.max(1, (task.date ?? 'yyyy-mm-dd').length) + 2}ch`,
                                   }}
                                 />
                               </div>
@@ -997,10 +1022,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                 </div>
                                 <input
                                   type="time"
-                                  value={task.time ?? ''}
+                                  value={task.time ?? '00:00'}
                                   onChange={(e) => updateTask(task.id, { time: e.target.value })}
                                   className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-                                  size={Math.max(1, (task.time ?? '').length)}
+                                  size={Math.max(1, (task.time ?? '00:00').length)}
                                 />
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
@@ -1034,8 +1059,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       )}
                     </div>
                   );
+                  );
                 })}
-              </div>
+                </div>
+              </>
             )}
           </section>
         </div>
