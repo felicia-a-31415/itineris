@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Info, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload } from 'lucide-react';
+import { Flame, Info, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Trash2, Upload } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
@@ -1001,7 +1001,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   onChange={(e) => updateTask(task.id, { date: e.target.value })}
                                   className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
                                   style={{
-                                    width: `${Math.max(1, (task.date ?? '').length) + 1}ch`,
+                                    width: `${Math.max(1, (task.date ?? '').length) + 2}ch`,
                                   }}
                                 />
                               </div>
@@ -1031,17 +1031,18 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             </div>
 
                             <div className="flex justify-end">
-                              <Button
-                                variant="outline"
-                                className="rounded-2xl border-red-500 text-red-400 hover:text-red-200 hover:border-red-400"
+                              <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setTasks((prev) => prev.filter((t) => t.id !== task.id));
                                   setInfoTaskId(null);
                                 }}
+                                className="text-red-500 hover:text-red-400"
+                                aria-label="Supprimer la tâche"
                               >
-                                Supprimer la tâche
-                              </Button>
+                                <Trash2 className="w-5 h-5" />
+                              </button>
                             </div>
                           </div>
                         </div>
