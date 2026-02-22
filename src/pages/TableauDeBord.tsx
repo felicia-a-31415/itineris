@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
+import { Check, Flame, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Upload, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
@@ -830,45 +830,89 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </section>
 
           {/* Tasks */}
-          <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
+          <section className="h-full space-y-6 font-sans tracking-[0.01em]">
             <div className="text-sm text-[#A9ACBA]">Tâches à faire</div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                saveTask();
+              }}
+              className="space-y-3"
+            >
+              <Input
+                placeholder="Ajouter une tâche…"
+                value={newTaskName}
+                onChange={(e) => setNewTaskName(e.target.value)}
+                className="bg-transparent border-[#1F2230] focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none px-0 text-[#ECECF3] placeholder:text-[#6F7384]"
+              />
+              <div className="flex flex-wrap gap-3">
+                <Input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="bg-transparent border-[#1F2230] focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none px-0 text-[#ECECF3] placeholder:text-[#6F7384]"
+                />
+                <Input
+                  type="time"
+                  value={selectedTime}
+                  onChange={(e) => setSelectedTime(e.target.value)}
+                  className="bg-transparent border-[#1F2230] focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none px-0 text-[#ECECF3] placeholder:text-[#6F7384]"
+                />
+              </div>
+              <Textarea
+                placeholder="Notes (optionnel)…"
+                value={newTaskDescription}
+                onChange={(e) => setNewTaskDescription(e.target.value)}
+                className="bg-transparent border-[#1F2230] focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none px-0 text-[#ECECF3] placeholder:text-[#6F7384] min-h-[80px]"
+              />
+              <div>
+                <Button type="submit" className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-full px-5">
+                  Ajouter
+                </Button>
+              </div>
+            </form>
+
             {agendaTasks.length === 0 ? (
-              <div className="mt-2 text-[#ECECF3] text-lg">Aucune tâche pour l’instant</div>
+              <div className="text-[#ECECF3] text-lg">Aucune tâche pour l’instant</div>
             ) : (
-              <div className="mt-4 space-y-3">
+              <div className="space-y-6">
                 {agendaTasks.map((task) => {
                   const taskDate = task.date ? new Date(task.date) : null;
                   const displayDate = taskDate
                     ? taskDate.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })
                     : 'Date à définir';
                   return (
-                    <div
-                      key={task.id}
-                      className="rounded-2xl p-3 text-sm bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
-                      style={{ borderLeft: `4px solid ${task.color}` }}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="text-[#ECECF3] font-semibold truncate">
-                          {task.name || 'Tâche sans titre'}
+                    <div key={task.id} className="group flex items-start gap-4">
+                      <button
+                        type="button"
+                        onClick={() => toggleTask(task.id)}
+                        className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border transition-all duration-200 ${
+                          task.completed
+                            ? 'border-[#4169E1] bg-[#4169E1]/20 text-[#4169E1]'
+                            : 'border-[#6F7384] text-transparent'
+                        } hover:shadow-[0_0_0_3px_rgba(65,105,225,0.15)]`}
+                        aria-label={task.completed ? 'Marquer comme non terminée' : 'Marquer comme terminée'}
+                      >
+                        <Check className={`h-3 w-3 transition-transform duration-200 ${task.completed ? 'scale-100' : 'scale-0'}`} />
+                      </button>
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div
+                            className={`text-base font-medium text-[#ECECF3] ${
+                              task.completed ? 'line-through opacity-50' : ''
+                            }`}
+                          >
+                            {task.name || 'Tâche sans titre'}
+                          </div>
+                          <div className="text-xs text-[#A9ACBA] uppercase tracking-[0.08em]">
+                            {displayDate} {task.time ? `· ${task.time}` : ''}
+                          </div>
                         </div>
-                        <div className="text-[10px] text-[#A9ACBA] uppercase">
-                          {displayDate} {task.time ? `· ${task.time}` : ''}
-                        </div>
-                      </div>
-                      {task.description && (
-                        <div className="text-xs text-[#A9ACBA] mt-1 break-words">{task.description}</div>
-                      )}
-                      <div className="mt-2 flex items-center gap-2">
-                        <span
-                          className="text-[9px] px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: `${task.color}20`, color: '#ECECF3' }}
-                        >
-                          {getPriorityLabel(task.priority)}
-                        </span>
-                        {task.completed ? (
-                          <span className="text-[10px] text-[#A9ACBA]">Terminée</span>
-                        ) : (
-                          <span className="text-[10px] text-[#A9ACBA]">À faire</span>
+                        {task.description && (
+                          <div className={`text-sm text-[#A9ACBA] ${task.completed ? 'line-through opacity-50' : ''}`}>
+                            {task.description}
+                          </div>
                         )}
                       </div>
                     </div>
