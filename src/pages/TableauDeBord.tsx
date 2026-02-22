@@ -945,7 +945,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           >
                             ×
                           </button>
-                          <div className="flex items-start gap-3 pt-4 pr-6">
+                          <div className="flex items-start gap-3 pt-2 pr-8 pl-1">
                             <div className="min-w-0">
                               <div className="text-sm text-[#A9ACBA]">Modifier la tâche</div>
                               {editingNameId === task.id ? (
