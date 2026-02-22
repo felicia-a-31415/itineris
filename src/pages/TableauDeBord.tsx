@@ -932,9 +932,20 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       {infoTaskId === task.id && (
                         <div
                           ref={infoPopoverRef}
-                          className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20"
+                          className="relative absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20"
                         >
-                          <div className="flex items-center justify-between gap-3 pt-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setInfoTaskId(null);
+                            }}
+                            className="absolute right-3 top-3 text-[#A9ACBA] hover:text-[#ECECF3] text-2xl leading-none"
+                            aria-label="Fermer"
+                          >
+                            ×
+                          </button>
+                          <div className="flex items-start gap-3 pt-4 pr-6">
                             <div className="min-w-0">
                               <div className="text-sm text-[#A9ACBA]">Modifier la tâche</div>
                               {editingNameId === task.id ? (
@@ -965,17 +976,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                 </button>
                               )}
                             </div>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setInfoTaskId(null);
-                              }}
-                              className="text-[#A9ACBA] hover:text-[#ECECF3] h-8 w-8 flex items-center justify-center"
-                              aria-label="Fermer"
-                            >
-                              ×
-                            </button>
                           </div>
 
                           <div className="mt-3 space-y-3">
@@ -999,7 +999,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   type="date"
                                   value={task.date ?? ''}
                                   onChange={(e) => updateTask(task.id, { date: e.target.value })}
-                                  className="h-7 w-auto min-w-[7.5rem] bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                                  className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                                  style={{
+                                    width: `${Math.max(10, (task.date ?? 'YYYY-MM-DD').length)}ch`,
+                                  }}
                                 />
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
@@ -1011,7 +1014,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   type="time"
                                   value={task.time ?? ''}
                                   onChange={(e) => updateTask(task.id, { time: e.target.value })}
-                                  className="h-7 w-auto min-w-[7.5rem] bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                                  className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                                  style={{
+                                    width: `${Math.max(5, (task.time ?? '00:00').length)}ch`,
+                                  }}
                                 />
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
