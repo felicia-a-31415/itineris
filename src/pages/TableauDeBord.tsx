@@ -4,7 +4,6 @@ import { Flame, Info, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Spa
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
 import alarmSound from '../assets/Christmas-jingle-bells-notification-melody.mp3';
 import { useAuth } from '../lib/auth';
 import {
@@ -96,7 +95,6 @@ const createDefaultTasks = () => {
     {
       id: '1',
       name: 'Réviser les notes de mathématiques',
-      description: 'Chapitres 3-5',
       completed: false,
       color: '#6B9AC4',
       urgent: false,
@@ -106,7 +104,6 @@ const createDefaultTasks = () => {
     {
       id: '2',
       name: 'Terminer le devoir de chimie',
-      description: 'Exercices page 45-48',
       completed: false,
       color: '#4169E1',
       urgent: false,
@@ -117,7 +114,6 @@ const createDefaultTasks = () => {
     {
       id: '3',
       name: "Réunion d'équipe",
-      description: 'Discuter du projet final',
       completed: false,
       color: '#6B9AC4',
       urgent: false,
@@ -160,11 +156,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newTaskName, setNewTaskName] = useState('');
-  const [newTaskDescription, setNewTaskDescription] = useState('');
   const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0]);
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
   const [selectedTime, setSelectedTime] = useState('');
   const [infoTaskId, setInfoTaskId] = useState<string | null>(null);
+  const [editingNameId, setEditingNameId] = useState<string | null>(null);
+  const [editingNameValue, setEditingNameValue] = useState('');
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
@@ -427,7 +424,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
   const resetTaskForm = () => {
     setNewTaskName('');
-    setNewTaskDescription('');
     setSelectedColor(TASK_COLORS[0]);
     setSelectedDate(formatDate(new Date()));
     setSelectedTime('');
@@ -441,13 +437,30 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, ...updates } : task)));
   };
 
+  const startEditingName = (task: Task) => {
+    setEditingNameId(task.id);
+    setEditingNameValue(task.name || '');
+  };
+
+  const cancelEditingName = () => {
+    setEditingNameId(null);
+    setEditingNameValue('');
+  };
+
+  const commitEditingName = (id: string) => {
+    const nextName = editingNameValue.trim();
+    if (nextName) {
+      updateTask(id, { name: nextName });
+    }
+    cancelEditingName();
+  };
+
   const saveTask = () => {
     if (!newTaskName.trim()) return;
 
     const newTask: Task = {
       id: Date.now().toString(),
       name: newTaskName.trim(),
-      description: newTaskDescription.trim(),
       completed: false,
       color: selectedColor,
       urgent: false,
@@ -478,7 +491,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       {
         id: `photo-${Date.now()}-1`,
         name: 'Importer le planning photo',
-        description: `IA: extrait depuis ${file.name}`,
         completed: false,
         color: '#F39C12',
         urgent: false,
@@ -840,13 +852,35 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div
-                          className={`text-sm font-medium break-words ${
-                            task.completed ? 'line-through' : ''
-                          } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
-                        >
-                          {task.name || 'Tâche sans titre'}
-                        </div>
+                        {editingNameId === task.id ? (
+                          <Input
+                            value={editingNameValue}
+                            onChange={(e) => setEditingNameValue(e.target.value)}
+                            onBlur={() => commitEditingName(task.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                commitEditingName(task.id);
+                              }
+                              if (e.key === 'Escape') {
+                                e.preventDefault();
+                                cancelEditingName();
+                              }
+                            }}
+                            autoFocus
+                            className="h-7 px-2 text-sm rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
+                          />
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => startEditingName(task)}
+                            className={`text-sm font-medium text-left break-words ${
+                              task.completed ? 'line-through' : ''
+                            } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
+                          >
+                            {task.name || 'Tâche sans titre'}
+                          </button>
+                        )}
                         <div
                           className={`mt-0.5 text-xs text-[#A9ACBA] ${
                             task.completed ? 'line-through' : ''
@@ -854,15 +888,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         >
                           {displayDate} {task.time ? `· ${task.time}` : ''}
                         </div>
-                        {task.description && (
-                          <div
-                            className={`mt-1 text-[10px] text-[#7F869A] break-words ${
-                              task.completed ? 'line-through' : ''
-                            }`}
-                          >
-                            {task.description}
-                          </div>
-                        )}
                       </div>
 
                       <div className="ml-auto flex items-start">
@@ -886,9 +911,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               <div className="text-base font-semibold text-[#ECECF3] break-words">
                                 {task.name || 'Tâche sans titre'}
                               </div>
-                              {task.description && (
-                                <div className="mt-1 text-sm text-[#A9ACBA] break-words">{task.description}</div>
-                              )}
                             </div>
                             <button
                               type="button"
@@ -917,10 +939,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               <div className="flex items-center justify-between px-3 py-2 border-b border-[#2B3550]">
                                 <div>
                                   <div className="text-sm text-[#ECECF3]">Date</div>
-                                  <div className="text-xs text-[#7F869A]">Définir une date</div>
-                                </div>
-                                <input
-                                  type="date"
+                              <div className="text-xs text-[#7F869A]">Définir une date</div>
+                            </div>
+                            <input
+                              type="date"
                                   value={task.date ?? ''}
                                   onChange={(e) => updateTask(task.id, { date: e.target.value })}
                                   className="bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 py-1"
@@ -940,9 +962,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               </div>
                               <div className="flex items-center justify-between px-3 py-2">
                                 <div>
-                                  <div className="text-sm text-[#ECECF3]">Urgent</div>
-                                  <div className="text-xs text-[#7F869A]">Met le titre en rouge</div>
-                                </div>
+                              <div className="text-sm text-[#ECECF3]">Urgent</div>
+                              <div className="text-xs text-[#7F869A]">Met le titre en rouge</div>
+                            </div>
                                 <button
                                   type="button"
                                   onClick={() => updateTask(task.id, { urgent: !task.urgent })}
@@ -1116,19 +1138,36 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                 {task.time && <span className="text-[10px] text-[#A9ACBA]">{task.time}</span>}
                               </div>
 
-                              <div
-                                className={`text-xs break-words ${
-                                  task.completed ? 'line-through opacity-50' : ''
-                                } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
-                              >
-                                {task.name}
-                              </div>
-
-                              {task.description && (
-                                <div className="text-[10px] text-[#A9ACBA] mt-1 break-words">
-                                  {task.description}
-                                </div>
+                              {editingNameId === task.id ? (
+                                <Input
+                                  value={editingNameValue}
+                                  onChange={(e) => setEditingNameValue(e.target.value)}
+                                  onBlur={() => commitEditingName(task.id)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      commitEditingName(task.id);
+                                    }
+                                    if (e.key === 'Escape') {
+                                      e.preventDefault();
+                                      cancelEditingName();
+                                    }
+                                  }}
+                                  autoFocus
+                                  className="h-6 px-2 text-xs rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
+                                />
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => startEditingName(task)}
+                                  className={`text-left text-xs break-words ${
+                                    task.completed ? 'line-through opacity-50' : ''
+                                  } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
+                                >
+                                  {task.name}
+                                </button>
                               )}
+
                             </div>
                           </div>
                           </div>
@@ -1228,16 +1267,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     value={selectedTime}
                     onChange={(e) => setSelectedTime(e.target.value)}
                     className="rounded-2xl border-[#1F2230]"
-                  />
-                </div>
-
-                <div className="space-y-3 md:col-span-2">
-                  <label className="text-sm text-[#ECECF3] block">Description</label>
-                  <Textarea
-                    value={newTaskDescription}
-                    onChange={(e) => setNewTaskDescription(e.target.value)}
-                    placeholder="Ajoute des détails, étapes, liens..."
-                    className="rounded-2xl border-[#1F2230] min-h-[90px]"
                   />
                 </div>
 

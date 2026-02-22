@@ -17,7 +17,6 @@ const DASHBOARD_CACHE_PREFIX = 'itineris:dashboard:v1';
 export type DashboardTask = {
   id: string;
   name: string;
-  description: string;
   completed: boolean;
   color: string;
   urgent?: boolean;
