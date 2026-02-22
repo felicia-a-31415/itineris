@@ -1005,28 +1005,44 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   <div className="text-sm text-[#ECECF3]">Date</div>
                                   <div className="text-xs text-[#7F869A]">Définir une date</div>
                                 </div>
-                                <input
-                                  type="date"
-                                  value={task.date ?? 'yyyy-mm-dd'}
-                                  onChange={(e) => updateTask(task.id, { date: e.target.value })}
-                                  className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-                                  style={{
-                                    width: `${Math.max(1, (task.date ?? 'yyyy-mm-dd').length) + 2}ch`,
-                                  }}
-                                />
+                                <div className="relative">
+                                  <input
+                                    type="date"
+                                    value={task.date ?? ''}
+                                    onChange={(e) => updateTask(task.id, { date: e.target.value })}
+                                    className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                                    style={{
+                                      width: `calc(${(task.date ?? 'yyyy-mm-dd').length}ch + 0.75rem)`,
+                                    }}
+                                  />
+                                  {!task.date && (
+                                    <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-xs text-[#7F869A]">
+                                      yyyy-mm-dd
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
                                 <div>
                                   <div className="text-sm text-[#ECECF3]">Heure</div>
                                   <div className="text-xs text-[#7F869A]">Optionnel</div>
                                 </div>
-                                <input
-                                  type="time"
-                                  value={task.time ?? '00:00'}
-                                  onChange={(e) => updateTask(task.id, { time: e.target.value })}
-                                  className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-                                  size={Math.max(1, (task.time ?? '00:00').length)}
-                                />
+                                <div className="relative">
+                                  <input
+                                    type="time"
+                                    value={task.time ?? ''}
+                                    onChange={(e) => updateTask(task.id, { time: e.target.value })}
+                                    className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                                    style={{
+                                      width: `calc(${(task.time ?? '00:00').length}ch + 0.75rem)`,
+                                    }}
+                                  />
+                                  {!task.time && (
+                                    <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-xs text-[#7F869A]">
+                                      00:00
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
                                 <div>
