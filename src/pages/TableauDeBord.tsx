@@ -540,6 +540,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const streakFilledSegments = Math.min(streakDays, streakSegments);
   const taskProgressRatio = totalTasks > 0 ? completedTasks / totalTasks : 0;
   const streakColor = streakDays > 0 ? '#F97316' : '#6B7280';
+  const agendaTasks = useMemo(() => {
+    return [...tasks].sort((a, b) => {
+      const aDate = new Date(`${a.date || formatDate(new Date())}T${a.time || '00:00'}`);
+      const bDate = new Date(`${b.date || formatDate(new Date())}T${b.time || '00:00'}`);
+      return aDate.getTime() - bDate.getTime();
+    });
+  }, [tasks]);
 
   useEffect(() => {
     alarmRef.current = new Audio(alarmSound);
@@ -825,7 +832,50 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           {/* Tasks */}
           <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
             <div className="text-sm text-[#A9ACBA]">Tâches à faire</div>
-            <div className="mt-2 text-[#ECECF3] text-lg">Espace réservé</div>
+            {agendaTasks.length === 0 ? (
+              <div className="mt-2 text-[#ECECF3] text-lg">Aucune tâche pour l’instant</div>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {agendaTasks.map((task) => {
+                  const taskDate = task.date ? new Date(task.date) : null;
+                  const displayDate = taskDate
+                    ? taskDate.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })
+                    : 'Date à définir';
+                  return (
+                    <div
+                      key={task.id}
+                      className="rounded-2xl p-3 text-sm bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
+                      style={{ borderLeft: `4px solid ${task.color}` }}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-[#ECECF3] font-semibold truncate">
+                          {task.name || 'Tâche sans titre'}
+                        </div>
+                        <div className="text-[10px] text-[#A9ACBA] uppercase">
+                          {displayDate} {task.time ? `· ${task.time}` : ''}
+                        </div>
+                      </div>
+                      {task.description && (
+                        <div className="text-xs text-[#A9ACBA] mt-1 break-words">{task.description}</div>
+                      )}
+                      <div className="mt-2 flex items-center gap-2">
+                        <span
+                          className="text-[9px] px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: `${task.color}20`, color: '#ECECF3' }}
+                        >
+                          {getPriorityLabel(task.priority)}
+                        </span>
+                        {task.completed ? (
+                          <span className="text-[10px] text-[#A9ACBA]">Terminée</span>
+                        ) : (
+                          <span className="text-[10px] text-[#A9ACBA]">À faire</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </section>
         </div>
 
