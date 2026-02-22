@@ -20,12 +20,6 @@ type Task = DashboardTask;
 
 const TASK_COLORS = ['#6B9AC4', '#4169E1', '#8B8680', '#E16941', '#41E169', '#9B59B6', '#F39C12', '#E91E63'];
 
-const PRIORITIES = [
-  { value: 1, label: '!', name: 'Basse' },
-  { value: 2, label: '!!', name: 'Moyenne' },
-  { value: 3, label: '!!!', name: 'Haute' },
-] as const;
-
 const getCurrentWeekDates = (offsetWeeks = 0) => {
   const today = new Date();
   const currentDay = today.getDay();
@@ -105,7 +99,6 @@ const createDefaultTasks = () => {
       description: 'Chapitres 3-5',
       completed: false,
       color: '#6B9AC4',
-      priority: 2,
       date: formatDate(new Date()),
     },
     {
@@ -114,7 +107,6 @@ const createDefaultTasks = () => {
       description: 'Exercices page 45-48',
       completed: false,
       color: '#4169E1',
-      priority: 3,
       date: formatDate(initialWeek[2]),
       time: '09:00',
     },
@@ -124,7 +116,6 @@ const createDefaultTasks = () => {
       description: 'Discuter du projet final',
       completed: false,
       color: '#6B9AC4',
-      priority: 1,
       date: formatDate(initialWeek[3]),
       time: '14:00',
     },
@@ -165,7 +156,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [newTaskName, setNewTaskName] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0]);
-  const [selectedPriority, setSelectedPriority] = useState<1 | 2 | 3>(1);
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
   const [selectedTime, setSelectedTime] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -338,10 +328,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     return `${minutes}:${seconds}`;
   };
 
-  const getPriorityLabel = (priority: 1 | 2 | 3) => {
-    return PRIORITIES.find((p) => p.value === priority)?.label || '!';
-  };
-
   const getMinutesForDate = (targetDate: Date, data: Record<string, number[]>) => {
     const normalized = new Date(targetDate);
     normalized.setHours(0, 0, 0, 0);
@@ -437,7 +423,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setNewTaskName('');
     setNewTaskDescription('');
     setSelectedColor(TASK_COLORS[0]);
-    setSelectedPriority(1);
     setSelectedDate(formatDate(new Date()));
     setSelectedTime('');
     setEditingTaskId(null);
@@ -455,7 +440,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 name: newTaskName.trim(),
                 description: newTaskDescription.trim(),
                 color: selectedColor,
-                priority: selectedPriority,
                 date: selectedDate || undefined,
                 time: selectedTime || undefined,
               }
@@ -469,7 +453,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         description: newTaskDescription.trim(),
         completed: false,
         color: selectedColor,
-        priority: selectedPriority,
         date: selectedDate || undefined,
         time: selectedTime || undefined,
       };
@@ -500,7 +483,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         description: `IA: extrait depuis ${file.name}`,
         completed: false,
         color: '#F39C12',
-        priority: 2,
         date: formatDate(weekDates[2]),
         time: '12:00',
       },
@@ -844,49 +826,41 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   return (
                     <div
                       key={task.id}
-                      className={`rounded-2xl p-3 bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)] ${
+                      className={`flex items-start gap-3 py-2 ${
                         task.completed ? 'opacity-60' : ''
                       }`}
                     >
-                      <div className="flex items-start gap-3">
-                        <button
-                          type="button"
-                          role="checkbox"
-                          aria-checked={task.completed}
-                          onClick={() => toggleTask(task.id)}
-                          className="mt-0.5 h-5 w-5 rounded-full border border-[#7C8DB5] flex items-center justify-center transition hover:shadow-[0_0_0_3px_rgba(65,105,225,0.2)]"
-                          style={{
-                            borderColor: task.completed ? '#A5C4FF' : task.color,
-                            backgroundColor: task.completed ? '#4169E1' : 'transparent',
-                          }}
-                        >
-                          {task.completed && <Check className="w-3 h-3 text-white" />}
-                        </button>
+                      <div className="mt-0.5">
+                        <Checkbox
+                          checked={task.completed}
+                          onCheckedChange={() => toggleTask(task.id)}
+                          className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
+                        />
+                      </div>
 
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-3">
-                            <div
-                              className={`text-xs font-medium text-[#ECECF3] break-words ${
-                                task.completed ? 'line-through' : ''
-                              }`}
-                            >
-                              {task.name || 'Tâche sans titre'}
-                            </div>
-                            <div className="text-[10px] text-[#A9ACBA] uppercase text-right shrink-0">
-                              {displayDate} {task.time ? `· ${task.time}` : ''}
-                            </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div
+                            className={`text-xs font-medium text-[#ECECF3] break-words ${
+                              task.completed ? 'line-through' : ''
+                            }`}
+                          >
+                            {task.name || 'Tâche sans titre'}
                           </div>
-
-                          {task.description && (
-                            <div
-                              className={`text-[10px] text-[#A9ACBA] mt-1 break-words ${
-                                task.completed ? 'line-through' : ''
-                              }`}
-                            >
-                              {task.description}
-                            </div>
-                          )}
+                          <div className="text-[10px] text-[#A9ACBA] uppercase text-right shrink-0">
+                            {displayDate} {task.time ? `· ${task.time}` : ''}
+                          </div>
                         </div>
+
+                        {task.description && (
+                          <div
+                            className={`text-[10px] text-[#A9ACBA] mt-1 break-words ${
+                              task.completed ? 'line-through' : ''
+                            }`}
+                          >
+                            {task.description}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -1002,7 +976,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               setNewTaskName(task.name || '');
                               setNewTaskDescription(task.description || '');
                               setSelectedColor(task.color || TASK_COLORS[0]);
-                              setSelectedPriority(task.priority || 1);
                               setSelectedDate(task.date || formatDate(new Date()));
                               setSelectedTime(task.time || '');
                               setShowAddDialog(true);
@@ -1031,12 +1004,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1 mb-1">
                                 {task.time && <span className="text-[10px] text-[#A9ACBA]">{task.time}</span>}
-                                <span
-                                  className="text-[9px] px-2 py-0.5 rounded-full"
-                                  style={{ backgroundColor: `${task.color}20`, color: '#ECECF3' }}
-                                >
-                                  {getPriorityLabel(task.priority)}
-                                </span>
                               </div>
 
                               <div
@@ -1154,26 +1121,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     onChange={(e) => setSelectedTime(e.target.value)}
                     className="rounded-2xl border-[#1F2230]"
                   />
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-sm text-[#ECECF3] block">Priorité</label>
-                  <div className="flex gap-2">
-                    {PRIORITIES.map((priority) => (
-                      <button
-                        key={priority.value}
-                        type="button"
-                        onClick={() => setSelectedPriority(priority.value)}
-                        className={`px-3 py-2 rounded-xl text-sm transition-all ${
-                          selectedPriority === priority.value
-                            ? 'bg-[#4169E1] text-white shadow'
-                            : 'bg-[#0F1117] text-[#ECECF3]'
-                        }`}
-                      >
-                        {priority.label} {priority.name}
-                      </button>
-                    ))}
-                  </div>
                 </div>
 
                 <div className="space-y-3 md:col-span-2">
