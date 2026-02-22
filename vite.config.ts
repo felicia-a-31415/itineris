@@ -53,5 +53,5 @@ export default defineConfig({
         '@': path.resolve(__dirname, './src'),
       },
     },
-  base: '/itineris/',
+  base: '/itineris-staging/',
 })
