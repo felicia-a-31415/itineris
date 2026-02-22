@@ -934,12 +934,36 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           ref={infoPopoverRef}
                           className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20"
                         >
-                          <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center justify-between gap-3 pt-1">
                             <div className="min-w-0">
                               <div className="text-sm text-[#A9ACBA]">Modifier la tâche</div>
-                              <div className="text-base font-semibold text-[#ECECF3] break-words">
-                                {task.name || 'Tâche sans titre'}
-                              </div>
+                              {editingNameId === task.id ? (
+                                <Input
+                                  value={editingNameValue}
+                                  onChange={(e) => setEditingNameValue(e.target.value)}
+                                  onBlur={() => commitEditingName(task.id)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      commitEditingName(task.id);
+                                    }
+                                    if (e.key === 'Escape') {
+                                      e.preventDefault();
+                                      cancelEditingName();
+                                    }
+                                  }}
+                                  autoFocus
+                                  className="mt-1 h-8 px-2 text-base rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
+                                />
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => startEditingName(task)}
+                                  className="mt-1 text-base font-semibold text-left text-[#ECECF3] break-words"
+                                >
+                                  {task.name || 'Tâche sans titre'}
+                                </button>
+                              )}
                             </div>
                             <button
                               type="button"
@@ -999,23 +1023,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   checked={!!task.urgent}
                                   onCheckedChange={(checked) => updateTask(task.id, { urgent: checked })}
                                 />
-                              </div>
-                            </div>
-
-                            <div className="rounded-2xl border border-[#2B3550] bg-[#161924] px-3 py-2 flex flex-col gap-1">
-                              <label className="text-[10px] uppercase text-[#7F869A]">Couleur</label>
-                              <div className="flex flex-wrap gap-2">
-                                {TASK_COLORS.map((color) => (
-                                  <button
-                                    key={color}
-                                    type="button"
-                                    onClick={() => updateTask(task.id, { color })}
-                                    className={`h-6 w-6 rounded-full border ${
-                                      task.color === color ? 'border-white' : 'border-transparent'
-                                    }`}
-                                    style={{ backgroundColor: color }}
-                                  />
-                                ))}
                               </div>
                             </div>
 
