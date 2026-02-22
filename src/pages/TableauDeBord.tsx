@@ -932,7 +932,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       {infoTaskId === task.id && (
                         <div
                           ref={infoPopoverRef}
-                          className="relative absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20"
+                          className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20"
                         >
                           <button
                             type="button"
@@ -999,7 +999,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   type="date"
                                   value={task.date ?? ''}
                                   onChange={(e) => updateTask(task.id, { date: e.target.value })}
-                                  className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                                  className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
                                   size={Math.max(1, (task.date ?? '').length)}
                                 />
                               </div>
