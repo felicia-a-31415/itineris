@@ -163,6 +163,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [infoTaskId, setInfoTaskId] = useState<string | null>(null);
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
+  const infoPopoverRef = useRef<HTMLDivElement | null>(null);
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
@@ -433,6 +434,28 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const toggleInfoTask = (id: string) => {
     setInfoTaskId((prev) => (prev === id ? null : id));
   };
+
+  useEffect(() => {
+    if (!infoTaskId) return;
+    const handleClickAway = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      if (infoPopoverRef.current?.contains(target)) return;
+      if (target.closest('[data-info-toggle="true"]')) return;
+      setInfoTaskId(null);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setInfoTaskId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickAway);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickAway);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [infoTaskId]);
 
   const updateTask = (id: string, updates: Partial<Task>) => {
     setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, ...updates } : task)));
@@ -839,7 +862,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   return (
                     <div
                       key={task.id}
-                      className={`group relative flex items-start gap-3 py-3 ${
+                      className={`group relative flex items-start gap-2 py-2 ${
                         task.completed ? 'opacity-60' : ''
                       }`}
                     >
@@ -898,6 +921,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             e.stopPropagation();
                             toggleInfoTask(task.id);
                           }}
+                          data-info-toggle="true"
                           className="opacity-0 group-hover:opacity-100 transition text-[#A9ACBA] hover:text-[#ECECF3] rounded-full border border-[#3B4154] h-6 w-6 flex items-center justify-center"
                           aria-label="Détails de la tâche"
                         >
@@ -906,9 +930,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       </div>
 
                       {infoTaskId === task.id && (
-                        <div className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20">
+                        <div
+                          ref={infoPopoverRef}
+                          className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20"
+                        >
                           <div className="flex items-center justify-between gap-3">
                             <div className="min-w-0">
+                              <div className="text-sm text-[#A9ACBA]">Modifier la tâche</div>
                               <div className="text-base font-semibold text-[#ECECF3] break-words">
                                 {task.name || 'Tâche sans titre'}
                               </div>
@@ -919,7 +947,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                 e.stopPropagation();
                                 setInfoTaskId(null);
                               }}
-                              className="text-[#A9ACBA] hover:text-[#ECECF3] h-8 w-8 flex items-center justify-center rounded-full border border-[#2B3550]"
+                              className="text-[#A9ACBA] hover:text-[#ECECF3] h-8 w-8 flex items-center justify-center"
                               aria-label="Fermer"
                             >
                               ×
@@ -947,7 +975,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   type="date"
                                   value={task.date ?? ''}
                                   onChange={(e) => updateTask(task.id, { date: e.target.value })}
-                                  className="h-8 w-36 bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                                  className="h-7 w-auto min-w-[7.5rem] bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
                                 />
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
@@ -959,7 +987,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   type="time"
                                   value={task.time ?? ''}
                                   onChange={(e) => updateTask(task.id, { time: e.target.value })}
-                                  className="h-8 w-36 bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                                  className="h-7 w-auto min-w-[7.5rem] bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
                                 />
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
