@@ -999,10 +999,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   type="date"
                                   value={task.date ?? ''}
                                   onChange={(e) => updateTask(task.id, { date: e.target.value })}
-                                  className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-                                  style={{
-                                    width: `${Math.max(10, (task.date ?? 'YYYY-MM-DD').length)}ch`,
-                                  }}
+                                  className="h-7 w-auto min-w-[7.5rem] bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
                                 />
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
@@ -1014,10 +1011,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   type="time"
                                   value={task.time ?? ''}
                                   onChange={(e) => updateTask(task.id, { time: e.target.value })}
-                                  className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-                                  style={{
-                                    width: `${Math.max(5, (task.time ?? '00:00').length)}ch`,
-                                  }}
+                                  className="h-7 w-auto min-w-[7.5rem] bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
                                 />
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
