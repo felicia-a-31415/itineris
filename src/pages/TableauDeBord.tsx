@@ -553,8 +553,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const streakSegments = 7;
   const streakFilledSegments = Math.min(streakDays, streakSegments);
   const taskProgressRatio = totalTasks > 0 ? completedTasks / totalTasks : 0;
-  const completedTasksCount = completedTasks;
-  const visibleTasks = showCompletedTasks ? agendaTasks : agendaTasks.filter((task) => !task.completed);
   const streakColor = streakDays > 0 ? '#F97316' : '#6B7280';
   const agendaTasks = useMemo(() => {
     return [...tasks].sort((a, b) => {
@@ -563,6 +561,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       return aDate.getTime() - bDate.getTime();
     });
   }, [tasks]);
+  const completedTasksCount = completedTasks;
+  const visibleTasks = showCompletedTasks ? agendaTasks : agendaTasks.filter((task) => !task.completed);
 
   useEffect(() => {
     alarmRef.current = new Audio(alarmSound);
