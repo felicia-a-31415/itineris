@@ -887,7 +887,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           )}
 
           <div className="mt-6 overflow-x-auto">
-            <div className="w-[980px] min-w-[980px] shrink-0">
+            <div className="w-[1200px] min-w-[1200px] shrink-0">
               <div className="grid grid-cols-7 border-b border-[#1F2230]">
                 {weekDates.map((date, index) => (
                   <div
