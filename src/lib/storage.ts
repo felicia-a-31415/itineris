@@ -20,7 +20,6 @@ export type DashboardTask = {
   completed: boolean;
   color: string;
   urgent?: boolean;
-  url?: string;
   date?: string;
   time?: string;
 };

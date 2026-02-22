@@ -99,7 +99,6 @@ const createDefaultTasks = () => {
       completed: false,
       color: '#6B9AC4',
       urgent: false,
-      url: '',
       date: formatDate(new Date()),
     },
     {
@@ -108,7 +107,6 @@ const createDefaultTasks = () => {
       completed: false,
       color: '#4169E1',
       urgent: false,
-      url: '',
       date: formatDate(initialWeek[2]),
       time: '09:00',
     },
@@ -118,7 +116,6 @@ const createDefaultTasks = () => {
       completed: false,
       color: '#6B9AC4',
       urgent: false,
-      url: '',
       date: formatDate(initialWeek[3]),
       time: '14:00',
     },
@@ -488,7 +485,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       completed: false,
       color: selectedColor,
       urgent: false,
-      url: '',
       date: selectedDate || undefined,
       time: selectedTime || undefined,
     };
@@ -518,7 +514,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         completed: false,
         color: '#F39C12',
         urgent: false,
-        url: '',
         date: formatDate(weekDates[2]),
         time: '12:00',
       },
@@ -979,16 +974,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           </div>
 
                           <div className="mt-3 space-y-3">
-                            <div className="rounded-2xl border border-[#2B3550] bg-[#161924] px-3 py-2 flex flex-col gap-1">
-                              <label className="text-[10px] uppercase text-[#7F869A]">URL</label>
-                              <input
-                                value={task.url ?? ''}
-                                onChange={(e) => updateTask(task.id, { url: e.target.value })}
-                                placeholder="https://"
-                                className="w-full bg-transparent text-sm text-[#ECECF3] outline-none"
-                              />
-                            </div>
-
                             <div className="rounded-2xl border border-[#2B3550] bg-[#161924]">
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
                                 <div>
