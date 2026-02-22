@@ -1006,7 +1006,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
 
           <div className="mt-2 overflow-x-auto">
-            <div className="min-w-[720px] grid grid-cols-7 gap-3 items-end">
+            <div className="w-[1104px] min-w-[1104px] grid grid-cols-7 gap-3 items-end">
               {weekDates.map((date, index) => {
                 const minutes = Math.round(activeWeekMinutes[index] ?? 0);
                 const showBar = minutes > 0;
@@ -1030,7 +1030,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
 
           <div className="mt-6 overflow-x-auto">
-            <div className="min-w-[560px] grid gap-4 md:grid-cols-3">
+            <div className="w-[1104px] min-w-[1104px] grid gap-4 md:grid-cols-3">
               <div className="space-y-1">
                 <p className="text-sm text-[#A9ACBA]">Total de cette semaine</p>
                 <p className="text-2xl text-[#ECECF3]">{activeWeekTotalMinutes} min</p>
