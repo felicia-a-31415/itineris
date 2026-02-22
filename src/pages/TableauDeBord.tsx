@@ -1000,7 +1000,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   value={task.date ?? ''}
                                   onChange={(e) => updateTask(task.id, { date: e.target.value })}
                                   className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-                                  size={Math.max(1, (task.date ?? '').length)}
+                                  style={{
+                                    width: `${Math.max(1, (task.date ?? '').length) + 1}ch`,
+                                  }}
                                 />
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
