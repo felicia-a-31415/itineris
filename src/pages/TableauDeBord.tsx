@@ -947,7 +947,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   type="date"
                                   value={task.date ?? ''}
                                   onChange={(e) => updateTask(task.id, { date: e.target.value })}
-                                  className="h-8 w-36 bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2"
+                                  className="h-8 w-36 bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
                                 />
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
@@ -959,7 +959,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                   type="time"
                                   value={task.time ?? ''}
                                   onChange={(e) => updateTask(task.id, { time: e.target.value })}
-                                  className="h-8 w-36 bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2"
+                                  className="h-8 w-36 bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
                                 />
                               </div>
                               <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
@@ -974,9 +974,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               </div>
                             </div>
 
-                            <div className="rounded-2xl border border-[#2B3550] bg-[#161924] px-3 py-2">
+                            <div className="rounded-2xl border border-[#2B3550] bg-[#161924] px-3 py-2 flex flex-col gap-1">
                               <label className="text-[10px] uppercase text-[#7F869A]">Couleur</label>
-                              <div className="mt-2 flex flex-wrap gap-2">
+                              <div className="flex flex-wrap gap-2">
                                 {TASK_COLORS.map((color) => (
                                   <button
                                     key={color}
