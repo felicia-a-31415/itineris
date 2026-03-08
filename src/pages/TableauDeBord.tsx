@@ -10,7 +10,6 @@ import {
   LogOut,
   Pause,
   Play,
-  Plus,
   RotateCcw,
   Settings,
   Sparkles,
@@ -1219,17 +1218,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex-1" />
               <div className="flex gap-2 items-center">
-                <Button
-                  onClick={() => {
-                    setSelectedDate(formatDate(new Date()));
-                    resetTaskForm();
-                    setShowAddDialog(true);
-                  }}
-                  className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white h-10 px-4"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Ajouter une tâche
-                </Button>
                 <label
                   htmlFor="agendaUpload"
                   className="flex items-center gap-2 h-10 px-4 rounded-2xl border border-dashed border-[#1F2230] text-sm font-medium text-[#ECECF3] cursor-pointer hover:bg-[#1A1D26]"
@@ -1296,7 +1284,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     return (
                       <div
                         key={index}
-                        className={`border-r border-[#1F2230] last:border-r-0 p-3 ${
+                        onClick={() => {
+                          setSelectedDate(dateString);
+                          resetTaskForm();
+                          setShowAddDialog(true);
+                        }}
+                        className={`border-r border-[#1F2230] last:border-r-0 p-3 cursor-pointer ${
                           isCurrentRangeToday(date) ? 'bg-[#4169E1]/5' : ''
                         } ${isOutsideMonth ? 'bg-[#121520] text-[#6F7587]' : ''}`}
                       >
@@ -1317,6 +1310,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           {tasksForDay.map((task) => (
                             <div
                               key={task.id}
+                              onClick={(e) => e.stopPropagation()}
                               className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
                               style={{
                                 borderLeft: `4px solid ${task.color}`,
@@ -1433,9 +1427,31 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Modal ajout tâche */}
         {showAddDialog && (
-          <div className="fixed inset-0 z-50 flex min-h-screen w-screen items-center justify-center bg-black/40 px-3 py-4 sm:px-4 sm:py-6">
-            <div className="bg-[#161924] border border-[#1F2230] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] rounded-3xl max-w-3xl w-full p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto">
-              <h2 className="text-lg font-semibold text-[#ECECF3] mb-4">Créer une tâche</h2>
+          <div
+            className="fixed inset-0 z-50 flex min-h-screen w-screen items-stretch justify-end bg-black/50 backdrop-blur-sm"
+            onClick={() => {
+              setShowAddDialog(false);
+              resetTaskForm();
+            }}
+          >
+            <div
+              className="bg-[#1B1E2A]/95 border-l border-[#2B3550] shadow-[0_24px_70px_rgba(0,0,0,0.65)] w-full max-w-md h-full p-5 sm:p-6 relative overflow-y-auto rounded-l-3xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h2 className="text-lg font-semibold text-[#ECECF3]">Créer une tâche</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddDialog(false);
+                    resetTaskForm();
+                  }}
+                  className="text-[#A9ACBA] hover:text-[#ECECF3] text-2xl leading-none"
+                  aria-label="Fermer"
+                >
+                  ×
+                </button>
+              </div>
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-3 md:col-span-2">
