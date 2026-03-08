@@ -724,7 +724,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       align="end"
                       side="bottom"
                       sideOffset={12}
-                      className="w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3"
+                      className="w-96 max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 shadow-[0_32px_80px_rgba(0,0,0,0.7)] p-3"
                       onOpenAutoFocus={(e) => e.preventDefault()}
                     >
                       <Button
