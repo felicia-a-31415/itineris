@@ -206,6 +206,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
+  const [taskModalAnchor, setTaskModalAnchor] = useState<{ x: number; y: number } | null>(null);
   const infoPopoverRef = useRef<HTMLDivElement | null>(null);
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -1149,30 +1150,32 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
               <div className="flex flex-col items-end gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
-                    <button
-                      type="button"
-                      onClick={() => setTimeView('week')}
-                      className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
-                        timeView === 'week'
-                          ? 'bg-[#E8E3D6] text-[#0B0D10]'
-                          : 'text-[#A9ACBA] hover:text-[#ECECF3]'
-                      }`}
-                    >
-                      Semaine
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTimeView('month')}
-                      className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
-                        timeView === 'month'
-                          ? 'bg-[#E8E3D6] text-[#0B0D10]'
-                          : 'text-[#A9ACBA] hover:text-[#ECECF3]'
-                      }`}
-                    >
-                      Mois
-                    </button>
-                  </div>
+                  {calendarMode === 'calendar' ? (
+                    <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
+                      <button
+                        type="button"
+                        onClick={() => setTimeView('week')}
+                        className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
+                          timeView === 'week'
+                            ? 'bg-[#E8E3D6] text-[#0B0D10]'
+                            : 'text-[#A9ACBA] hover:text-[#ECECF3]'
+                        }`}
+                      >
+                        Semaine
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTimeView('month')}
+                        className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
+                          timeView === 'month'
+                            ? 'bg-[#E8E3D6] text-[#0B0D10]'
+                            : 'text-[#A9ACBA] hover:text-[#ECECF3]'
+                        }`}
+                      >
+                        Mois
+                      </button>
+                    </div>
+                  ) : null}
                   <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
                     <button
                       type="button"
@@ -1199,6 +1202,20 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       <List className="w-5 h-5" />
                     </button>
                   </div>
+                  <label
+                    htmlFor="agendaUpload"
+                    className="flex items-center gap-2 h-11 px-4 rounded-full border border-dashed border-[#1F2230] text-sm font-medium text-[#ECECF3] cursor-pointer hover:bg-[#1A1D26]"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Importer une photo
+                  </label>
+                  <input
+                    id="agendaUpload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleAgendaImageUpload(e.target.files?.[0])}
+                  />
                 </div>
                 {calendarMode === 'tasks' ? (
                   <div className="flex items-center gap-2 text-sm text-[#A9ACBA]">
@@ -1216,25 +1233,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex-1" />
-              <div className="flex gap-2 items-center">
-                <label
-                  htmlFor="agendaUpload"
-                  className="flex items-center gap-2 h-10 px-4 rounded-2xl border border-dashed border-[#1F2230] text-sm font-medium text-[#ECECF3] cursor-pointer hover:bg-[#1A1D26]"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Importer une photo
-                </label>
-                <input
-                  id="agendaUpload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleAgendaImageUpload(e.target.files?.[0])}
-                />
-              </div>
-            </div>
           </div>
 
           {uploadNotice && (
@@ -1260,10 +1258,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       <div className="text-[10px] text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
                       {timeView === 'week' ? (
                         <div
-                          className={`text-base font-semibold ${
+                          className={`text-base font-semibold w-8 h-8 rounded-full flex items-center justify-center mx-auto transition ${
                             isCurrentRangeToday(date)
-                              ? 'text-white bg-[#4169E1] w-10 h-10 rounded-full flex items-center justify-center mx-auto'
-                              : 'text-[#ECECF3]'
+                              ? 'text-white bg-[#4169E1]'
+                              : 'text-[#ECECF3] hover:bg-[#2B2F3A]'
                           }`}
                         >
                           {date.getDate()}
@@ -1285,22 +1283,28 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     return (
                       <div
                         key={index}
-                        onClick={() => {
+                        onClick={(event) => {
+                          const rect = event.currentTarget.getBoundingClientRect();
+                          const modalWidth = 360;
+                          const padding = 16;
+                          const canPlaceRight = rect.right + modalWidth + padding <= window.innerWidth;
+                          const anchorX = canPlaceRight ? rect.right + padding : rect.left - modalWidth - padding;
+                          setTaskModalAnchor({ x: Math.max(padding, anchorX), y: rect.top });
                           setSelectedDate(dateString);
                           resetTaskForm();
                           setShowAddDialog(true);
                         }}
-                        className={`border-r border-[#1F2230] last:border-r-0 p-3 cursor-pointer ${
+                        className={`group border-r border-[#1F2230] last:border-r-0 p-3 cursor-pointer ${
                           isCurrentRangeToday(date) ? 'bg-[#4169E1]/5' : ''
                         } ${isOutsideMonth ? 'bg-[#121520] text-[#6F7587]' : ''}`}
                       >
                         {timeView === 'month' ? (
                           <div className="flex items-center justify-between mb-2">
                             <div
-                              className={`text-xs font-semibold ${
+                              className={`text-xs font-semibold w-8 h-8 rounded-full flex items-center justify-center transition ${
                                 isCurrentRangeToday(date)
-                                  ? 'text-white bg-[#4169E1] w-6 h-6 rounded-full flex items-center justify-center'
-                                  : 'text-[#A9ACBA]'
+                                  ? 'text-white bg-[#4169E1]'
+                                  : 'text-[#A9ACBA] group-hover:bg-[#2B2F3A]'
                               }`}
                             >
                               {date.getDate()}
@@ -1438,9 +1442,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           selectedColor={selectedColor}
           colors={TASK_COLORS}
           onColorChange={setSelectedColor}
+          anchor={taskModalAnchor}
           onClose={() => {
             setShowAddDialog(false);
             resetTaskForm();
+            setTaskModalAnchor(null);
           }}
           onSave={saveTask}
         />
