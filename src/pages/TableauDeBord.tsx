@@ -20,6 +20,7 @@ import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Switch } from '../ui/switch';
 import { TaskModal } from '../components/TaskModal';
 import alarmSound from '../assets/Gentle-little-bell-ringing-sound-effect.mp3';
@@ -207,7 +208,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
-  const infoPopoverRef = useRef<HTMLDivElement | null>(null);
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
@@ -475,32 +475,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setSelectedTime('');
   };
 
-  const toggleInfoTask = (id: string) => {
-    setInfoTaskId((prev) => (prev === id ? null : id));
-  };
-
-  useEffect(() => {
-    if (!infoTaskId) return;
-    const handleClickAway = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (!target) return;
-      if (infoPopoverRef.current?.contains(target)) return;
-      if (target.closest('[data-info-toggle="true"]')) return;
-      setInfoTaskId(null);
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setInfoTaskId(null);
-      }
-    };
-    document.addEventListener('mousedown', handleClickAway);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleClickAway);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [infoTaskId]);
-
   const updateTask = (id: string, updates: Partial<Task>) => {
     setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, ...updates } : task)));
   };
@@ -734,132 +708,132 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
 
                 <div className="ml-auto flex items-start">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleInfoTask(task.id);
-                    }}
-                    data-info-toggle="true"
-                    className="opacity-0 group-hover:opacity-100 transition text-[#A9ACBA] hover:text-[#ECECF3] rounded-full border border-[#3B4154] h-6 w-6 p-0"
-                    aria-label="Détails de la tâche"
-                  >
-                    <Info className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-
-                {infoTaskId === task.id && (
-                  <div
-                    ref={infoPopoverRef}
-                    className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20"
-                  >
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setInfoTaskId(null);
-                      }}
-                      className="absolute right-3 top-3 text-[#A9ACBA] hover:text-[#ECECF3] text-2xl leading-none h-8 w-8 p-0"
-                      aria-label="Fermer"
+                  <Popover open={infoTaskId === task.id} onOpenChange={(open) => setInfoTaskId(open ? task.id : null)}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={(e) => e.stopPropagation()}
+                        className="opacity-0 group-hover:opacity-100 transition text-[#A9ACBA] hover:text-[#ECECF3] rounded-full border border-[#3B4154] h-6 w-6 p-0"
+                        aria-label="Détails de la tâche"
+                      >
+                        <Info className="w-3.5 h-3.5" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="end"
+                      side="bottom"
+                      sideOffset={12}
+                      className="w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3"
+                      onOpenAutoFocus={(e) => e.preventDefault()}
                     >
-                      ×
-                    </Button>
-                    <div className="flex items-start gap-3 pt-2 pr-8 pl-1">
-                      <div className="min-w-0">
-                        <div className="text-sm text-[#A9ACBA]">Modifier la tâche</div>
-                        {editingNameId === task.id ? (
-                          <Input
-                            value={editingNameValue}
-                            onChange={(e) => setEditingNameValue(e.target.value)}
-                            onBlur={() => commitEditingName(task.id)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                commitEditingName(task.id);
-                              }
-                              if (e.key === 'Escape') {
-                                e.preventDefault();
-                                cancelEditingName();
-                              }
-                            }}
-                            autoFocus
-                            className="mt-1 h-8 px-2 text-base rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
-                          />
-                        ) : (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInfoTaskId(null);
+                        }}
+                        className="absolute right-3 top-3 text-[#A9ACBA] hover:text-[#ECECF3] text-2xl leading-none h-8 w-8 p-0"
+                        aria-label="Fermer"
+                      >
+                        ×
+                      </Button>
+                      <div className="flex items-start gap-3 pt-2 pr-8 pl-1">
+                        <div className="min-w-0">
+                          <div className="text-sm text-[#A9ACBA]">Modifier la tâche</div>
+                          {editingNameId === task.id ? (
+                            <Input
+                              value={editingNameValue}
+                              onChange={(e) => setEditingNameValue(e.target.value)}
+                              onBlur={() => commitEditingName(task.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  commitEditingName(task.id);
+                                }
+                                if (e.key === 'Escape') {
+                                  e.preventDefault();
+                                  cancelEditingName();
+                                }
+                              }}
+                              autoFocus
+                              className="mt-1 h-8 px-2 text-base rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
+                            />
+                          ) : (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => startEditingName(task)}
+                              className="mt-1 h-auto p-0 text-base font-semibold text-left text-[#ECECF3] break-words cursor-text hover:bg-transparent"
+                            >
+                              {task.name || 'Tâche sans titre'}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-3 space-y-3">
+                        <div className="rounded-2xl border border-[#2B3550] bg-[#161924]">
+                          <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
+                            <div>
+                              <div className="text-sm text-[#ECECF3]">Date</div>
+                              <div className="text-xs text-[#7F869A]">Définir une date</div>
+                            </div>
+                            <Input
+                              type="date"
+                              value={task.date ?? 'yyyy-mm-dd'}
+                              onChange={(e) => updateTask(task.id, { date: e.target.value })}
+                              className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                              style={{
+                                width: `${Math.max(1, (task.date ?? 'yyyy-mm-dd').length) + 2}ch`,
+                              }}
+                            />
+                          </div>
+                          <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
+                            <div>
+                              <div className="text-sm text-[#ECECF3]">Heure</div>
+                              <div className="text-xs text-[#7F869A]">Optionnel</div>
+                            </div>
+                            <Input
+                              type="time"
+                              value={task.time ?? '00:00'}
+                              onChange={(e) => updateTask(task.id, { time: e.target.value })}
+                              className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                              size={Math.max(1, (task.time ?? '00:00').length)}
+                            />
+                          </div>
+                          <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
+                            <div>
+                              <div className="text-sm text-[#ECECF3]">Urgent</div>
+                              <div className="text-xs text-[#7F869A]">Met le titre en rouge</div>
+                            </div>
+                            <Switch
+                              checked={!!task.urgent}
+                              onCheckedChange={(checked) => updateTask(task.id, { urgent: checked })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end">
                           <Button
                             type="button"
                             variant="ghost"
-                            onClick={() => startEditingName(task)}
-                            className="mt-1 h-auto p-0 text-base font-semibold text-left text-[#ECECF3] break-words cursor-text hover:bg-transparent"
-                          >
-                            {task.name || 'Tâche sans titre'}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-3 space-y-3">
-                      <div className="rounded-2xl border border-[#2B3550] bg-[#161924]">
-                        <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
-                          <div>
-                            <div className="text-sm text-[#ECECF3]">Date</div>
-                            <div className="text-xs text-[#7F869A]">Définir une date</div>
-                          </div>
-                          <Input
-                            type="date"
-                            value={task.date ?? 'yyyy-mm-dd'}
-                            onChange={(e) => updateTask(task.id, { date: e.target.value })}
-                            className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-                            style={{
-                              width: `${Math.max(1, (task.date ?? 'yyyy-mm-dd').length) + 2}ch`,
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setTasks((prev) => prev.filter((t) => t.id !== task.id));
+                              setInfoTaskId(null);
                             }}
-                          />
-                        </div>
-                        <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
-                          <div>
-                            <div className="text-sm text-[#ECECF3]">Heure</div>
-                            <div className="text-xs text-[#7F869A]">Optionnel</div>
-                          </div>
-                          <Input
-                            type="time"
-                            value={task.time ?? '00:00'}
-                            onChange={(e) => updateTask(task.id, { time: e.target.value })}
-                            className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-                            size={Math.max(1, (task.time ?? '00:00').length)}
-                          />
-                        </div>
-                        <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
-                          <div>
-                            <div className="text-sm text-[#ECECF3]">Urgent</div>
-                            <div className="text-xs text-[#7F869A]">Met le titre en rouge</div>
-                          </div>
-                          <Switch
-                            checked={!!task.urgent}
-                            onCheckedChange={(checked) => updateTask(task.id, { urgent: checked })}
-                          />
+                            className="h-auto p-0 text-red-500 hover:text-red-400"
+                            aria-label="Supprimer la tâche"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </Button>
                         </div>
                       </div>
-
-                      <div className="flex justify-end">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setTasks((prev) => prev.filter((t) => t.id !== task.id));
-                            setInfoTaskId(null);
-                          }}
-                          className="h-auto p-0 text-red-500 hover:text-red-400"
-                          aria-label="Supprimer la tâche"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             );
           })}
