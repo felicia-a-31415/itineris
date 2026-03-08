@@ -207,7 +207,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
-  const [taskModalAnchor, setTaskModalAnchor] = useState<{ x: number; y: number } | null>(null);
   const infoPopoverRef = useRef<HTMLDivElement | null>(null);
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -1295,13 +1294,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     return (
                       <div
                         key={index}
-                        onClick={(event) => {
-                          const rect = event.currentTarget.getBoundingClientRect();
-                          const modalWidth = 360;
-                          const padding = 16;
-                          const canPlaceRight = rect.right + modalWidth + padding <= window.innerWidth;
-                          const anchorX = canPlaceRight ? rect.right + padding : rect.left - modalWidth - padding;
-                          setTaskModalAnchor({ x: Math.max(padding, anchorX), y: rect.top });
+                        onClick={() => {
                           setSelectedDate(dateString);
                           resetTaskForm();
                           setShowAddDialog(true);
@@ -1455,11 +1448,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           selectedColor={selectedColor}
           colors={TASK_COLORS}
           onColorChange={setSelectedColor}
-          anchor={taskModalAnchor}
           onClose={() => {
             setShowAddDialog(false);
             resetTaskForm();
-            setTaskModalAnchor(null);
           }}
           onSave={saveTask}
         />

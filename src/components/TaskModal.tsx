@@ -1,4 +1,5 @@
 import React from 'react';
+import { Dialog, DialogContent } from '../ui/dialog';
 import { Input } from '../ui/input';
 
 interface TaskModalProps {
@@ -12,10 +13,6 @@ interface TaskModalProps {
   selectedColor: string;
   colors: string[];
   onColorChange: (value: string) => void;
-  anchor?: {
-    x: number;
-    y: number;
-  } | null;
   onClose: () => void;
   onSave: () => void;
 }
@@ -31,32 +28,12 @@ export function TaskModal({
   selectedColor,
   colors,
   onColorChange,
-  anchor,
   onClose,
   onSave,
 }: TaskModalProps) {
-  if (!isOpen) return null;
-
-  const modalWidth = 360;
-  const maxHeight = Math.min(620, Math.max(420, window.innerHeight - 48));
-  const top = anchor ? Math.min(Math.max(anchor.y, 16), window.innerHeight - maxHeight - 16) : 0;
-  const left = anchor ? anchor.x : 0;
-
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div
-        className="absolute rounded-[24px] bg-[#2B2F3A]/95 shadow-[0_32px_80px_rgba(0,0,0,0.7)] border border-white/10 overflow-hidden"
-        style={{
-          width: modalWidth,
-          maxHeight,
-          top: anchor ? top : '50%',
-          left: anchor ? left : '50%',
-          transform: anchor ? 'translateY(0)' : 'translate(-50%, -50%)',
-        }}
-      >
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="bg-[#2B2F3A]/95 border border-white/10 rounded-[24px] p-0 shadow-[0_32px_80px_rgba(0,0,0,0.7)]">
         <div className="flex items-center justify-between px-4 pt-4 pb-3">
           <button
             type="button"
@@ -75,7 +52,7 @@ export function TaskModal({
           </button>
         </div>
 
-        <div className="px-4 pb-5 overflow-y-auto" style={{ maxHeight: maxHeight - 56 }}>
+        <div className="px-4 pb-5 max-h-[75vh] overflow-y-auto">
           <div className="rounded-2xl bg-white/5 border border-white/10">
             <Input
               value={title}
@@ -119,7 +96,7 @@ export function TaskModal({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
