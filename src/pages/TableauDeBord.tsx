@@ -21,7 +21,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Switch } from '../ui/switch';
 import { TaskModal } from '../components/TaskModal';
-import alarmSound from '../assets/Christmas-jingle-bells-notification-melody.mp3';
+import alarmSound from '../assets/Gentle-little-bell-ringing-sound-effect.mp3';
 import { useAuth } from '../lib/auth';
 import {
   clearUserData,
