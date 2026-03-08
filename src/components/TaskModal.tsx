@@ -1,4 +1,5 @@
 import React from 'react';
+import { Input } from '../ui/input';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -76,27 +77,27 @@ export function TaskModal({
 
         <div className="px-4 pb-5 overflow-y-auto" style={{ maxHeight: maxHeight - 56 }}>
           <div className="rounded-2xl bg-white/5 border border-white/10">
-            <input
+            <Input
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
               placeholder="Nom de la tâche"
-              className="w-full bg-transparent border-b border-white/10 px-4 py-3 text-sm text-[#ECECF3] placeholder:text-[#A9ACBA] outline-none"
+              className="w-full bg-transparent border-0 border-b border-white/10 px-4 py-3 text-sm text-[#ECECF3] placeholder:text-[#A9ACBA] rounded-none"
             />
             <div className="grid gap-3 p-4">
               <label className="text-xs uppercase tracking-wide text-[#A9ACBA]">Date</label>
-              <input
+              <Input
                 type="date"
                 value={date}
                 onChange={(e) => onDateChange(e.target.value)}
-                className="h-10 rounded-xl bg-[#1B1E2A] border border-white/10 px-3 text-sm text-[#ECECF3] outline-none"
+                className="h-10 rounded-xl bg-[#1B1E2A] border-white/10 px-3 text-sm text-[#ECECF3]"
               />
 
               <label className="text-xs uppercase tracking-wide text-[#A9ACBA]">Heure (optionnel)</label>
-              <input
+              <Input
                 type="time"
                 value={time}
                 onChange={(e) => onTimeChange(e.target.value)}
-                className="h-10 rounded-xl bg-[#1B1E2A] border border-white/10 px-3 text-sm text-[#ECECF3] outline-none"
+                className="h-10 rounded-xl bg-[#1B1E2A] border-white/10 px-3 text-sm text-[#ECECF3]"
               />
             </div>
           </div>

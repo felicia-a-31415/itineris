@@ -17,6 +17,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { Button } from '../ui/button';
+import { Card } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Switch } from '../ui/switch';
@@ -807,11 +808,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             <div className="text-sm text-[#ECECF3]">Date</div>
                             <div className="text-xs text-[#7F869A]">Définir une date</div>
                           </div>
-                          <input
+                          <Input
                             type="date"
                             value={task.date ?? 'yyyy-mm-dd'}
                             onChange={(e) => updateTask(task.id, { date: e.target.value })}
-                            className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                            className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
                             style={{
                               width: `${Math.max(1, (task.date ?? 'yyyy-mm-dd').length) + 2}ch`,
                             }}
@@ -822,11 +823,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             <div className="text-sm text-[#ECECF3]">Heure</div>
                             <div className="text-xs text-[#7F869A]">Optionnel</div>
                           </div>
-                          <input
+                          <Input
                             type="time"
                             value={task.time ?? '00:00'}
                             onChange={(e) => updateTask(task.id, { time: e.target.value })}
-                            className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                            className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
                             size={Math.max(1, (task.time ?? '00:00').length)}
                           />
                         </div>
@@ -969,7 +970,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         <div className="grid gap-6 items-stretch">
           {/* Pomodoro */}
-          <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
+          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
             <div className="mb-2">
               <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
@@ -1116,11 +1117,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
               </div>
             </div>
-          </section>
+          </Card>
         </div>
 
         {/* Agenda en ligne */}
-        <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
+        <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
           <div className="flex flex-col gap-4">
             <p className="text-sm text-[#A9ACBA]">Agenda en ligne</p>
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -1388,10 +1389,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               </div>
             </div>
           )}
-        </section>
+        </Card>
 
         {/* Temps étudié */}
-        <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
+        <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
           <div className="flex flex-col gap-0">
             <p className="text-sm text-[#A9ACBA]">Temps étudié</p>
             <div className="flex flex-wrap items-center justify-between gap-3"></div>
@@ -1440,7 +1441,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               </div>
             </div>
           </div>
-        </section>
+        </Card>
 
         {/* Modal ajout tâche */}
         <TaskModal
