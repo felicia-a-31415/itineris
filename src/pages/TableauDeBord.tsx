@@ -1,6 +1,22 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Info, LogIn, LogOut, Pause, Play, Plus, RotateCcw, Settings, Sparkles, Trash2, Upload } from 'lucide-react';
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Flame,
+  Info,
+  List,
+  LogOut,
+  Pause,
+  Play,
+  Plus,
+  RotateCcw,
+  Settings,
+  Sparkles,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
@@ -47,35 +63,54 @@ const getDayName = (date: Date) => {
   return days[date.getDay()];
 };
 
-const formatWeekRangeLabel = (dates: Date[]) => {
-  if (!dates.length) return '';
-  const start = dates[0];
-  const end = dates[dates.length - 1];
-  const months = [
-    'janvier',
-    'février',
-    'mars',
-    'avril',
-    'mai',
-    'juin',
-    'juillet',
-    'août',
-    'septembre',
-    'octobre',
-    'novembre',
-    'décembre',
-  ];
-  const startDay = start.getDate();
-  const endDay = end.getDate();
-  const startMonth = months[start.getMonth()];
-  const endMonth = months[end.getMonth()];
+const MONTHS = [
+  'janvier',
+  'février',
+  'mars',
+  'avril',
+  'mai',
+  'juin',
+  'juillet',
+  'août',
+  'septembre',
+  'octobre',
+  'novembre',
+  'décembre',
+];
+
+const getWeekStartMonday = (date: Date) => {
+  const day = date.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const monday = new Date(date);
+  monday.setDate(date.getDate() + diff);
+  return monday;
+};
+
+const getMonthGridDates = (anchor: Date) => {
+  const monthStart = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+  const gridStart = getWeekStartMonday(monthStart);
+  const dates: Date[] = [];
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(gridStart);
+    date.setDate(gridStart.getDate() + i);
+    dates.push(date);
+  }
+  return dates;
+};
+
+const formatMonthRangeLabel = (start: Date, end: Date) => {
+  const startMonth = MONTHS[start.getMonth()];
+  const endMonth = MONTHS[end.getMonth()];
   const startYear = start.getFullYear();
   const endYear = end.getFullYear();
 
   if (startMonth === endMonth && startYear === endYear) {
-    return `Semaine du ${startDay} au ${endDay} ${endMonth} ${endYear}`;
+    return `${startMonth} ${startYear}`;
   }
-  return `Semaine du ${startDay} ${startMonth} ${startYear} au ${endDay} ${endMonth} ${endYear}`;
+  if (startYear === endYear) {
+    return `${startMonth} - ${endMonth} ${startYear}`;
+  }
+  return `${startMonth} ${startYear} - ${endMonth} ${endYear}`;
 };
 
 interface TableauDeBordScreenProps {
@@ -137,6 +172,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [weekOffset, setWeekOffset] = useState(0);
   const weekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
   const currentWeekStart = formatDate(getCurrentWeekDates(0)[0]);
+  const [timeView, setTimeView] = useState<'week' | 'month'>('week');
+  const [calendarMode, setCalendarMode] = useState<'calendar' | 'tasks'>('calendar');
+  const [monthOffset, setMonthOffset] = useState(0);
+  const monthAnchor = useMemo(() => {
+    const base = new Date();
+    base.setDate(1);
+    base.setMonth(base.getMonth() + monthOffset);
+    return base;
+  }, [monthOffset]);
+  const monthGridDates = useMemo(() => getMonthGridDates(monthAnchor), [monthAnchor]);
 
   const [tasks, setTasks] = useState<Task[]>(() => createDefaultTasks());
 
@@ -547,13 +592,43 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const previousWeekMinutes = studyData[previousWeekKey] ?? [];
   const previousWeekTotalMinutes = Math.round(previousWeekMinutes.reduce((sum, n) => sum + (n || 0), 0));
   const weekDeltaMinutes = activeWeekTotalMinutes - previousWeekTotalMinutes;
-  const weekRangeLabel = formatWeekRangeLabel(weekDates);
+  const monthRangeStart = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), 1);
+  const monthRangeEnd = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 0);
+  const monthRangeLabel =
+    timeView === 'month'
+      ? formatMonthRangeLabel(monthRangeStart, monthRangeEnd)
+      : formatMonthRangeLabel(weekDates[0], weekDates[weekDates.length - 1]);
+  const calendarDates = timeView === 'month' ? monthGridDates : weekDates;
+  const headerDates = timeView === 'month' ? calendarDates.slice(0, 7) : weekDates;
   const studyGoalMinutes = 240;
   const studyProgressRatio = Math.min(1, roundedStudiedMinutes / studyGoalMinutes || 0);
   const streakSegments = 7;
   const streakFilledSegments = Math.min(streakDays, streakSegments);
   const taskProgressRatio = totalTasks > 0 ? completedTasks / totalTasks : 0;
   const streakColor = streakDays > 0 ? '#F97316' : '#6B7280';
+  const isCurrentRangeToday = (date: Date) =>
+    isToday(date) && (timeView === 'month' ? monthOffset === 0 : weekOffset === 0);
+  const handlePrevRange = () => {
+    if (timeView === 'month') {
+      setMonthOffset((prev) => prev - 1);
+      return;
+    }
+    setWeekOffset((prev) => prev - 1);
+  };
+  const handleNextRange = () => {
+    if (timeView === 'month') {
+      setMonthOffset((prev) => prev + 1);
+      return;
+    }
+    setWeekOffset((prev) => prev + 1);
+  };
+  const handleToday = () => {
+    if (timeView === 'month') {
+      setMonthOffset(0);
+      return;
+    }
+    setWeekOffset(0);
+  };
   const agendaTasks = useMemo(() => {
     return [...tasks].sort((a, b) => {
       const aDate = new Date(`${a.date || formatDate(new Date())}T${a.time || '00:00'}`);
@@ -594,6 +669,198 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     }
     prevStreakRef.current = streakDays;
   }, [streakDays]);
+
+  const tasksListContent = (
+    <div className="space-y-3">
+      <div className="text-sm text-[#A9ACBA]">Tâches à faire</div>
+      {agendaTasks.length === 0 ? (
+        <div className="mt-2 text-[#ECECF3] text-lg">Aucune tâche pour l’instant</div>
+      ) : (
+        <div className="mt-3 divide-y divide-[#25293A]">
+          {visibleTasks.map((task) => {
+            const taskDate = task.date ? new Date(task.date) : null;
+            const displayDate = taskDate
+              ? taskDate.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })
+              : 'Date à définir';
+            return (
+              <div
+                key={task.id}
+                className={`group relative flex items-start gap-2 py-2 ${task.completed ? 'opacity-60' : ''}`}
+              >
+                <div className="mt-0.5">
+                  <Checkbox
+                    checked={task.completed}
+                    onClick={(e) => e.stopPropagation()}
+                    onCheckedChange={() => toggleTask(task.id)}
+                    className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
+                  />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  {editingNameId === task.id ? (
+                    <Input
+                      value={editingNameValue}
+                      onChange={(e) => setEditingNameValue(e.target.value)}
+                      onBlur={() => commitEditingName(task.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          commitEditingName(task.id);
+                        }
+                        if (e.key === 'Escape') {
+                          e.preventDefault();
+                          cancelEditingName();
+                        }
+                      }}
+                      autoFocus
+                      className="h-7 px-2 text-sm rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => startEditingName(task)}
+                      className={`text-sm font-medium text-left break-words ${
+                        task.completed ? 'line-through' : ''
+                      } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
+                    >
+                      {task.name || 'Tâche sans titre'}
+                    </button>
+                  )}
+                  <div className={`mt-0.5 text-xs text-[#A9ACBA] ${task.completed ? 'line-through' : ''}`}>
+                    {displayDate} {task.time ? `· ${task.time}` : ''}
+                  </div>
+                </div>
+
+                <div className="ml-auto flex items-start">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleInfoTask(task.id);
+                    }}
+                    data-info-toggle="true"
+                    className="opacity-0 group-hover:opacity-100 transition text-[#A9ACBA] hover:text-[#ECECF3] rounded-full border border-[#3B4154] h-6 w-6 flex items-center justify-center"
+                    aria-label="Détails de la tâche"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {infoTaskId === task.id && (
+                  <div
+                    ref={infoPopoverRef}
+                    className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20"
+                  >
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setInfoTaskId(null);
+                      }}
+                      className="absolute right-3 top-3 text-[#A9ACBA] hover:text-[#ECECF3] text-2xl leading-none"
+                      aria-label="Fermer"
+                    >
+                      ×
+                    </button>
+                    <div className="flex items-start gap-3 pt-2 pr-8 pl-1">
+                      <div className="min-w-0">
+                        <div className="text-sm text-[#A9ACBA]">Modifier la tâche</div>
+                        {editingNameId === task.id ? (
+                          <Input
+                            value={editingNameValue}
+                            onChange={(e) => setEditingNameValue(e.target.value)}
+                            onBlur={() => commitEditingName(task.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                commitEditingName(task.id);
+                              }
+                              if (e.key === 'Escape') {
+                                e.preventDefault();
+                                cancelEditingName();
+                              }
+                            }}
+                            autoFocus
+                            className="mt-1 h-8 px-2 text-base rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
+                          />
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => startEditingName(task)}
+                            className="mt-1 text-base font-semibold text-left text-[#ECECF3] break-words cursor-text"
+                          >
+                            {task.name || 'Tâche sans titre'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 space-y-3">
+                      <div className="rounded-2xl border border-[#2B3550] bg-[#161924]">
+                        <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
+                          <div>
+                            <div className="text-sm text-[#ECECF3]">Date</div>
+                            <div className="text-xs text-[#7F869A]">Définir une date</div>
+                          </div>
+                          <input
+                            type="date"
+                            value={task.date ?? 'yyyy-mm-dd'}
+                            onChange={(e) => updateTask(task.id, { date: e.target.value })}
+                            className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                            style={{
+                              width: `${Math.max(1, (task.date ?? 'yyyy-mm-dd').length) + 2}ch`,
+                            }}
+                          />
+                        </div>
+                        <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
+                          <div>
+                            <div className="text-sm text-[#ECECF3]">Heure</div>
+                            <div className="text-xs text-[#7F869A]">Optionnel</div>
+                          </div>
+                          <input
+                            type="time"
+                            value={task.time ?? '00:00'}
+                            onChange={(e) => updateTask(task.id, { time: e.target.value })}
+                            className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
+                            size={Math.max(1, (task.time ?? '00:00').length)}
+                          />
+                        </div>
+                        <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
+                          <div>
+                            <div className="text-sm text-[#ECECF3]">Urgent</div>
+                            <div className="text-xs text-[#7F869A]">Met le titre en rouge</div>
+                          </div>
+                          <Switch
+                            checked={!!task.urgent}
+                            onCheckedChange={(checked) => updateTask(task.id, { urgent: checked })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTasks((prev) => prev.filter((t) => t.id !== task.id));
+                            setInfoTaskId(null);
+                          }}
+                          className="text-red-500 hover:text-red-400"
+                          aria-label="Supprimer la tâche"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-10">
@@ -694,7 +961,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
         ) : null}
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr,1.4fr] items-stretch">
+        <div className="grid gap-6 items-stretch">
           {/* Pomodoro */}
           <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
             <div className="mb-2">
@@ -844,26 +1111,98 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               </div>
             </div>
           </section>
+        </div>
 
-          {/* Tasks */}
-          <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
-            <div className="text-sm text-[#A9ACBA]">Tâches à faire</div>
-            {agendaTasks.length === 0 ? (
-              <div className="mt-2 text-[#ECECF3] text-lg">Aucune tâche pour l’instant</div>
-            ) : (
-              <>
-                <div className="mt-3 flex items-center justify-between text-sm text-[#A9ACBA]">
-                  <div className="flex items-center gap-2">
-                    <span>{completedTasksCount} terminées</span>
-                    <span>•</span>
+        {/* Agenda en ligne */}
+        <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-[#A9ACBA]">Agenda en ligne</p>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  variant="outline"
+                  className="rounded-full border-[#2B3550] bg-[#0F1117] text-[#ECECF3] hover:bg-[#1A1D26] px-5"
+                  onClick={handleToday}
+                >
+                  Aujourd&apos;hui
+                </Button>
+                <div className="inline-flex items-center gap-1 rounded-full border border-[#2B3550] bg-[#0F1117] p-1">
+                  <button
+                    type="button"
+                    onClick={handlePrevRange}
+                    className="h-9 w-9 rounded-full text-[#ECECF3] hover:bg-[#1A1D26] flex items-center justify-center"
+                    aria-label="Période précédente"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextRange}
+                    className="h-9 w-9 rounded-full text-[#ECECF3] hover:bg-[#1A1D26] flex items-center justify-center"
+                    aria-label="Période suivante"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="text-2xl font-semibold text-[#ECECF3] capitalize">{monthRangeLabel}</div>
+              </div>
+
+              <div className="flex flex-col items-end gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1">
                     <button
                       type="button"
-                      onClick={() => setTasks((prev) => prev.filter((task) => !task.completed))}
-                      className="text-[#F43F5E] hover:text-[#FF5E7A]"
+                      onClick={() => setTimeView('week')}
+                      className={`px-4 py-2 text-sm font-semibold rounded-full transition ${
+                        timeView === 'week'
+                          ? 'bg-[#E8E3D6] text-[#0B0D10]'
+                          : 'text-[#A9ACBA] hover:text-[#ECECF3]'
+                      }`}
                     >
-                      Effacer
+                      Semaine
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTimeView('month')}
+                      className={`px-4 py-2 text-sm font-semibold rounded-full transition ${
+                        timeView === 'month'
+                          ? 'bg-[#E8E3D6] text-[#0B0D10]'
+                          : 'text-[#A9ACBA] hover:text-[#ECECF3]'
+                      }`}
+                    >
+                      Mois
                     </button>
                   </div>
+                  <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1">
+                    <button
+                      type="button"
+                      onClick={() => setCalendarMode('calendar')}
+                      className={`h-10 w-12 rounded-full flex items-center justify-center transition ${
+                        calendarMode === 'calendar'
+                          ? 'bg-[#9FD0FF] text-[#0B0D10]'
+                          : 'text-[#A9ACBA] hover:text-[#ECECF3]'
+                      }`}
+                      aria-label="Vue calendrier"
+                    >
+                      <Calendar className="w-5 h-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCalendarMode('tasks')}
+                      className={`h-10 w-12 rounded-full flex items-center justify-center transition ${
+                        calendarMode === 'tasks'
+                          ? 'bg-[#9FD0FF] text-[#0B0D10]'
+                          : 'text-[#A9ACBA] hover:text-[#ECECF3]'
+                      }`}
+                      aria-label="Vue liste"
+                    >
+                      <List className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-[#A9ACBA]">
+                  <span>{completedTasksCount} terminées</span>
+                  <span>•</span>
                   <button
                     type="button"
                     onClick={() => setShowCompletedTasks((prev) => !prev)}
@@ -872,220 +1211,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     {showCompletedTasks ? 'Masquer' : 'Afficher'}
                   </button>
                 </div>
-
-                <div className="mt-3 divide-y divide-[#25293A]">
-                  {visibleTasks.map((task) => {
-                  const taskDate = task.date ? new Date(task.date) : null;
-                  const displayDate = taskDate
-                    ? taskDate.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })
-                    : 'Date à définir';
-                  return (
-                    <div
-                      key={task.id}
-                      className={`group relative flex items-start gap-2 py-2 ${
-                        task.completed ? 'opacity-60' : ''
-                      }`}
-                    >
-                      <div className="mt-0.5">
-                        <Checkbox
-                          checked={task.completed}
-                          onClick={(e) => e.stopPropagation()}
-                          onCheckedChange={() => toggleTask(task.id)}
-                          className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
-                        />
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        {editingNameId === task.id ? (
-                          <Input
-                            value={editingNameValue}
-                            onChange={(e) => setEditingNameValue(e.target.value)}
-                            onBlur={() => commitEditingName(task.id)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                commitEditingName(task.id);
-                              }
-                              if (e.key === 'Escape') {
-                                e.preventDefault();
-                                cancelEditingName();
-                              }
-                            }}
-                            autoFocus
-                            className="h-7 px-2 text-sm rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
-                          />
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => startEditingName(task)}
-                            className={`text-sm font-medium text-left break-words ${
-                              task.completed ? 'line-through' : ''
-                            } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
-                          >
-                            {task.name || 'Tâche sans titre'}
-                          </button>
-                        )}
-                        <div
-                          className={`mt-0.5 text-xs text-[#A9ACBA] ${
-                            task.completed ? 'line-through' : ''
-                          }`}
-                        >
-                          {displayDate} {task.time ? `· ${task.time}` : ''}
-                        </div>
-                      </div>
-
-                      <div className="ml-auto flex items-start">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleInfoTask(task.id);
-                          }}
-                          data-info-toggle="true"
-                          className="opacity-0 group-hover:opacity-100 transition text-[#A9ACBA] hover:text-[#ECECF3] rounded-full border border-[#3B4154] h-6 w-6 flex items-center justify-center"
-                          aria-label="Détails de la tâche"
-                        >
-                          <Info className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      {infoTaskId === task.id && (
-                        <div
-                          ref={infoPopoverRef}
-                          className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20"
-                        >
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setInfoTaskId(null);
-                            }}
-                            className="absolute right-3 top-3 text-[#A9ACBA] hover:text-[#ECECF3] text-2xl leading-none"
-                            aria-label="Fermer"
-                          >
-                            ×
-                          </button>
-                          <div className="flex items-start gap-3 pt-2 pr-8 pl-1">
-                            <div className="min-w-0">
-                              <div className="text-sm text-[#A9ACBA]">Modifier la tâche</div>
-                              {editingNameId === task.id ? (
-                                <Input
-                                  value={editingNameValue}
-                                  onChange={(e) => setEditingNameValue(e.target.value)}
-                                  onBlur={() => commitEditingName(task.id)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      e.preventDefault();
-                                      commitEditingName(task.id);
-                                    }
-                                    if (e.key === 'Escape') {
-                                      e.preventDefault();
-                                      cancelEditingName();
-                                    }
-                                  }}
-                                  autoFocus
-                                  className="mt-1 h-8 px-2 text-base rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
-                                />
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => startEditingName(task)}
-                                  className="mt-1 text-base font-semibold text-left text-[#ECECF3] break-words cursor-text"
-                                >
-                                  {task.name || 'Tâche sans titre'}
-                                </button>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="mt-3 space-y-3">
-                            <div className="rounded-2xl border border-[#2B3550] bg-[#161924]">
-                              <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
-                                <div>
-                                  <div className="text-sm text-[#ECECF3]">Date</div>
-                                  <div className="text-xs text-[#7F869A]">Définir une date</div>
-                                </div>
-                                <input
-                                  type="date"
-                                  value={task.date ?? 'yyyy-mm-dd'}
-                                  onChange={(e) => updateTask(task.id, { date: e.target.value })}
-                                  className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-                                  style={{
-                                    width: `${Math.max(1, (task.date ?? 'yyyy-mm-dd').length) + 2}ch`,
-                                  }}
-                                />
-                              </div>
-                              <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
-                                <div>
-                                  <div className="text-sm text-[#ECECF3]">Heure</div>
-                                  <div className="text-xs text-[#7F869A]">Optionnel</div>
-                                </div>
-                                <input
-                                  type="time"
-                                  value={task.time ?? '00:00'}
-                                  onChange={(e) => updateTask(task.id, { time: e.target.value })}
-                                  className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-                                  size={Math.max(1, (task.time ?? '00:00').length)}
-                                />
-                              </div>
-                              <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
-                                <div>
-                                  <div className="text-sm text-[#ECECF3]">Urgent</div>
-                                  <div className="text-xs text-[#7F869A]">Met le titre en rouge</div>
-                                </div>
-                                <Switch
-                                  checked={!!task.urgent}
-                                  onCheckedChange={(checked) => updateTask(task.id, { urgent: checked })}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="flex justify-end">
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setTasks((prev) => prev.filter((t) => t.id !== task.id));
-                                  setInfoTaskId(null);
-                                }}
-                                className="text-red-500 hover:text-red-400"
-                                aria-label="Supprimer la tâche"
-                              >
-                                <Trash2 className="w-5 h-5" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                </div>
-              </>
-            )}
-          </section>
-        </div>
-
-        {/* Agenda en ligne */}
-        <section className="bg-[#161924] border border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
-          <div className="flex flex-col gap-3">
-            <p className="text-sm text-[#A9ACBA]">Agenda en ligne</p>
-            <div className="flex flex-wrap items-center gap-3 text-base font-semibold text-[#4169E1]">
-              <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w - 1)}>
-                ← Semaine précédente
-              </button>
-              <div className="h-4 w-px bg-[#E8E3D6]" />
-              <button type="button" className="hover:underline" onClick={() => setWeekOffset(0)}>
-                Aujourd&apos;hui
-              </button>
-              <div className="h-4 w-px bg-[#E8E3D6]" />
-              <button type="button" className="hover:underline" onClick={() => setWeekOffset((w) => w + 1)}>
-                Semaine suivante →
-              </button>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="text-2xl font-semibold text-[#ECECF3]">{weekRangeLabel}</div>
+              <div className="flex-1" />
               <div className="flex gap-2 items-center">
                 <Button
                   onClick={() => {
@@ -1123,106 +1253,128 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             </div>
           )}
 
-          <div className="mt-6 overflow-x-auto">
-            <div className="w-[1104px] min-w-[1104px] shrink-0">
-              <div className="grid grid-cols-7 border-b border-[#1F2230]">
-                {weekDates.map((date, index) => (
-                  <div
-                    key={index}
-                    className={`p-3 text-center border-r border-[#1F2230] last:border-r-0 ${
-                      isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
-                    }`}
-                  >
-                    <div className="text-[10px] text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
-                    <div
-                      className={`text-base font-semibold ${
-                        isToday(date) && weekOffset === 0
-                          ? 'text-white bg-[#4169E1] w-10 h-10 rounded-full flex items-center justify-center mx-auto'
-                          : 'text-[#ECECF3]'
-                      }`}
-                    >
-                      {date.getDate()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-7 min-h-[380px]">
-                {weekDates.map((date, index) => {
-                  const dateString = formatDate(date);
-                  const tasksForDay = getTasksForDate(dateString);
-
-                  return (
+          {calendarMode === 'tasks' ? (
+            <div className="mt-4">{tasksListContent}</div>
+          ) : (
+            <div className="mt-6 overflow-x-auto">
+              <div className="w-[1104px] min-w-[1104px] shrink-0">
+                <div className="grid grid-cols-7 border-b border-[#1F2230]">
+                  {headerDates.map((date, index) => (
                     <div
                       key={index}
-                      className={`border-r border-[#1F2230] last:border-r-0 p-3 ${
-                        isToday(date) && weekOffset === 0 ? 'bg-[#4169E1]/5' : ''
+                      className={`p-3 text-center border-r border-[#1F2230] last:border-r-0 ${
+                        timeView === 'week' && isCurrentRangeToday(date) ? 'bg-[#4169E1]/5' : ''
                       }`}
                     >
-                      <div className="space-y-3">
-                        {tasksForDay.map((task) => (
-                          <div
-                            key={task.id}
-                            className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
-                            style={{
-                              borderLeft: `4px solid ${task.color}`,
-                            }}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className="flex flex-col items-center gap-2 mt-0.5">
-                                <Checkbox
-                                  checked={task.completed}
-                                  onClick={(e) => e.stopPropagation()}
-                                  onCheckedChange={() => toggleTask(task.id)}
-                                  className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
-                                />
-                              </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-1 mb-1">
-                                {task.time && <span className="text-[10px] text-[#A9ACBA]">{task.time}</span>}
-                              </div>
+                      <div className="text-[10px] text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
+                      {timeView === 'week' ? (
+                        <div
+                          className={`text-base font-semibold ${
+                            isCurrentRangeToday(date)
+                              ? 'text-white bg-[#4169E1] w-10 h-10 rounded-full flex items-center justify-center mx-auto'
+                              : 'text-[#ECECF3]'
+                          }`}
+                        >
+                          {date.getDate()}
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
 
-                              {editingNameId === task.id ? (
-                                <Input
-                                  value={editingNameValue}
-                                  onChange={(e) => setEditingNameValue(e.target.value)}
-                                  onBlur={() => commitEditingName(task.id)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      e.preventDefault();
-                                      commitEditingName(task.id);
-                                    }
-                                    if (e.key === 'Escape') {
-                                      e.preventDefault();
-                                      cancelEditingName();
-                                    }
-                                  }}
-                                  autoFocus
-                                  className="h-6 px-2 text-xs rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
-                                />
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => startEditingName(task)}
-                                  className={`text-left text-xs break-words ${
-                                    task.completed ? 'line-through opacity-50' : ''
-                                  } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
-                                >
-                                  {task.name}
-                                </button>
-                              )}
+                <div className={`grid grid-cols-7 ${timeView === 'month' ? 'min-h-[720px]' : 'min-h-[380px]'}`}>
+                  {calendarDates.map((date, index) => {
+                    const dateString = formatDate(date);
+                    const tasksForDay = getTasksForDate(dateString);
+                    const isOutsideMonth =
+                      timeView === 'month' &&
+                      (date.getMonth() !== monthRangeStart.getMonth() ||
+                        date.getFullYear() !== monthRangeStart.getFullYear());
 
+                    return (
+                      <div
+                        key={index}
+                        className={`border-r border-[#1F2230] last:border-r-0 p-3 ${
+                          isCurrentRangeToday(date) ? 'bg-[#4169E1]/5' : ''
+                        } ${isOutsideMonth ? 'bg-[#121520] text-[#6F7587]' : ''}`}
+                      >
+                        {timeView === 'month' ? (
+                          <div className="flex items-center justify-between mb-2">
+                            <div
+                              className={`text-xs font-semibold ${
+                                isCurrentRangeToday(date)
+                                  ? 'text-white bg-[#4169E1] w-6 h-6 rounded-full flex items-center justify-center'
+                                  : 'text-[#A9ACBA]'
+                              }`}
+                            >
+                              {date.getDate()}
                             </div>
                           </div>
-                          </div>
-                        ))}
+                        ) : null}
+                        <div className="space-y-3">
+                          {tasksForDay.map((task) => (
+                            <div
+                              key={task.id}
+                              className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
+                              style={{
+                                borderLeft: `4px solid ${task.color}`,
+                              }}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="flex flex-col items-center gap-2 mt-0.5">
+                                  <Checkbox
+                                    checked={task.completed}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onCheckedChange={() => toggleTask(task.id)}
+                                    className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1 mb-1">
+                                    {task.time && <span className="text-[10px] text-[#A9ACBA]">{task.time}</span>}
+                                  </div>
+
+                                  {editingNameId === task.id ? (
+                                    <Input
+                                      value={editingNameValue}
+                                      onChange={(e) => setEditingNameValue(e.target.value)}
+                                      onBlur={() => commitEditingName(task.id)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          e.preventDefault();
+                                          commitEditingName(task.id);
+                                        }
+                                        if (e.key === 'Escape') {
+                                          e.preventDefault();
+                                          cancelEditingName();
+                                        }
+                                      }}
+                                      autoFocus
+                                      className="h-6 px-2 text-xs rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
+                                    />
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => startEditingName(task)}
+                                      className={`text-left text-xs break-words ${
+                                        task.completed ? 'line-through opacity-50' : ''
+                                      } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
+                                    >
+                                      {task.name}
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </section>
 
         {/* Temps étudié */}
