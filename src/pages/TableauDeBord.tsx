@@ -20,6 +20,7 @@ import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Switch } from '../ui/switch';
+import { TaskModal } from '../components/TaskModal';
 import alarmSound from '../assets/Christmas-jingle-bells-notification-melody.mp3';
 import { useAuth } from '../lib/auth';
 import {
@@ -1426,103 +1427,23 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         </section>
 
         {/* Modal ajout tâche */}
-        {showAddDialog && (
-          <div
-            className="fixed inset-0 z-50 flex min-h-screen w-screen items-stretch justify-end bg-black/50 backdrop-blur-sm"
-            onClick={() => {
-              setShowAddDialog(false);
-              resetTaskForm();
-            }}
-          >
-            <div
-              className="bg-[#1B1E2A]/95 border-l border-[#2B3550] shadow-[0_24px_70px_rgba(0,0,0,0.65)] w-full max-w-md h-full p-5 sm:p-6 relative overflow-y-auto rounded-l-3xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <h2 className="text-lg font-semibold text-[#ECECF3]">Créer une tâche</h2>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAddDialog(false);
-                    resetTaskForm();
-                  }}
-                  className="text-[#A9ACBA] hover:text-[#ECECF3] text-2xl leading-none"
-                  aria-label="Fermer"
-                >
-                  ×
-                </button>
-              </div>
-
-              <div className="grid gap-5 md:grid-cols-2">
-                <div className="space-y-3 md:col-span-2">
-                  <label className="text-sm text-[#ECECF3] block">Nom de la tâche</label>
-                  <Input
-                    value={newTaskName}
-                    onChange={(e) => setNewTaskName(e.target.value)}
-                    placeholder="Ex: Relire chapitre 4"
-                    className="rounded-2xl border-[#1F2230]"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-sm text-[#ECECF3] block">Date</label>
-                  <Input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="rounded-2xl border-[#1F2230]"
-                  />
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-sm text-[#ECECF3] block">Heure (optionnel)</label>
-                  <Input
-                    type="time"
-                    value={selectedTime}
-                    onChange={(e) => setSelectedTime(e.target.value)}
-                    className="rounded-2xl border-[#1F2230]"
-                  />
-                </div>
-
-                <div className="space-y-3 md:col-span-2">
-                  <label className="text-sm text-[#ECECF3] block">Couleur</label>
-                  <div className="flex gap-2 flex-wrap">
-                    {TASK_COLORS.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => setSelectedColor(color)}
-                        className={`w-8 h-8 rounded-xl transition-all ${
-                          selectedColor === color ? 'ring-2 ring-offset-2 ring-[#4169E1]' : ''
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-end gap-3">
-                <Button
-                  variant="outline"
-                  className="rounded-2xl border-[#1F2230]"
-                  onClick={() => {
-                    setShowAddDialog(false);
-                    resetTaskForm();
-                  }}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  onClick={saveTask}
-                  className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
-                >
-                  Enregistrer
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <TaskModal
+          isOpen={showAddDialog}
+          title={newTaskName}
+          onTitleChange={setNewTaskName}
+          date={selectedDate}
+          onDateChange={setSelectedDate}
+          time={selectedTime}
+          onTimeChange={setSelectedTime}
+          selectedColor={selectedColor}
+          colors={TASK_COLORS}
+          onColorChange={setSelectedColor}
+          onClose={() => {
+            setShowAddDialog(false);
+            resetTaskForm();
+          }}
+          onSave={saveTask}
+        />
 
       </div>
     </div>

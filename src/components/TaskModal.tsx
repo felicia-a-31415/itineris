@@ -1,0 +1,105 @@
+import React from 'react';
+
+interface TaskModalProps {
+  isOpen: boolean;
+  title: string;
+  onTitleChange: (value: string) => void;
+  date: string;
+  onDateChange: (value: string) => void;
+  time: string;
+  onTimeChange: (value: string) => void;
+  selectedColor: string;
+  colors: string[];
+  onColorChange: (value: string) => void;
+  onClose: () => void;
+  onSave: () => void;
+}
+
+export function TaskModal({
+  isOpen,
+  title,
+  onTitleChange,
+  date,
+  onDateChange,
+  time,
+  onTimeChange,
+  selectedColor,
+  colors,
+  onColorChange,
+  onClose,
+  onSave,
+}: TaskModalProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md px-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="w-full max-w-sm rounded-[24px] bg-[#2B2F3A]/95 shadow-[0_32px_80px_rgba(0,0,0,0.7)] border border-white/10 overflow-hidden">
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-sm font-semibold text-[#FF2D55] hover:text-[#FF6B85]"
+          >
+            Annuler
+          </button>
+          <div className="text-sm font-semibold text-[#ECECF3]">Nouvelle tâche</div>
+          <button
+            type="button"
+            onClick={onSave}
+            className="text-sm font-semibold text-[#FF2D55] hover:text-[#FF6B85]"
+          >
+            Enregistrer
+          </button>
+        </div>
+
+        <div className="px-4 pb-5 max-h-[75vh] overflow-y-auto">
+          <div className="rounded-2xl bg-white/5 border border-white/10">
+            <input
+              value={title}
+              onChange={(e) => onTitleChange(e.target.value)}
+              placeholder="Nom de la tâche"
+              className="w-full bg-transparent border-b border-white/10 px-4 py-3 text-sm text-[#ECECF3] placeholder:text-[#A9ACBA] outline-none"
+            />
+            <div className="grid gap-3 p-4">
+              <label className="text-xs uppercase tracking-wide text-[#A9ACBA]">Date</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => onDateChange(e.target.value)}
+                className="h-10 rounded-xl bg-[#1B1E2A] border border-white/10 px-3 text-sm text-[#ECECF3] outline-none"
+              />
+
+              <label className="text-xs uppercase tracking-wide text-[#A9ACBA]">Heure (optionnel)</label>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => onTimeChange(e.target.value)}
+                className="h-10 rounded-xl bg-[#1B1E2A] border border-white/10 px-3 text-sm text-[#ECECF3] outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-2xl bg-white/5 border border-white/10 p-4">
+            <div className="text-xs uppercase tracking-wide text-[#A9ACBA] mb-3">Couleur</div>
+            <div className="flex flex-wrap gap-2">
+              {colors.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => onColorChange(color)}
+                  className={`w-8 h-8 rounded-xl transition ring-offset-2 ring-offset-[#2B2F3A] ${
+                    selectedColor === color ? 'ring-2 ring-[#FF2D55]' : ''
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
