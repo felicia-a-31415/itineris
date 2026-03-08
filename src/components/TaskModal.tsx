@@ -6,6 +6,7 @@ interface TaskModalProps {
   isOpen: boolean;
   title: string;
   onTitleChange: (value: string) => void;
+  titlePlaceholder?: string;
   date: string;
   onDateChange: (value: string) => void;
   time: string;
@@ -21,6 +22,7 @@ export function TaskModal({
   isOpen,
   title,
   onTitleChange,
+  titlePlaceholder = 'Ajouter un titre',
   date,
   onDateChange,
   time,
@@ -57,7 +59,7 @@ export function TaskModal({
             <Input
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
-              placeholder="Nom de la tâche"
+              placeholder={titlePlaceholder}
               className="w-full bg-transparent border-0 border-b border-white/10 px-4 py-3 text-sm text-[#ECECF3] placeholder:text-[#A9ACBA] rounded-none"
             />
             <div className="grid gap-3 p-4">

@@ -207,6 +207,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [infoTaskId, setInfoTaskId] = useState<string | null>(null);
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
+  const [modalTaskId, setModalTaskId] = useState<string | null>(null);
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -473,6 +474,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setSelectedColor(TASK_COLORS[0]);
     setSelectedDate(formatDate(new Date()));
     setSelectedTime('');
+    setModalTaskId(null);
   };
 
   const updateTask = (id: string, updates: Partial<Task>) => {
@@ -498,6 +500,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   };
 
   const saveTask = () => {
+    if (modalTaskId) {
+      updateTask(modalTaskId, {
+        name: newTaskName.trim() || 'Aucun titre',
+        date: selectedDate || undefined,
+        time: selectedTime || undefined,
+        color: selectedColor,
+      });
+      setShowAddDialog(false);
+      resetTaskForm();
+      return;
+    }
     if (!newTaskName.trim()) return;
 
     const newTask: Task = {
@@ -1269,8 +1282,21 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       <div
                         key={index}
                         onClick={() => {
+                          const newTask: Task = {
+                            id: Date.now().toString(),
+                            name: 'Aucun titre',
+                            completed: false,
+                            color: selectedColor,
+                            urgent: false,
+                            date: dateString,
+                            time: undefined,
+                          };
+                          setTasks((prev) => [...prev, newTask]);
                           setSelectedDate(dateString);
-                          resetTaskForm();
+                          setNewTaskName('Aucun titre');
+                          setModalTaskId(newTask.id);
+                          setEditingNameId(newTask.id);
+                          setEditingNameValue('Aucun titre');
                           setShowAddDialog(true);
                         }}
                         className={`group border-r border-[#1F2230] last:border-r-0 p-3 cursor-pointer ${
@@ -1414,14 +1440,35 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         <TaskModal
           isOpen={showAddDialog}
           title={newTaskName}
-          onTitleChange={setNewTaskName}
+          onTitleChange={(value) => {
+            setNewTaskName(value);
+            if (modalTaskId) {
+              updateTask(modalTaskId, { name: value.trim() || 'Aucun titre' });
+            }
+          }}
+          titlePlaceholder="Ajouter un titre"
           date={selectedDate}
-          onDateChange={setSelectedDate}
+          onDateChange={(value) => {
+            setSelectedDate(value);
+            if (modalTaskId) {
+              updateTask(modalTaskId, { date: value || undefined });
+            }
+          }}
           time={selectedTime}
-          onTimeChange={setSelectedTime}
+          onTimeChange={(value) => {
+            setSelectedTime(value);
+            if (modalTaskId) {
+              updateTask(modalTaskId, { time: value || undefined });
+            }
+          }}
           selectedColor={selectedColor}
           colors={TASK_COLORS}
-          onColorChange={setSelectedColor}
+          onColorChange={(value) => {
+            setSelectedColor(value);
+            if (modalTaskId) {
+              updateTask(modalTaskId, { color: value });
+            }
+          }}
           onClose={() => {
             setShowAddDialog(false);
             resetTaskForm();
