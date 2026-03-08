@@ -717,15 +717,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       className="h-7 px-2 text-sm rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
                     />
                   ) : (
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
                       onClick={() => startEditingName(task)}
-                      className={`text-sm font-medium text-left break-words ${
+                      className={`h-auto p-0 text-sm font-medium text-left break-words ${
                         task.completed ? 'line-through' : ''
-                      } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
+                      } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'} hover:bg-transparent`}
                     >
                       {task.name || 'Tâche sans titre'}
-                    </button>
+                    </Button>
                   )}
                   <div className={`mt-0.5 text-xs text-[#A9ACBA] ${task.completed ? 'line-through' : ''}`}>
                     {displayDate} {task.time ? `· ${task.time}` : ''}
@@ -733,18 +734,19 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
 
                 <div className="ml-auto flex items-start">
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleInfoTask(task.id);
                     }}
                     data-info-toggle="true"
-                    className="opacity-0 group-hover:opacity-100 transition text-[#A9ACBA] hover:text-[#ECECF3] rounded-full border border-[#3B4154] h-6 w-6 flex items-center justify-center"
+                    className="opacity-0 group-hover:opacity-100 transition text-[#A9ACBA] hover:text-[#ECECF3] rounded-full border border-[#3B4154] h-6 w-6 p-0"
                     aria-label="Détails de la tâche"
                   >
                     <Info className="w-3.5 h-3.5" />
-                  </button>
+                  </Button>
                 </div>
 
                 {infoTaskId === task.id && (
@@ -752,17 +754,18 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     ref={infoPopoverRef}
                     className="absolute right-0 top-full mt-3 w-96 max-w-[calc(100vw-2rem)] rounded-3xl border border-[#2B3550] bg-[#1A1D26] shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35)] p-3 z-20"
                   >
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
                       onClick={(e) => {
                         e.stopPropagation();
                         setInfoTaskId(null);
                       }}
-                      className="absolute right-3 top-3 text-[#A9ACBA] hover:text-[#ECECF3] text-2xl leading-none"
+                      className="absolute right-3 top-3 text-[#A9ACBA] hover:text-[#ECECF3] text-2xl leading-none h-8 w-8 p-0"
                       aria-label="Fermer"
                     >
                       ×
-                    </button>
+                    </Button>
                     <div className="flex items-start gap-3 pt-2 pr-8 pl-1">
                       <div className="min-w-0">
                         <div className="text-sm text-[#A9ACBA]">Modifier la tâche</div>
@@ -785,13 +788,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             className="mt-1 h-8 px-2 text-base rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
                           />
                         ) : (
-                          <button
+                          <Button
                             type="button"
+                            variant="ghost"
                             onClick={() => startEditingName(task)}
-                            className="mt-1 text-base font-semibold text-left text-[#ECECF3] break-words cursor-text"
+                            className="mt-1 h-auto p-0 text-base font-semibold text-left text-[#ECECF3] break-words cursor-text hover:bg-transparent"
                           >
                             {task.name || 'Tâche sans titre'}
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -839,18 +843,19 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       </div>
 
                       <div className="flex justify-end">
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
                             setTasks((prev) => prev.filter((t) => t.id !== task.id));
                             setInfoTaskId(null);
                           }}
-                          className="text-red-500 hover:text-red-400"
+                          className="h-auto p-0 text-red-500 hover:text-red-400"
                           aria-label="Supprimer la tâche"
                         >
                           <Trash2 className="w-5 h-5" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -1128,22 +1133,24 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   Aujourd&apos;hui
                 </Button>
                 <div className="inline-flex items-center gap-1 rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
-                  <button
+                  <Button
                     type="button"
                     onClick={handlePrevRange}
-                    className="h-9 w-9 rounded-full text-[#ECECF3] hover:bg-[#1A1D26] flex items-center justify-center"
+                    variant="ghost"
+                    className="h-9 w-9 rounded-full text-[#ECECF3] hover:bg-[#1A1D26] p-0"
                     aria-label="Période précédente"
                   >
                     <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     onClick={handleNextRange}
-                    className="h-9 w-9 rounded-full text-[#ECECF3] hover:bg-[#1A1D26] flex items-center justify-center"
+                    variant="ghost"
+                    className="h-9 w-9 rounded-full text-[#ECECF3] hover:bg-[#1A1D26] p-0"
                     aria-label="Période suivante"
                   >
                     <ChevronRight className="w-5 h-5" />
-                  </button>
+                  </Button>
                 </div>
                 <div className="text-2xl font-semibold text-[#ECECF3] capitalize">{monthRangeLabel}</div>
               </div>
@@ -1152,9 +1159,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 <div className="flex flex-wrap items-center gap-2">
                   {calendarMode === 'calendar' ? (
                     <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setTimeView('week')}
+                        variant="ghost"
                         className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
                           timeView === 'week'
                             ? 'bg-[#E8E3D6] text-[#0B0D10]'
@@ -1162,10 +1170,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         }`}
                       >
                         Semaine
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
                         onClick={() => setTimeView('month')}
+                        variant="ghost"
                         className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
                           timeView === 'month'
                             ? 'bg-[#E8E3D6] text-[#0B0D10]'
@@ -1173,13 +1182,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         }`}
                       >
                         Mois
-                      </button>
+                      </Button>
                     </div>
                   ) : null}
                   <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
-                    <button
+                    <Button
                       type="button"
                       onClick={() => setCalendarMode('calendar')}
+                      variant="ghost"
                       className={`h-9 w-11 rounded-full flex items-center justify-center transition ${
                         calendarMode === 'calendar'
                           ? 'bg-[#9FD0FF] text-[#0B0D10]'
@@ -1188,10 +1198,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       aria-label="Vue calendrier"
                     >
                       <Calendar className="w-5 h-5" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => setCalendarMode('tasks')}
+                      variant="ghost"
                       className={`h-9 w-11 rounded-full flex items-center justify-center transition ${
                         calendarMode === 'tasks'
                           ? 'bg-[#9FD0FF] text-[#0B0D10]'
@@ -1200,15 +1211,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       aria-label="Vue liste"
                     >
                       <List className="w-5 h-5" />
-                    </button>
+                    </Button>
                   </div>
-                  <label
-                    htmlFor="agendaUpload"
-                    className="flex items-center gap-2 h-11 px-4 rounded-full border border-dashed border-[#1F2230] text-sm font-medium text-[#ECECF3] cursor-pointer hover:bg-[#1A1D26]"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Importer une photo
-                  </label>
+                  <Button asChild variant="ghost" className="h-11 px-4 rounded-full border border-[#2B3550] bg-[#0F1117] text-sm font-semibold text-[#ECECF3] hover:bg-[#1A1D26]">
+                    <label htmlFor="agendaUpload" className="flex items-center gap-2 cursor-pointer">
+                      <Upload className="w-4 h-4" />
+                      Importer une photo
+                    </label>
+                  </Button>
                   <input
                     id="agendaUpload"
                     type="file"
@@ -1221,13 +1231,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   <div className="flex items-center gap-2 text-sm text-[#A9ACBA]">
                     <span>{completedTasksCount} terminées</span>
                     <span>•</span>
-                    <button
+                    <Button
                       type="button"
                       onClick={() => setShowCompletedTasks((prev) => !prev)}
-                      className="text-[#F43F5E] hover:text-[#FF5E7A]"
+                      variant="ghost"
+                      className="h-auto p-0 text-[#F43F5E] hover:text-[#FF5E7A]"
                     >
                       {showCompletedTasks ? 'Masquer' : 'Afficher'}
-                    </button>
+                    </Button>
                   </div>
                 ) : null}
               </div>
@@ -1354,15 +1365,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       className="h-6 px-2 text-xs rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
                                     />
                                   ) : (
-                                    <button
+                                    <Button
                                       type="button"
+                                      variant="ghost"
                                       onClick={() => startEditingName(task)}
-                                      className={`text-left text-xs break-words ${
+                                      className={`h-auto p-0 text-left text-xs break-words ${
                                         task.completed ? 'line-through opacity-50' : ''
-                                      } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
+                                      } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'} hover:bg-transparent`}
                                     >
                                       {task.name}
-                                    </button>
+                                    </Button>
                                   )}
                                 </div>
                               </div>
