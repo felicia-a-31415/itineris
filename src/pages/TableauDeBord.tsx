@@ -1121,12 +1121,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               <div className="flex flex-wrap items-center gap-3">
                 <Button
                   variant="outline"
-                  className="rounded-full border-[#2B3550] bg-[#0F1117] text-[#ECECF3] hover:bg-[#1A1D26] px-5"
+                  className="h-11 rounded-full border-[#2B3550] bg-[#0F1117] text-[#ECECF3] hover:bg-[#1A1D26] px-5"
                   onClick={handleToday}
                 >
                   Aujourd&apos;hui
                 </Button>
-                <div className="inline-flex items-center gap-1 rounded-full border border-[#2B3550] bg-[#0F1117] p-1">
+                <div className="inline-flex items-center gap-1 rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
                   <button
                     type="button"
                     onClick={handlePrevRange}
@@ -1149,11 +1149,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
               <div className="flex flex-col items-end gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1">
+                  <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
                     <button
                       type="button"
                       onClick={() => setTimeView('week')}
-                      className={`px-4 py-2 text-sm font-semibold rounded-full transition ${
+                      className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
                         timeView === 'week'
                           ? 'bg-[#E8E3D6] text-[#0B0D10]'
                           : 'text-[#A9ACBA] hover:text-[#ECECF3]'
@@ -1164,7 +1164,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     <button
                       type="button"
                       onClick={() => setTimeView('month')}
-                      className={`px-4 py-2 text-sm font-semibold rounded-full transition ${
+                      className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
                         timeView === 'month'
                           ? 'bg-[#E8E3D6] text-[#0B0D10]'
                           : 'text-[#A9ACBA] hover:text-[#ECECF3]'
@@ -1173,11 +1173,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       Mois
                     </button>
                   </div>
-                  <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1">
+                  <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
                     <button
                       type="button"
                       onClick={() => setCalendarMode('calendar')}
-                      className={`h-10 w-12 rounded-full flex items-center justify-center transition ${
+                      className={`h-9 w-11 rounded-full flex items-center justify-center transition ${
                         calendarMode === 'calendar'
                           ? 'bg-[#9FD0FF] text-[#0B0D10]'
                           : 'text-[#A9ACBA] hover:text-[#ECECF3]'
@@ -1189,7 +1189,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     <button
                       type="button"
                       onClick={() => setCalendarMode('tasks')}
-                      className={`h-10 w-12 rounded-full flex items-center justify-center transition ${
+                      className={`h-9 w-11 rounded-full flex items-center justify-center transition ${
                         calendarMode === 'tasks'
                           ? 'bg-[#9FD0FF] text-[#0B0D10]'
                           : 'text-[#A9ACBA] hover:text-[#ECECF3]'
@@ -1200,17 +1200,19 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-[#A9ACBA]">
-                  <span>{completedTasksCount} terminées</span>
-                  <span>•</span>
-                  <button
-                    type="button"
-                    onClick={() => setShowCompletedTasks((prev) => !prev)}
-                    className="text-[#F43F5E] hover:text-[#FF5E7A]"
-                  >
-                    {showCompletedTasks ? 'Masquer' : 'Afficher'}
-                  </button>
-                </div>
+                {calendarMode === 'tasks' ? (
+                  <div className="flex items-center gap-2 text-sm text-[#A9ACBA]">
+                    <span>{completedTasksCount} terminées</span>
+                    <span>•</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowCompletedTasks((prev) => !prev)}
+                      className="text-[#F43F5E] hover:text-[#FF5E7A]"
+                    >
+                      {showCompletedTasks ? 'Masquer' : 'Afficher'}
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </div>
 
