@@ -9,6 +9,7 @@ import {
   List,
   LogOut,
   Pause,
+  Pencil,
   Play,
   RotateCcw,
   Settings,
@@ -210,6 +211,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [modalTaskId, setModalTaskId] = useState<string | null>(null);
   const [draftTaskId, setDraftTaskId] = useState<string | null>(null);
   const draftTaskIdRef = useRef<string | null>(null);
+  const [taskDetailsId, setTaskDetailsId] = useState<string | null>(null);
   const [taskPopoverSide, setTaskPopoverSide] = useState<'left' | 'right'>('right');
   const taskPopoverAnchorRef = useRef<HTMLDivElement | null>(null);
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
@@ -1236,7 +1238,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       </Button>
                     </div>
                   ) : null}
-                  <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
+                  <div className="inline-flex items-center rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
                     <Button
                       type="button"
                       onClick={() => setCalendarMode('calendar')}
@@ -1376,7 +1378,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             const taskCard = (
                               <div
                                 ref={shouldShowEditor ? taskPopoverAnchorRef : undefined}
-                                onClick={(e) => e.stopPropagation()}
                                 className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
                                 style={{
                                   borderLeft: `4px solid ${task.color}`,
@@ -1431,6 +1432,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               </div>
                             );
 
+                            const taskDateLabel = task.date
+                              ? new Date(task.date).toLocaleDateString('fr-FR', {
+                                  weekday: 'long',
+                                  day: '2-digit',
+                                  month: 'long',
+                                })
+                              : 'Date à définir';
+                            const taskTimeLabel = task.time ? task.time : '';
+
                             return (
                               <div key={task.id}>
                                 {shouldShowEditor ? (
@@ -1442,7 +1452,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       }
                                     }}
                                   >
-                                    <PopoverAnchor asChild>{taskCard}</PopoverAnchor>
+                                    <PopoverAnchor asChild>
+                                      <div onClick={(e) => e.stopPropagation()}>{taskCard}</div>
+                                    </PopoverAnchor>
                                     <PopoverContent
                                       side={taskPopoverSide}
                                       align="start"
@@ -1490,7 +1502,70 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                     </PopoverContent>
                                   </Popover>
                                 ) : (
-                                  taskCard
+                                  <Popover
+                                    open={taskDetailsId === task.id}
+                                    onOpenChange={(open) => setTaskDetailsId(open ? task.id : null)}
+                                  >
+                                    <PopoverTrigger asChild>
+                                      <div
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setTaskDetailsId(task.id);
+                                        }}
+                                      >
+                                        {taskCard}
+                                      </div>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                      side="right"
+                                      align="start"
+                                      sideOffset={12}
+                                      collisionPadding={16}
+                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 text-[#ECECF3] p-4 shadow-[0_24px_70px_rgba(0,0,0,0.55)]"
+                                      onOpenAutoFocus={(e) => e.preventDefault()}
+                                    >
+                                      <div className="flex items-start justify-between gap-4">
+                                        <div className="flex items-center gap-3">
+                                          <span
+                                            className="h-4 w-4 rounded-[6px]"
+                                            style={{ backgroundColor: task.color }}
+                                          />
+                                          <div className="text-lg font-semibold">
+                                            {task.name || 'Aucun titre'}
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-[#A9ACBA]">
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              startEditingName(task);
+                                            }}
+                                            className="p-2 rounded-full hover:bg-white/5"
+                                            aria-label="Modifier la tâche"
+                                          >
+                                            <Pencil className="w-4 h-4" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setTasks((prev) => prev.filter((t) => t.id !== task.id));
+                                              setTaskDetailsId(null);
+                                            }}
+                                            className="p-2 rounded-full hover:bg-white/5"
+                                            aria-label="Supprimer la tâche"
+                                          >
+                                            <Trash2 className="w-4 h-4" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                      <div className="mt-3 text-sm text-[#A9ACBA]">
+                                        {taskDateLabel}
+                                        {taskTimeLabel ? ` • ${taskTimeLabel}` : ''}
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
                                 )}
                               </div>
                             );
