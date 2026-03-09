@@ -212,6 +212,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [draftTaskId, setDraftTaskId] = useState<string | null>(null);
   const draftTaskIdRef = useRef<string | null>(null);
   const [taskDetailsId, setTaskDetailsId] = useState<string | null>(null);
+  const ignoreCalendarClickUntilRef = useRef(0);
   const [taskPopoverSide, setTaskPopoverSide] = useState<'left' | 'right'>('right');
   const taskPopoverAnchorRef = useRef<HTMLDivElement | null>(null);
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
@@ -486,6 +487,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   };
 
   const cancelDraftTask = (id?: string | null) => {
+    ignoreCalendarClickUntilRef.current = Date.now() + 250;
     const targetId = id ?? draftTaskIdRef.current ?? draftTaskId;
     if (targetId) {
       setTasks((prev) => prev.filter((t) => t.id !== targetId));
@@ -517,6 +519,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   };
 
   const saveTask = () => {
+    ignoreCalendarClickUntilRef.current = Date.now() + 250;
     const effectiveId = modalTaskId ?? draftTaskIdRef.current ?? draftTaskId;
     if (effectiveId) {
       updateTask(effectiveId, {
@@ -1335,6 +1338,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       <div
                         key={index}
                         onClick={() => {
+                          if (Date.now() < ignoreCalendarClickUntilRef.current) return;
                           const newTask: Task = {
                             id: Date.now().toString(),
                             name: 'Aucun titre',
