@@ -1152,7 +1152,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 <div className="text-2xl font-semibold text-[#ECECF3] capitalize">{monthRangeLabel}</div>
               </div>
 
-              <div className="flex flex-col items-end gap-2">
+              <div
+                className={
+                  calendarMode === 'tasks'
+                    ? 'flex flex-wrap items-center gap-2'
+                    : 'flex flex-col items-end gap-2'
+                }
+              >
                 <div className="flex flex-wrap items-center gap-2">
                   {calendarMode === 'calendar' ? (
                     <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
