@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Calendar,
@@ -20,9 +20,9 @@ import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Switch } from '../ui/switch';
-import { TaskModal } from '../components/TaskModal';
+import { TaskEditor } from '../components/TaskModal';
 import alarmSound from '../assets/Gentle-little-bell-ringing-sound-effect.mp3';
 import { useAuth } from '../lib/auth';
 import {
@@ -208,6 +208,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
   const [modalTaskId, setModalTaskId] = useState<string | null>(null);
+  const [taskPopoverSide, setTaskPopoverSide] = useState<'left' | 'right'>('right');
+  const taskPopoverAnchorRef = useRef<HTMLDivElement | null>(null);
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -657,6 +659,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     }
     prevStreakRef.current = streakDays;
   }, [streakDays]);
+
+  useLayoutEffect(() => {
+    if (!showAddDialog || !modalTaskId || !taskPopoverAnchorRef.current) return;
+    const rect = taskPopoverAnchorRef.current.getBoundingClientRect();
+    const estimatedPopoverWidth = 380;
+    const spaceRight = window.innerWidth - rect.right;
+    setTaskPopoverSide(spaceRight < estimatedPopoverWidth ? 'left' : 'right');
+  }, [showAddDialog, modalTaskId, timeView, calendarMode]);
 
   const tasksListContent = (
     <div className="space-y-3">
@@ -1317,63 +1327,133 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           </div>
                         ) : null}
                         <div className="space-y-3">
-                          {tasksForDay.map((task) => (
-                            <div
-                              key={task.id}
-                              onClick={(e) => e.stopPropagation()}
-                              className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
-                              style={{
-                                borderLeft: `4px solid ${task.color}`,
-                              }}
-                            >
-                              <div className="flex items-start gap-3">
-                                <div className="flex flex-col items-center gap-2 mt-0.5">
-                                  <Checkbox
-                                    checked={task.completed}
-                                    onClick={(e) => e.stopPropagation()}
-                                    onCheckedChange={() => toggleTask(task.id)}
-                                    className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
-                                  />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-1 mb-1">
-                                    {task.time && <span className="text-[10px] text-[#A9ACBA]">{task.time}</span>}
-                                  </div>
-
-                                  {editingNameId === task.id ? (
-                                    <Input
-                                      value={editingNameValue}
-                                      onChange={(e) => setEditingNameValue(e.target.value)}
-                                      onBlur={() => commitEditingName(task.id)}
-                                      onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                          e.preventDefault();
-                                          commitEditingName(task.id);
-                                        }
-                                        if (e.key === 'Escape') {
-                                          e.preventDefault();
-                                          cancelEditingName();
-                                        }
-                                      }}
-                                      autoFocus
-                                      className="h-6 px-2 text-xs rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
+                          {tasksForDay.map((task) => {
+                            const taskCard = (
+                              <div
+                                ref={shouldShowEditor ? taskPopoverAnchorRef : undefined}
+                                onClick={(e) => e.stopPropagation()}
+                                className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
+                                style={{
+                                  borderLeft: `4px solid ${task.color}`,
+                                }}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <div className="flex flex-col items-center gap-2 mt-0.5">
+                                    <Checkbox
+                                      checked={task.completed}
+                                      onClick={(e) => e.stopPropagation()}
+                                      onCheckedChange={() => toggleTask(task.id)}
+                                      className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
                                     />
-                                  ) : (
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      onClick={() => startEditingName(task)}
-                                      className={`h-auto p-0 text-left text-xs break-words ${
-                                        task.completed ? 'line-through opacity-50' : ''
-                                      } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'} hover:bg-transparent`}
-                                    >
-                                      {task.name}
-                                    </Button>
-                                  )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1 mb-1">
+                                      {task.time && <span className="text-[10px] text-[#A9ACBA]">{task.time}</span>}
+                                    </div>
+
+                                    {editingNameId === task.id ? (
+                                      <Input
+                                        value={editingNameValue}
+                                        onChange={(e) => setEditingNameValue(e.target.value)}
+                                        onBlur={() => commitEditingName(task.id)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            commitEditingName(task.id);
+                                          }
+                                          if (e.key === 'Escape') {
+                                            e.preventDefault();
+                                            cancelEditingName();
+                                          }
+                                        }}
+                                        autoFocus
+                                        className="h-6 px-2 text-xs rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
+                                      />
+                                    ) : (
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        onClick={() => startEditingName(task)}
+                                        className={`h-auto p-0 text-left text-xs break-words ${
+                                          task.completed ? 'line-through opacity-50' : ''
+                                        } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'} hover:bg-transparent`}
+                                      >
+                                        {task.name}
+                                      </Button>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+
+                            const shouldShowEditor = showAddDialog && modalTaskId === task.id;
+
+                            return (
+                              <div key={task.id}>
+                                {shouldShowEditor ? (
+                                  <Popover
+                                    open={shouldShowEditor}
+                                    onOpenChange={(open) => {
+                                      if (!open) {
+                                        setShowAddDialog(false);
+                                        resetTaskForm();
+                                      }
+                                    }}
+                                  >
+                                    <PopoverAnchor asChild>{taskCard}</PopoverAnchor>
+                                    <PopoverContent
+                                      side={taskPopoverSide}
+                                      align="start"
+                                      sideOffset={12}
+                                      collisionPadding={16}
+                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 p-0 shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
+                                      onOpenAutoFocus={(e) => e.preventDefault()}
+                                    >
+                                      <TaskEditor
+                                        title={newTaskName}
+                                        onTitleChange={(value) => {
+                                          setNewTaskName(value);
+                                          if (modalTaskId) {
+                                            updateTask(modalTaskId, { name: value.trim() || 'Aucun titre' });
+                                          }
+                                        }}
+                                        titlePlaceholder="Ajouter un titre"
+                                        date={selectedDate}
+                                        onDateChange={(value) => {
+                                          setSelectedDate(value);
+                                          if (modalTaskId) {
+                                            updateTask(modalTaskId, { date: value || undefined });
+                                          }
+                                        }}
+                                        time={selectedTime}
+                                        onTimeChange={(value) => {
+                                          setSelectedTime(value);
+                                          if (modalTaskId) {
+                                            updateTask(modalTaskId, { time: value || undefined });
+                                          }
+                                        }}
+                                        selectedColor={selectedColor}
+                                        colors={TASK_COLORS}
+                                        onColorChange={(value) => {
+                                          setSelectedColor(value);
+                                          if (modalTaskId) {
+                                            updateTask(modalTaskId, { color: value });
+                                          }
+                                        }}
+                                        onClose={() => {
+                                          setShowAddDialog(false);
+                                          resetTaskForm();
+                                        }}
+                                        onSave={saveTask}
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                ) : (
+                                  taskCard
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     );
@@ -1435,46 +1515,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             </div>
           </div>
         </Card>
-
-        {/* Modal ajout tâche */}
-        <TaskModal
-          isOpen={showAddDialog}
-          title={newTaskName}
-          onTitleChange={(value) => {
-            setNewTaskName(value);
-            if (modalTaskId) {
-              updateTask(modalTaskId, { name: value.trim() || 'Aucun titre' });
-            }
-          }}
-          titlePlaceholder="Ajouter un titre"
-          date={selectedDate}
-          onDateChange={(value) => {
-            setSelectedDate(value);
-            if (modalTaskId) {
-              updateTask(modalTaskId, { date: value || undefined });
-            }
-          }}
-          time={selectedTime}
-          onTimeChange={(value) => {
-            setSelectedTime(value);
-            if (modalTaskId) {
-              updateTask(modalTaskId, { time: value || undefined });
-            }
-          }}
-          selectedColor={selectedColor}
-          colors={TASK_COLORS}
-          onColorChange={(value) => {
-            setSelectedColor(value);
-            if (modalTaskId) {
-              updateTask(modalTaskId, { color: value });
-            }
-          }}
-          onClose={() => {
-            setShowAddDialog(false);
-            resetTaskForm();
-          }}
-          onSave={saveTask}
-        />
 
       </div>
     </div>
