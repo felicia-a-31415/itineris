@@ -32,7 +32,7 @@ export function TaskEditor({
 }: TaskEditorProps) {
   return (
     <>
-      <div className="flex items-center justify-between px-4 pt-4 pb-3">
+      <div className="flex items-center justify-between">
         <button
           type="button"
           onClick={(e) => {
@@ -58,7 +58,7 @@ export function TaskEditor({
         </button>
       </div>
 
-      <div className="px-4 pb-5 max-h-[75vh] overflow-y-auto">
+      <div className="max-h-[75vh] overflow-y-auto space-y-4">
         <div className="rounded-2xl bg-white/5 border border-white/10">
           <Input
             value={title}

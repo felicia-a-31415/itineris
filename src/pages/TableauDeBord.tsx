@@ -523,7 +523,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     const effectiveId = modalTaskId ?? draftTaskIdRef.current ?? draftTaskId;
     if (effectiveId) {
       updateTask(effectiveId, {
-        name: newTaskName.trim() || 'Aucun titre',
+        name: newTaskName.trim() || '(Titre)',
         date: selectedDate || undefined,
         time: selectedTime || undefined,
         color: selectedColor,
@@ -780,7 +780,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       align="end"
                       side="bottom"
                       sideOffset={12}
-                      className="w-96 max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 shadow-[0_32px_80px_rgba(0,0,0,0.7)] p-3"
+                      className="w-96 max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 text-[#ECECF3] text-sm shadow-[0_32px_80px_rgba(0,0,0,0.7)] p-4"
                       onOpenAutoFocus={(e) => e.preventDefault()}
                     >
                       <Button
@@ -1341,7 +1341,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           if (Date.now() < ignoreCalendarClickUntilRef.current) return;
                           const newTask: Task = {
                             id: Date.now().toString(),
-                            name: 'Aucun titre',
+                            name: '(Titre)',
                             completed: false,
                             color: selectedColor,
                             urgent: false,
@@ -1350,12 +1350,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           };
                           setTasks((prev) => [...prev, newTask]);
                           setSelectedDate(dateString);
-                          setNewTaskName('Aucun titre');
+                          setNewTaskName('(Titre)');
                           setModalTaskId(newTask.id);
                           setDraftTaskId(newTask.id);
                           draftTaskIdRef.current = newTask.id;
                           setEditingNameId(newTask.id);
-                          setEditingNameValue('Aucun titre');
+                          setEditingNameValue('(Titre)');
                           setShowAddDialog(true);
                         }}
                         className={`group border-r border-[#1F2230] last:border-r-0 p-3 cursor-pointer ${
@@ -1461,7 +1461,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       align="start"
                                       sideOffset={12}
                                       collisionPadding={16}
-                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 p-0 shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
+                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 text-[#ECECF3] text-sm p-4 shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
                                       onOpenAutoFocus={(e) => e.preventDefault()}
                                     >
                                       <TaskEditor
@@ -1469,7 +1469,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                         onTitleChange={(value) => {
                                           setNewTaskName(value);
                                           if (modalTaskId) {
-                                            updateTask(modalTaskId, { name: value.trim() || 'Aucun titre' });
+                                            updateTask(modalTaskId, { name: value.trim() || '(Titre)' });
                                           }
                                         }}
                                         titlePlaceholder="Ajouter un titre"
@@ -1522,7 +1522,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       align="start"
                                       sideOffset={12}
                                       collisionPadding={16}
-                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 text-[#ECECF3] p-4 shadow-[0_24px_70px_rgba(0,0,0,0.55)]"
+                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 text-[#ECECF3] text-sm p-4 shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
                                       onOpenAutoFocus={(e) => e.preventDefault()}
                                     >
                                       <div className="flex items-start justify-between gap-4">
@@ -1532,7 +1532,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                             style={{ backgroundColor: task.color }}
                                           />
                                           <div className="text-lg font-semibold">
-                                            {task.name || 'Aucun titre'}
+                                            {task.name || '(Titre)'}
                                           </div>
                                         </div>
                                         <div className="flex items-center gap-2 text-[#A9ACBA]">
