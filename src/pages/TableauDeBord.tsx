@@ -481,6 +481,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setDraftTaskId(null);
   };
 
+  const cancelDraftTask = () => {
+    if (draftTaskId) {
+      setTasks((prev) => prev.filter((t) => t.id !== draftTaskId));
+    }
+    setShowAddDialog(false);
+    resetTaskForm();
+  };
+
   const updateTask = (id: string, updates: Partial<Task>) => {
     setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, ...updates } : task)));
   };
@@ -504,13 +512,19 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   };
 
   const saveTask = () => {
-    if (modalTaskId) {
-      updateTask(modalTaskId, {
+    const effectiveId = modalTaskId ?? draftTaskId;
+    if (showAddDialog && effectiveId) {
+      updateTask(effectiveId, {
         name: newTaskName.trim() || 'Aucun titre',
         date: selectedDate || undefined,
         time: selectedTime || undefined,
         color: selectedColor,
       });
+      setShowAddDialog(false);
+      resetTaskForm();
+      return;
+    }
+    if (showAddDialog) {
       setShowAddDialog(false);
       resetTaskForm();
       return;
@@ -980,7 +994,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
         ) : null}
 
-        <div className="grid gap-6 items-stretch">
+        <div className="grid gap-6 items-stretch md:grid-cols-2">
           {/* Pomodoro */}
           <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
             <div className="mb-2">
@@ -1128,6 +1142,26 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   </span>
                 </div>
               </div>
+            </div>
+          </Card>
+
+          {/* Chat IA */}
+          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full flex flex-col">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-sm text-[#A9ACBA]">Chat IA</p>
+              <span className="text-xs text-[#7F869A]">Bêta</span>
+            </div>
+            <div className="flex-1 rounded-2xl border border-[#1F2230] bg-[#0F1117] p-4 text-sm text-[#A9ACBA]">
+              Commence une conversation pour obtenir de l&apos;aide sur tes tâches ou ton planning.
+            </div>
+            <div className="mt-4 flex items-center gap-2">
+              <Input
+                placeholder="Écris ta question..."
+                className="h-10 rounded-xl border-[#1F2230] bg-[#0F1117] text-[#ECECF3]"
+              />
+              <Button className="h-10 rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white px-4">
+                Envoyer
+              </Button>
             </div>
           </Card>
         </div>
@@ -1405,11 +1439,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                     open={shouldShowEditor}
                                     onOpenChange={(open) => {
                                       if (!open) {
-                                        if (draftTaskId && modalTaskId === draftTaskId) {
-                                          setTasks((prev) => prev.filter((t) => t.id !== draftTaskId));
-                                        }
-                                        setShowAddDialog(false);
-                                        resetTaskForm();
+                                        cancelDraftTask();
                                       }
                                     }}
                                   >
@@ -1454,11 +1484,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                           }
                                         }}
                                         onClose={() => {
-                                          if (draftTaskId && modalTaskId === draftTaskId) {
-                                            setTasks((prev) => prev.filter((t) => t.id !== draftTaskId));
-                                          }
-                                          setShowAddDialog(false);
-                                          resetTaskForm();
+                                          cancelDraftTask();
                                         }}
                                         onSave={saveTask}
                                       />
