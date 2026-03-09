@@ -35,7 +35,11 @@ export function TaskEditor({
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
         <button
           type="button"
-          onClick={onClose}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
           className="text-sm font-semibold text-[#FF2D55] hover:text-[#FF6B85]"
         >
           Annuler
@@ -43,7 +47,11 @@ export function TaskEditor({
         <div className="text-sm font-semibold text-[#ECECF3]">Nouvelle tâche</div>
         <button
           type="button"
-          onClick={onSave}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSave();
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
           className="text-sm font-semibold text-[#FF2D55] hover:text-[#FF6B85]"
         >
           Enregistrer
