@@ -208,6 +208,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [editingNameId, setEditingNameId] = useState<string | null>(null);
   const [editingNameValue, setEditingNameValue] = useState('');
   const [modalTaskId, setModalTaskId] = useState<string | null>(null);
+  const [draftTaskId, setDraftTaskId] = useState<string | null>(null);
   const [taskPopoverSide, setTaskPopoverSide] = useState<'left' | 'right'>('right');
   const taskPopoverAnchorRef = useRef<HTMLDivElement | null>(null);
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
@@ -477,6 +478,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setSelectedDate(formatDate(new Date()));
     setSelectedTime('');
     setModalTaskId(null);
+    setDraftTaskId(null);
   };
 
   const updateTask = (id: string, updates: Partial<Task>) => {
@@ -670,7 +672,21 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
   const tasksListContent = (
     <div className="space-y-3">
-      <div className="text-sm text-[#A9ACBA]">Tâches à faire</div>
+      <div>
+        <div className="text-sm text-[#A9ACBA]">Tâches à faire</div>
+        <div className="mt-1 flex items-center gap-2 text-sm text-[#A9ACBA]">
+          <span>{completedTasksCount} terminées</span>
+          <span>•</span>
+          <Button
+            type="button"
+            onClick={() => setShowCompletedTasks((prev) => !prev)}
+            variant="ghost"
+            className="h-auto p-0 text-[#F43F5E] hover:text-[#FF5E7A]"
+          >
+            {showCompletedTasks ? 'Masquer' : 'Afficher'}
+          </Button>
+        </div>
+      </div>
       {agendaTasks.length === 0 ? (
         <div className="mt-2 text-[#ECECF3] text-lg">Aucune tâche pour l’instant</div>
       ) : (
@@ -1161,14 +1177,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               >
                 <div className="flex flex-wrap items-center gap-2">
                   {calendarMode === 'calendar' ? (
-                    <div className="inline-flex rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
+                    <div className="inline-flex items-center rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
                       <Button
                         type="button"
                         onClick={() => setTimeView('week')}
                         variant="ghost"
                         className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
                           timeView === 'week'
-                            ? 'bg-[#E8E3D6] text-[#0B0D10]'
+                            ? 'bg-[#E8E3D6] text-[#0B0D10] hover:bg-[#E8E3D6] hover:text-[#0B0D10]'
                             : 'text-[#A9ACBA] hover:text-[#ECECF3]'
                         }`}
                       >
@@ -1180,7 +1196,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         variant="ghost"
                         className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
                           timeView === 'month'
-                            ? 'bg-[#E8E3D6] text-[#0B0D10]'
+                            ? 'bg-[#E8E3D6] text-[#0B0D10] hover:bg-[#E8E3D6] hover:text-[#0B0D10]'
                             : 'text-[#A9ACBA] hover:text-[#ECECF3]'
                         }`}
                       >
@@ -1230,20 +1246,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     onChange={(e) => handleAgendaImageUpload(e.target.files?.[0])}
                   />
                 </div>
-                {calendarMode === 'tasks' ? (
-                  <div className="flex items-center gap-2 text-sm text-[#A9ACBA]">
-                    <span>{completedTasksCount} terminées</span>
-                    <span>•</span>
-                    <Button
-                      type="button"
-                      onClick={() => setShowCompletedTasks((prev) => !prev)}
-                      variant="ghost"
-                      className="h-auto p-0 text-[#F43F5E] hover:text-[#FF5E7A]"
-                    >
-                      {showCompletedTasks ? 'Masquer' : 'Afficher'}
-                    </Button>
-                  </div>
-                ) : null}
+                {calendarMode === 'tasks' ? null : null}
               </div>
             </div>
 
@@ -1311,6 +1314,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           setSelectedDate(dateString);
                           setNewTaskName('Aucun titre');
                           setModalTaskId(newTask.id);
+                          setDraftTaskId(newTask.id);
                           setEditingNameId(newTask.id);
                           setEditingNameValue('Aucun titre');
                           setShowAddDialog(true);
@@ -1401,6 +1405,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                     open={shouldShowEditor}
                                     onOpenChange={(open) => {
                                       if (!open) {
+                                        if (draftTaskId && modalTaskId === draftTaskId) {
+                                          setTasks((prev) => prev.filter((t) => t.id !== draftTaskId));
+                                        }
                                         setShowAddDialog(false);
                                         resetTaskForm();
                                       }
@@ -1447,6 +1454,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                           }
                                         }}
                                         onClose={() => {
+                                          if (draftTaskId && modalTaskId === draftTaskId) {
+                                            setTasks((prev) => prev.filter((t) => t.id !== draftTaskId));
+                                          }
                                           setShowAddDialog(false);
                                           resetTaskForm();
                                         }}
