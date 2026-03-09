@@ -209,6 +209,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [editingNameValue, setEditingNameValue] = useState('');
   const [modalTaskId, setModalTaskId] = useState<string | null>(null);
   const [draftTaskId, setDraftTaskId] = useState<string | null>(null);
+  const draftTaskIdRef = useRef<string | null>(null);
   const [taskPopoverSide, setTaskPopoverSide] = useState<'left' | 'right'>('right');
   const taskPopoverAnchorRef = useRef<HTMLDivElement | null>(null);
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
@@ -479,11 +480,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setSelectedTime('');
     setModalTaskId(null);
     setDraftTaskId(null);
+    draftTaskIdRef.current = null;
   };
 
-  const cancelDraftTask = () => {
-    if (draftTaskId) {
-      setTasks((prev) => prev.filter((t) => t.id !== draftTaskId));
+  const cancelDraftTask = (id?: string | null) => {
+    const targetId = id ?? draftTaskIdRef.current ?? draftTaskId;
+    if (targetId) {
+      setTasks((prev) => prev.filter((t) => t.id !== targetId));
     }
     setShowAddDialog(false);
     resetTaskForm();
@@ -512,19 +515,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   };
 
   const saveTask = () => {
-    const effectiveId = modalTaskId ?? draftTaskId;
-    if (showAddDialog && effectiveId) {
+    const effectiveId = modalTaskId ?? draftTaskIdRef.current ?? draftTaskId;
+    if (effectiveId) {
       updateTask(effectiveId, {
         name: newTaskName.trim() || 'Aucun titre',
         date: selectedDate || undefined,
         time: selectedTime || undefined,
         color: selectedColor,
       });
-      setShowAddDialog(false);
-      resetTaskForm();
-      return;
-    }
-    if (showAddDialog) {
       setShowAddDialog(false);
       resetTaskForm();
       return;
@@ -1349,6 +1347,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           setNewTaskName('Aucun titre');
                           setModalTaskId(newTask.id);
                           setDraftTaskId(newTask.id);
+                          draftTaskIdRef.current = newTask.id;
                           setEditingNameId(newTask.id);
                           setEditingNameValue('Aucun titre');
                           setShowAddDialog(true);
@@ -1439,7 +1438,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                     open={shouldShowEditor}
                                     onOpenChange={(open) => {
                                       if (!open) {
-                                        cancelDraftTask();
+                                        cancelDraftTask(draftTaskIdRef.current);
                                       }
                                     }}
                                   >
@@ -1484,7 +1483,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                           }
                                         }}
                                         onClose={() => {
-                                          cancelDraftTask();
+                                          cancelDraftTask(draftTaskIdRef.current);
                                         }}
                                         onSave={saveTask}
                                       />
