@@ -723,7 +723,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     checked={task.completed}
                     onClick={(e) => e.stopPropagation()}
                     onCheckedChange={() => toggleTask(task.id)}
-                    className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
+                    className="rounded-sm h-4 w-4 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
                   />
                 </div>
 
@@ -1393,7 +1393,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       checked={task.completed}
                                       onClick={(e) => e.stopPropagation()}
                                       onCheckedChange={() => toggleTask(task.id)}
-                                      className="rounded-sm h-5 w-5 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
+                                      className="rounded-sm h-4 w-4 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
                                     />
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -1420,16 +1420,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       className="h-6 px-2 text-xs md:text-xs rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
                                       />
                                     ) : (
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        onClick={() => startEditingName(task)}
-                                        className={`h-auto p-0 text-left text-xs break-words ${
+                                      <div
+                                        className={`text-left text-xs break-words ${
                                           task.completed ? 'line-through opacity-50' : ''
-                                        } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'} hover:bg-transparent`}
+                                        } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
                                       >
                                         {task.name}
-                                      </Button>
+                                      </div>
                                     )}
                                   </div>
                                 </div>
