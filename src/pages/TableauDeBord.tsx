@@ -1328,6 +1328,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         ) : null}
                         <div className="space-y-3">
                           {tasksForDay.map((task) => {
+                            const shouldShowEditor = showAddDialog && modalTaskId === task.id;
+
                             const taskCard = (
                               <div
                                 ref={shouldShowEditor ? taskPopoverAnchorRef : undefined}
@@ -1385,8 +1387,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                 </div>
                               </div>
                             );
-
-                            const shouldShowEditor = showAddDialog && modalTaskId === task.id;
 
                             return (
                               <div key={task.id}>

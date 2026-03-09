@@ -1,5 +1,4 @@
 import React from 'react';
-import { Dialog, DialogContent } from '../ui/dialog';
 import { Input } from '../ui/input';
 
 interface TaskEditorProps {
@@ -15,10 +14,6 @@ interface TaskEditorProps {
   onColorChange: (value: string) => void;
   onClose: () => void;
   onSave: () => void;
-}
-
-interface TaskModalProps extends TaskEditorProps {
-  isOpen: boolean;
 }
 
 export function TaskEditor({
@@ -100,15 +95,5 @@ export function TaskEditor({
         </div>
       </div>
     </>
-  );
-}
-
-export function TaskModal({ isOpen, ...props }: TaskModalProps) {
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && props.onClose()}>
-      <DialogContent className="bg-[#2B2F3A]/95 border border-white/10 rounded-[24px] p-0 shadow-[0_32px_80px_rgba(0,0,0,0.7)]">
-        <TaskEditor {...props} />
-      </DialogContent>
-    </Dialog>
   );
 }
