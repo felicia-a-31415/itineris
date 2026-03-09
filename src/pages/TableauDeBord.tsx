@@ -1369,7 +1369,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                           }
                                         }}
                                         autoFocus
-                                        className="h-6 px-2 text-xs rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
+                                      className="h-6 px-2 text-xs md:text-xs rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
                                       />
                                     ) : (
                                       <Button
