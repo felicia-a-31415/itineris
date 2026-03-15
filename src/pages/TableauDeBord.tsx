@@ -38,6 +38,13 @@ import {
 } from '../lib/storage';
 
 type Task = DashboardTask;
+type ChatTaskAction = {
+  name?: string;
+  date?: string;
+  time?: string;
+  urgent?: boolean;
+  color?: string;
+};
 
 const TASK_COLORS = ['#6B9AC4', '#4169E1', '#8B8680', '#E16941', '#41E169', '#9B59B6', '#F39C12', '#E91E63'];
 
@@ -174,6 +181,9 @@ const createDefaultSessionsByDay = () => {
 const DEFAULT_CHAT_MESSAGES: DashboardChatMessage[] = [
   { role: 'assistant', content: "Salut, dis-moi ce que tu dois etudier et je t'aide a faire un plan." },
 ];
+
+const isValidTaskDate = (value?: string) => !!value && /^\d{4}-\d{2}-\d{2}$/.test(value);
+const isValidTaskTime = (value?: string) => !!value && /^\d{2}:\d{2}$/.test(value);
 
 const renderInlineFormattedText = (text: string) => {
   const nodes: React.ReactNode[] = [];
@@ -1171,7 +1181,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       });
 
       const responseText = await response.text();
-      let payload: { reply?: string; error?: string } | null = null;
+      let payload: { reply?: string; error?: string; actions?: ChatTaskAction[] } | null = null;
 
       try {
         payload = responseText ? JSON.parse(responseText) : null;
@@ -1190,14 +1200,44 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       }
 
       if (!payload?.reply) {
-        setMessages((prev) => [
-          ...prev,
-          { role: 'assistant', content: 'La fonction a repondu sans message exploitable.' },
-        ]);
-        return;
+        if (!Array.isArray(payload?.actions) || payload.actions.length === 0) {
+          setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: 'La fonction a repondu sans message exploitable.' },
+          ]);
+          return;
+        }
       }
 
-      setMessages((prev) => [...prev, { role: 'assistant', content: payload.reply }]);
+      const validActions = Array.isArray(payload?.actions)
+        ? payload.actions.filter((action) => typeof action?.name === 'string' && action.name.trim().length > 0)
+        : [];
+
+      if (validActions.length > 0) {
+        const newTasks: Task[] = validActions.map((action, index) => ({
+          id: `ai-${Date.now()}-${index}`,
+          name: action.name!.trim(),
+          completed: false,
+          color:
+            typeof action.color === 'string' && TASK_COLORS.includes(action.color)
+              ? action.color
+              : TASK_COLORS[index % TASK_COLORS.length],
+          urgent: !!action.urgent,
+          date: isValidTaskDate(action.date) ? action.date : formatDate(new Date()),
+          time: isValidTaskTime(action.time) ? action.time : undefined,
+        }));
+
+        setTasks((prev) => [...prev, ...newTasks]);
+      }
+
+      const assistantReply =
+        payload?.reply && payload.reply.trim()
+          ? payload.reply
+          : validActions.length > 0
+            ? `${validActions.length} tache${validActions.length > 1 ? 's ont ete ajoutees' : ' a ete ajoutee'} au calendrier.`
+            : 'Aucune reponse.';
+
+      setMessages((prev) => [...prev, { role: 'assistant', content: assistantReply }]);
     } catch (error) {
       setMessages((prev) => [
         ...prev,
