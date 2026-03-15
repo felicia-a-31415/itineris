@@ -24,10 +24,16 @@ export type DashboardTask = {
   time?: string;
 };
 
+export type DashboardChatMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
 export type DashboardData = {
   tasks: DashboardTask[];
   studyData: Record<string, number[]>;
   sessionsByDay: Record<string, number>;
+  chatMessages?: DashboardChatMessage[];
 };
 
 export function loadUserData(): UserData | null {

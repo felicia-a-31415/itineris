@@ -29,6 +29,7 @@ import alarmSound from '../assets/Gentle-little-bell-ringing-sound-effect.mp3';
 import { useAuth } from '../lib/auth';
 import {
   clearUserData,
+  type DashboardChatMessage,
   loadDashboardDataFromLocal,
   loadDashboardDataFromSupabase,
   saveDashboardDataToLocal,
@@ -170,6 +171,92 @@ const createDefaultSessionsByDay = () => {
   return { [todayKey]: 0 };
 };
 
+const DEFAULT_CHAT_MESSAGES: DashboardChatMessage[] = [
+  { role: 'assistant', content: "Salut, dis-moi ce que tu dois etudier et je t'aide a faire un plan." },
+];
+
+const renderInlineFormattedText = (text: string) => {
+  const nodes: React.ReactNode[] = [];
+  const pattern = /(\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|\*[^*]+\*)/g;
+  let lastIndex = 0;
+
+  for (const match of text.matchAll(pattern)) {
+    const token = match[0];
+    const index = match.index ?? 0;
+
+    if (index > lastIndex) {
+      nodes.push(text.slice(lastIndex, index));
+    }
+
+    if (token.startsWith('***') && token.endsWith('***')) {
+      nodes.push(
+        <strong key={`${index}-strong-em`} className="font-semibold italic">
+          {token.slice(3, -3)}
+        </strong>
+      );
+    } else if (token.startsWith('**') && token.endsWith('**')) {
+      nodes.push(
+        <strong key={`${index}-strong`} className="font-semibold text-[#ECECF3]">
+          {token.slice(2, -2)}
+        </strong>
+      );
+    } else if (token.startsWith('*') && token.endsWith('*')) {
+      nodes.push(
+        <em key={`${index}-em`} className="italic">
+          {token.slice(1, -1)}
+        </em>
+      );
+    } else {
+      nodes.push(token);
+    }
+
+    lastIndex = index + token.length;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+
+  return nodes.length > 0 ? nodes : text;
+};
+
+const renderFormattedMessage = (content: string) => {
+  const lines = content.split('\n');
+
+  return lines.map((line, index) => {
+    const trimmed = line.trim();
+
+    if (!trimmed) {
+      return <div key={`line-${index}`} className="h-3" />;
+    }
+
+    if (/^[-*]\s+/.test(trimmed)) {
+      return (
+        <div key={`line-${index}`} className="flex items-start gap-2">
+          <span className="mt-1 text-[#7F869A]">•</span>
+          <span>{renderInlineFormattedText(trimmed.replace(/^[-*]\s+/, ''))}</span>
+        </div>
+      );
+    }
+
+    if (/^\d+\.\s+/.test(trimmed)) {
+      const marker = trimmed.match(/^\d+\./)?.[0] ?? '';
+      return (
+        <div key={`line-${index}`} className="flex items-start gap-2">
+          <span className="min-w-6 text-[#7F869A]">{marker}</span>
+          <span>{renderInlineFormattedText(trimmed.replace(/^\d+\.\s+/, ''))}</span>
+        </div>
+      );
+    }
+
+    return (
+      <div key={`line-${index}`} className="leading-6">
+        {renderInlineFormattedText(line)}
+      </div>
+    );
+  });
+};
+
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
   const { signOut, user, loading } = useAuth();
@@ -229,9 +316,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const hasInitializedStreakRef = useRef(false);
   const hasHydratedStreakRef = useRef(false);
   const [isDashboardHydrated, setIsDashboardHydrated] = useState(false);
-  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([
-    { role: 'assistant', content: "Salut, dis-moi ce que tu dois etudier et je t'aide a faire un plan." },
-  ]);
+  const [messages, setMessages] = useState<DashboardChatMessage[]>(DEFAULT_CHAT_MESSAGES);
   const [chatInput, setChatInput] = useState('');
   const [isSendingChat, setIsSendingChat] = useState(false);
 
@@ -250,12 +335,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         if (Array.isArray(cached.tasks)) setTasks(cached.tasks);
         if (cached.studyData && typeof cached.studyData === 'object') setStudyData(cached.studyData);
         if (cached.sessionsByDay && typeof cached.sessionsByDay === 'object') setSessionsByDay(cached.sessionsByDay);
+        if (Array.isArray(cached.chatMessages) && cached.chatMessages.length > 0) {
+          setMessages(cached.chatMessages);
+        }
         setIsDashboardHydrated(true);
       }
       if (!user) {
         setTasks(createDefaultTasks());
         setStudyData(createDefaultStudyData(currentWeekStart));
         setSessionsByDay(createDefaultSessionsByDay());
+        setMessages(DEFAULT_CHAT_MESSAGES);
         setIsDashboardHydrated(true);
         return;
       }
@@ -275,6 +364,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             ? remoteData.sessionsByDay
             : createDefaultSessionsByDay()
         );
+        setMessages(
+          Array.isArray(remoteData.chatMessages) && remoteData.chatMessages.length > 0
+            ? remoteData.chatMessages
+            : DEFAULT_CHAT_MESSAGES
+        );
         saveDashboardDataToLocal(user.id, remoteData);
       }
 
@@ -289,11 +383,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   }, [user, currentWeekStart, loading]);
 
   useEffect(() => {
-    if (loading || !user || !isDashboardHydrated) return;
-    const payload = { tasks, studyData, sessionsByDay };
-    saveDashboardDataToSupabase(user.id, payload);
-    saveDashboardDataToLocal(user.id, payload);
-  }, [user, tasks, studyData, sessionsByDay, isDashboardHydrated, loading]);
+    if (loading || !isDashboardHydrated) return;
+    const payload = { tasks, studyData, sessionsByDay, chatMessages: messages };
+    saveDashboardDataToLocal(user?.id, payload);
+    if (user) {
+      saveDashboardDataToSupabase(user.id, payload);
+    }
+  }, [user, tasks, studyData, sessionsByDay, messages, isDashboardHydrated, loading]);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -1042,8 +1138,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const handleSendChat = async () => {
     const message = chatInput.trim();
     if (!message || isSendingChat) return;
+    const nextMessages = [...messages, { role: 'user' as const, content: message }];
 
-    setMessages((prev) => [...prev, { role: 'user', content: message }]);
+    setMessages(nextMessages);
     setChatInput('');
     setIsSendingChat(true);
 
@@ -1058,6 +1155,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           message,
           context: {
             tasks,
+            history: nextMessages.slice(-12),
+            timerSessions: {
+              completedToday: sessionsCompletedToday,
+              byDay: sessionsByDay,
+            },
+            currentDate: new Date().toLocaleDateString('fr-CA', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            }),
           },
         }),
       });
@@ -1351,18 +1459,26 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </Card>
 
           {/* Chat IA */}
-          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full flex flex-col">
+          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full min-h-0 flex flex-col">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm text-[#A9ACBA]">Chat IA</p>
               <span className="text-xs text-[#7F869A]">Bêta</span>
             </div>
-            <div className="flex-1 rounded-2xl border border-[#1F2230] bg-[#0F1117] p-4 text-sm text-[#A9ACBA] overflow-y-auto space-y-3">
+            <div className="h-[340px] overflow-y-auto rounded-2xl border border-[#1F2230] bg-[#0F1117] p-4 text-sm text-[#A9ACBA] space-y-3">
               {messages.map((message, index) => (
                 <div
                   key={`${message.role}-${index}`}
                   className={message.role === 'user' ? 'text-right text-[#ECECF3]' : 'text-left text-[#A9ACBA]'}
                 >
-                  {message.content}
+                  <div
+                    className={
+                      message.role === 'user'
+                        ? 'inline-block max-w-[90%] rounded-2xl bg-[#1C2233] px-3 py-2 text-left'
+                        : 'max-w-[90%] rounded-2xl bg-[#131722] px-3 py-2'
+                    }
+                  >
+                    {renderFormattedMessage(message.content)}
+                  </div>
                 </div>
               ))}
               {isSendingChat ? <div className="text-left text-[#7F869A]">L&apos;IA ecrit...</div> : null}
