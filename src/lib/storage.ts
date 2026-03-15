@@ -131,3 +131,8 @@ export function saveDashboardDataToLocal(userId: string | undefined, data: Dashb
     // storage full or disabled — ignore
   }
 }
+
+export function clearDashboardDataFromLocal(userId?: string) {
+  const key = `${DASHBOARD_CACHE_PREFIX}:${userId ?? 'guest'}`;
+  localStorage.removeItem(key);
+}
