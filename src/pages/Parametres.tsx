@@ -143,6 +143,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
   const { user, updateEmail, updatePassword, signOut } = useAuth();
   const [formData, setFormData] = useState<UserData>(userData);
   const [saved, setSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState<'profile' | 'subjects' | 'account'>('profile');
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [accountError, setAccountError] = useState<string | null>(null);
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
@@ -274,7 +275,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-4">
-        <Tabs defaultValue="profile" className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'profile' | 'subjects' | 'account')} className="w-full">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <TabsList className="flex h-auto flex-wrap gap-2 rounded-3xl border border-[#1F2230] bg-[#161924] p-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_8px_18px_rgba(0,0,0,0.25),0_1px_0_rgba(255,255,255,0.04)]">
               <TabsTrigger
@@ -300,18 +301,28 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               </TabsTrigger>
             </TabsList>
 
-            <Button
-              onClick={onBack}
-              variant="ghost"
-              className="rounded-xl border border-[#1F2230] bg-[#161924] text-[#ECECF3] hover:bg-[#1B2030]"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Retour
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={onBack}
+                variant="ghost"
+                className="h-[52px] rounded-2xl border border-[#1F2230] bg-[#161924] px-5 text-[#ECECF3] hover:bg-[#1B2030]"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Retour
+              </Button>
+              {activeTab === 'profile' ? (
+                <Button
+                  onClick={handleSaveProfile}
+                  className="h-[52px] rounded-2xl bg-[#4169E1] px-5 text-white hover:bg-[#3557C1]"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {saved ? 'Sauvegardé' : 'Sauvegarder'}
+                </Button>
+              ) : null}
+            </div>
           </div>
 
           <TabsContent value="profile" className="mt-4">
-            <div className="space-y-3">
             <Card className={`${cardClassName} space-y-2`}>
               <div>
                 <h2 className="text-xl font-semibold text-[#ECECF3]">Profil scolaire</h2>
@@ -369,16 +380,6 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </div>
               ) : null}
             </Card>
-              <div className="flex justify-end">
-                <Button
-                  onClick={handleSaveProfile}
-                  className="rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  {saved ? 'Sauvegardé' : 'Sauvegarder'}
-                </Button>
-              </div>
-            </div>
           </TabsContent>
 
           <TabsContent value="subjects" className="mt-4">

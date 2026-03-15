@@ -1536,7 +1536,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       align="start"
                                       sideOffset={12}
                                       collisionPadding={16}
-                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[28px] border border-[#2B3550] bg-[#161924]/98 text-[#ECECF3] text-sm p-5 shadow-[0_28px_70px_rgba(0,0,0,0.6),0_8px_24px_rgba(0,0,0,0.35)]"
+                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[28px] border border-[rgba(150,180,255,0.16)] bg-[rgba(22,25,36,0.78)] text-[#ECECF3] text-sm p-5 backdrop-blur-2xl shadow-[0_28px_70px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)]"
                                       onOpenAutoFocus={(e) => e.preventDefault()}
                                     >
                                       <div className="flex items-start justify-between gap-4">
@@ -1556,7 +1556,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                               e.stopPropagation();
                                               startEditingName(task);
                                             }}
-                                            className="h-10 w-10 rounded-2xl border border-[#2B3550] bg-[#10131B] flex items-center justify-center hover:bg-[#1B2030] hover:text-[#ECECF3] transition"
+                                            className="h-10 w-10 rounded-2xl border border-[rgba(150,180,255,0.16)] bg-[rgba(10,13,18,0.35)] flex items-center justify-center hover:bg-[rgba(65,105,225,0.14)] hover:text-[#ECECF3] transition"
                                             aria-label="Modifier la tâche"
                                           >
                                             <Pencil className="w-4 h-4" />
@@ -1568,14 +1568,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                               setTasks((prev) => prev.filter((t) => t.id !== task.id));
                                               setTaskDetailsId(null);
                                             }}
-                                            className="h-10 w-10 rounded-2xl border border-[#4C2A2A] bg-[#201416] text-[#E16941] flex items-center justify-center hover:bg-[#2A1B1B] transition"
+                                            className="h-10 w-10 rounded-2xl border border-[rgba(225,105,65,0.22)] bg-[rgba(225,105,65,0.08)] text-[#E16941] flex items-center justify-center hover:bg-[rgba(225,105,65,0.14)] transition"
                                             aria-label="Supprimer la tâche"
                                           >
                                             <Trash2 className="w-4 h-4" />
                                           </button>
                                         </div>
                                       </div>
-                                      <div className="mt-4 rounded-2xl border border-[#1F2230] bg-[#10131B] px-4 py-3 text-sm text-[#A9ACBA]">
+                                      <div className="mt-4 rounded-2xl border border-[rgba(150,180,255,0.12)] bg-[rgba(10,13,18,0.38)] px-4 py-3 text-sm text-[#C6CAD8] backdrop-blur-xl">
                                         <span>{taskDateLabel}</span>
                                         {taskTimeLabel ? <span>{` • ${taskTimeLabel}`}</span> : null}
                                       </div>
