@@ -317,6 +317,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const taskListItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const taskListPositionsRef = useRef<Record<string, number>>({});
   const pendingTaskMotionRef = useRef<{ id: string; direction: 'down' | 'up' } | null>(null);
+  const chatScrollRef = useRef<HTMLDivElement | null>(null);
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -400,6 +401,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       saveDashboardDataToSupabase(user.id, payload);
     }
   }, [user, tasks, studyData, sessionsByDay, messages, isDashboardHydrated, loading]);
+
+  useEffect(() => {
+    if (!chatScrollRef.current) return;
+    chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+  }, [messages, isSendingChat, isDashboardHydrated]);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -1170,12 +1176,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               completedToday: sessionsCompletedToday,
               byDay: sessionsByDay,
             },
-            currentDate: new Date().toLocaleDateString('fr-CA', {
+            currentDate: new Intl.DateTimeFormat('fr-CA', {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
               day: 'numeric',
-            }),
+              hour: '2-digit',
+              minute: '2-digit',
+            }).format(new Date()),
           },
         }),
       });
@@ -1504,7 +1512,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               <p className="text-sm text-[#A9ACBA]">Chat IA</p>
               <span className="text-xs text-[#7F869A]">Bêta</span>
             </div>
-            <div className="h-[340px] overflow-y-auto rounded-2xl border border-[#1F2230] bg-[#0F1117] p-4 text-sm text-[#A9ACBA] space-y-3">
+            <div
+              ref={chatScrollRef}
+              className="h-[340px] overflow-y-auto rounded-2xl border border-[#1F2230] bg-[#0F1117] p-4 text-sm text-[#A9ACBA] space-y-3"
+            >
               {messages.map((message, index) => (
                 <div
                   key={`${message.role}-${index}`}
