@@ -692,7 +692,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   }, [showAddDialog, modalTaskId, timeView, calendarMode]);
 
   const tasksListContent = (
-    <div className="space-y-2">
+    <div className="space-y-0.5">
       <div>
         <div className="flex items-center gap-2 text-sm text-[#A9ACBA]">
           <span>{completedTasksCount} terminées</span>
@@ -1334,7 +1334,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   ))}
                 </div>
 
-                <div className={`grid grid-cols-7 ${timeView === 'month' ? 'min-h-[720px]' : 'min-h-[380px]'}`}>
+                <div className={`grid grid-cols-7 ${timeView === 'month' ? '' : 'min-h-[380px]'}`}>
                   {calendarDates.map((date, index) => {
                     const dateString = formatDate(date);
                     const tasksForDay = getTasksForDate(dateString);
@@ -1367,47 +1367,60 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           setEditingNameValue('(Titre)');
                           setShowAddDialog(true);
                         }}
-                        className={`group border-r border-[#1F2230] last:border-r-0 p-3 cursor-pointer ${
-                          isCurrentRangeToday(date) ? 'bg-[#4169E1]/5' : ''
-                        } ${isOutsideMonth ? 'bg-[#121520] text-[#6F7587]' : ''}`}
+                        className={`group border-r border-b border-[#1F2230] last:border-r-0 cursor-pointer ${
+                          timeView === 'month' ? 'aspect-square p-2.5' : 'p-3'
+                        } ${isCurrentRangeToday(date) ? 'bg-[#4169E1]/5' : ''} ${
+                          isOutsideMonth ? 'bg-[#121520] text-[#6F7587]' : ''
+                        }`}
                       >
                         {timeView === 'month' ? (
-                          <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center justify-center mb-2">
                             <div
-                              className={`text-xs font-semibold w-8 h-8 rounded-full flex items-center justify-center transition ${
-                                isCurrentRangeToday(date)
-                                  ? 'text-white bg-[#4169E1]'
-                                  : 'text-[#A9ACBA] group-hover:bg-[#2B2F3A]'
+                              className={`text-xs font-semibold w-8 h-8 rounded-full flex items-center justify-center ${
+                                isCurrentRangeToday(date) ? 'text-white bg-[#4169E1]' : 'text-[#A9ACBA]'
                               }`}
                             >
                               {date.getDate()}
                             </div>
                           </div>
                         ) : null}
-                        <div className="space-y-3">
+                        <div className={timeView === 'month' ? 'space-y-2' : 'space-y-3'}>
                           {tasksForDay.map((task) => {
                             const shouldShowEditor = showAddDialog && modalTaskId === task.id;
+                            const isMonthView = timeView === 'month';
 
                             const taskCard = (
                               <div
                                 ref={shouldShowEditor ? taskPopoverAnchorRef : undefined}
-                                className="rounded-2xl p-3 text-xs bg-[#182032] border border-[#2B3550] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
+                                className={`text-xs shadow-[0_4px_12px_rgba(65,105,225,0.06)] ${
+                                  isMonthView
+                                    ? 'rounded-xl px-2.5 py-2 bg-[#EEF3FF] text-[#101524]'
+                                    : 'rounded-2xl p-3 bg-[#182032] border border-[#2B3550]'
+                                }`}
                                 style={{
-                                  borderLeft: `4px solid ${task.color}`,
+                                  borderLeft: `${isMonthView ? 3 : 4}px solid ${task.color}`,
                                 }}
                               >
-                                <div className="flex items-start gap-3">
-                                  <div className="flex flex-col items-center gap-2 mt-0.5">
+                                <div className={`flex items-center ${isMonthView ? 'gap-2 min-h-5' : 'gap-3 min-h-6'}`}>
+                                  <div className="flex items-center justify-center">
                                     <Checkbox
                                       checked={task.completed}
                                       onClick={(e) => e.stopPropagation()}
                                       onCheckedChange={() => toggleTask(task.id)}
-                                      className="rounded-sm h-4 w-4 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
+                                      className={`rounded-sm h-4 w-4 border-2 ${
+                                        isMonthView
+                                          ? 'border-[#4F5F8B] bg-white/90 data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#4169E1]'
+                                          : 'border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]'
+                                      }`}
                                     />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1 mb-1">
-                                      {task.time && <span className="text-[10px] text-[#A9ACBA]">{task.time}</span>}
+                                    <div className={`flex items-center gap-1 ${isMonthView ? 'mb-0' : 'mb-1'}`}>
+                                      {task.time && (
+                                        <span className={`text-[10px] ${isMonthView ? 'text-[#5C6787]' : 'text-[#A9ACBA]'}`}>
+                                          {task.time}
+                                        </span>
+                                      )}
                                     </div>
 
                                     {editingNameId === task.id ? (
@@ -1432,7 +1445,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       <div
                                         className={`text-left text-xs break-words ${
                                           task.completed ? 'line-through opacity-50' : ''
-                                        } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
+                                        } ${task.urgent ? 'text-red-400' : isMonthView ? 'text-[#101524]' : 'text-[#ECECF3]'}`}
                                       >
                                         {task.name}
                                       </div>

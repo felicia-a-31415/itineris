@@ -368,13 +368,13 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </div>
               ) : null}
 
-              <div className="pt-1">
+              <div className="pt-1 flex justify-end">
                 <Button
                   onClick={handleSaveProfile}
                   className="rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {saved ? 'Sauvegardé' : 'Sauvegarder le profil'}
+                  {saved ? 'Sauvegardé' : 'Sauvegarder'}
                 </Button>
               </div>
             </Card>
