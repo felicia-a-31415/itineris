@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Compass, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 
 import { Button } from '../ui/button';
@@ -14,22 +14,69 @@ type LocationState = {
 export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, signUp } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { signIn, signUp, requestPasswordReset, updatePassword, user } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const initialMode = (location.state as LocationState | null)?.mode;
   const [isSigningUp, setIsSigningUp] = useState(initialMode === 'signup');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   const requestedPath = (location.state as LocationState | null)?.from?.pathname ?? null;
+  const isRecoveryMode = useMemo(() => searchParams.get('mode') === 'recovery', [searchParams]);
+
+  const getRecoveryRedirectUrl = () => {
+    const basePath = import.meta.env.BASE_URL ?? '/';
+    const normalizedBasePath = basePath.endsWith('/') ? basePath : `${basePath}/`;
+    return `${window.location.origin}${normalizedBasePath}login?mode=recovery`;
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+    setMessage(null);
     setIsSubmitting(true);
+
+    if (isRecoveryMode) {
+      if (!user) {
+        setError('Ouvre le lien de réinitialisation envoyé par email avant de choisir un nouveau mot de passe.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (password.length < 6) {
+        setError('Le nouveau mot de passe doit contenir au moins 6 caractères.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setError('Les mots de passe ne correspondent pas.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { error: updateError } = await updatePassword(password);
+
+      if (updateError) {
+        setError(updateError.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      setMessage('Mot de passe mis à jour. Tu peux maintenant te connecter.');
+      setPassword('');
+      setConfirmPassword('');
+      setIsSubmitting(false);
+      navigate('/login', { replace: true });
+      return;
+    }
 
     const { error: authError } = isSigningUp
       ? await signUp(email.trim(), password)
@@ -49,6 +96,28 @@ export function Login() {
 
     const redirectPath = requestedPath ?? '/tableaudebord';
     navigate(redirectPath, { replace: true });
+  };
+
+  const handleForgotPassword = async () => {
+    setError(null);
+    setMessage(null);
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setError("Entre ton email, puis relance l'envoi du lien de réinitialisation.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const { error: resetError } = await requestPasswordReset(trimmedEmail, getRecoveryRedirectUrl());
+    setIsSubmitting(false);
+
+    if (resetError) {
+      setError(resetError.message);
+      return;
+    }
+
+    setMessage('Email envoyé. Vérifie ta boite de réception puis ouvre le lien Supabase pour choisir un nouveau mot de passe.');
   };
 
   return (
@@ -71,34 +140,40 @@ export function Login() {
             </div>
             <h1 className="text-4xl text-[#ECECF3] tracking-tight mb-2">Itineris</h1>
             <p className="text-[#A9ACBA]">
-              {isSigningUp ? 'Crée ton compte pour continuer.' : 'Bienvenue ! Connecte-toi pour continuer'}
+              {isRecoveryMode
+                ? 'Choisis un nouveau mot de passe pour ton compte.'
+                : isSigningUp
+                  ? 'Crée ton compte pour continuer.'
+                  : 'Bienvenue ! Connecte-toi pour continuer'}
             </p>
           </div>
 
           <div className="bg-[#161924] border border-[#1F2230] rounded-2xl shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] p-8 space-y-6">
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-[#ECECF3] block">
-                  Adresse email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A9ACBA]" />
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="votre@email.com"
-                    className="pl-11 bg-[#0F1117] border border-[#1F2230] focus:border-[#4169E1] rounded-xl h-12"
-                    required
-                    disabled={isSubmitting}
-                  />
+              {!isRecoveryMode ? (
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-[#ECECF3] block">
+                    Adresse email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A9ACBA]" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="votre@email.com"
+                      className="pl-11 bg-[#0F1117] border border-[#1F2230] focus:border-[#4169E1] rounded-xl h-12"
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
               <div className="space-y-2">
                 <label htmlFor="password" className="text-[#ECECF3] block">
-                  Mot de passe
+                  {isRecoveryMode ? 'Nouveau mot de passe' : 'Mot de passe'}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A9ACBA]" />
@@ -123,23 +198,72 @@ export function Login() {
                 </div>
               </div>
 
+              {isRecoveryMode ? (
+                <div className="space-y-2">
+                  <label htmlFor="confirmPassword" className="text-[#ECECF3] block">
+                    Confirme le mot de passe
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A9ACBA]" />
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      placeholder="••••••••"
+                      className="pl-11 pr-11 bg-[#0F1117] border border-[#1F2230] focus:border-[#4169E1] rounded-xl h-12"
+                      required
+                      disabled={isSubmitting}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A9ACBA] hover:text-[#ECECF3] transition-colors"
+                      disabled={isSubmitting}
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
               {error ? (
                 <div className="bg-[#2A1B1B] border border-[#4C2A2A] text-[#E16941] px-4 py-3 rounded-xl text-sm">
                   {error}
                 </div>
               ) : null}
-              <div className="flex justify-end">
-                <button type="button" className="text-sm text-[#A9ACBA] hover:text-[#ECECF3]" disabled={isSubmitting}>
-                  Mot de passe oublié ?
-                </button>
-              </div>
+              {message ? (
+                <div className="bg-[#182332] border border-[#29425B] text-[#9DD0FF] px-4 py-3 rounded-xl text-sm">
+                  {message}
+                </div>
+              ) : null}
+              {!isRecoveryMode ? (
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-sm text-[#A9ACBA] hover:text-[#ECECF3]"
+                    disabled={isSubmitting}
+                  >
+                    Mot de passe oublié ?
+                  </button>
+                </div>
+              ) : null}
 
               <Button
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full bg-[#4169E1] hover:bg-[#3557C1] text-white py-6 rounded-xl shadow-md transition-all"
               >
-                {isSubmitting ? 'Connexion...' : isSigningUp ? 'Créer un compte' : 'Se connecter'}
+                {isSubmitting
+                  ? isRecoveryMode
+                    ? 'Mise à jour...'
+                    : 'Connexion...'
+                  : isRecoveryMode
+                    ? 'Mettre à jour le mot de passe'
+                    : isSigningUp
+                      ? 'Créer un compte'
+                      : 'Se connecter'}
               </Button>
             </form>
           </div>
