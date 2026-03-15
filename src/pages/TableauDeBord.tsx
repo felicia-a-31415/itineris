@@ -692,7 +692,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   }, [showAddDialog, modalTaskId, timeView, calendarMode]);
 
   const tasksListContent = (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div>
         <div className="flex items-center gap-2 text-sm text-[#A9ACBA]">
           <span>{completedTasksCount} terminées</span>
@@ -1013,10 +1013,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         <div className="grid gap-6 items-stretch md:grid-cols-2">
           {/* Pomodoro */}
           <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
-            <div className="mb-4">
+            <div className="mb-2">
               <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
-            <div className="grid gap-6 sm:grid-cols-[1.1fr,1fr] items-start">
+            <div className="grid gap-4 sm:grid-cols-[1.1fr,1fr] items-start">
               <div className="flex flex-col items-center justify-start gap-5 pt-1">
                 <div className="flex gap-3">
                   {(
@@ -1201,19 +1201,23 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       type="button"
                       onClick={handlePrevRange}
                       variant="ghost"
-                      className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#ECECF3] hover:bg-[#0F1117] hover:border-[#2B3550] p-0"
+                      className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#ECECF3] p-0"
                       aria-label="Période précédente"
                     >
-                      <ChevronLeft className="w-5 h-5" />
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-[#0F1117]">
+                        <ChevronLeft className="w-5 h-5" />
+                      </span>
                     </Button>
                     <Button
                       type="button"
                       onClick={handleNextRange}
                       variant="ghost"
-                      className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#ECECF3] hover:bg-[#0F1117] hover:border-[#2B3550] p-0"
+                      className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#ECECF3] p-0"
                       aria-label="Période suivante"
                     >
-                      <ChevronRight className="w-5 h-5" />
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-[#0F1117]">
+                        <ChevronRight className="w-5 h-5" />
+                      </span>
                     </Button>
                   </div>
                   <div className="text-2xl font-semibold text-[#ECECF3] capitalize">{monthRangeLabel}</div>
@@ -1226,7 +1230,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 <div className="flex flex-wrap items-center gap-2">
                   {calendarMode === 'calendar' ? (
                     <Select value={timeView} onValueChange={(value: 'week' | 'month') => setTimeView(value)}>
-                      <SelectTrigger className="h-11 min-h-11 w-[128px] rounded-full border-[#2B3550] bg-[#0F1117] px-4 text-sm font-semibold text-[#ECECF3] hover:bg-[#1A1D26] data-[size=default]:h-11">
+                      <SelectTrigger className="h-11 min-h-11 w-[128px] rounded-full border-[#2B3550] bg-[#0F1117] px-4 text-sm font-semibold text-[#ECECF3] hover:bg-[#1A1D26] focus-visible:border-[#2B3550] focus-visible:ring-0 data-[size=default]:h-11">
                         <SelectValue>{timeView === 'week' ? 'Semaine' : 'Mois'}</SelectValue>
                       </SelectTrigger>
                       <SelectContent className="rounded-xl border border-[#1F2230] bg-[#161924] text-[#ECECF3] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
@@ -1241,7 +1245,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   ) : null}
                   <div className="relative inline-flex items-center h-11 w-[102px] rounded-full border border-[#2B3550] bg-[#0F1117] overflow-hidden">
                     <div
-                      className={`absolute top-0 bottom-0 w-1/2 bg-[#9FD0FF] transition-all ${
+                      className={`absolute top-0 bottom-0 w-1/2 bg-[#9FD0FF] ${
                         calendarMode === 'calendar'
                           ? 'left-0 rounded-l-full rounded-r-none'
                           : 'left-1/2 rounded-r-full rounded-l-none'
@@ -1254,7 +1258,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
                         calendarMode === 'calendar'
                           ? 'text-[#0B0D10]'
-                          : 'text-[#A9ACBA] hover:text-[#ECECF3]'
+                          : 'text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-white/5'
                       }`}
                       aria-label="Vue calendrier"
                     >
@@ -1267,7 +1271,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
                         calendarMode === 'tasks'
                           ? 'text-[#0B0D10]'
-                          : 'text-[#A9ACBA] hover:text-[#ECECF3]'
+                          : 'text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-white/5'
                       }`}
                       aria-label="Vue liste"
                     >

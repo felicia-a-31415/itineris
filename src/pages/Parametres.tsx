@@ -274,12 +274,32 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-4">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-[#ECECF3]">Paramètres du compte</h1>
-          </div>
+        <Tabs defaultValue="profile" className="w-full">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <TabsList className="flex h-auto flex-wrap gap-2 rounded-3xl border border-[#1F2230] bg-[#161924] p-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_8px_18px_rgba(0,0,0,0.25),0_1px_0_rgba(255,255,255,0.04)]">
+              <TabsTrigger
+                value="profile"
+                className="rounded-2xl px-4 py-2 text-[#A9ACBA] data-[state=active]:bg-[#10131B] data-[state=active]:text-[#ECECF3]"
+              >
+                <CircleUserRound className="w-4 h-4 mr-2" />
+                Profil
+              </TabsTrigger>
+              <TabsTrigger
+                value="subjects"
+                className="rounded-2xl px-4 py-2 text-[#A9ACBA] data-[state=active]:bg-[#10131B] data-[state=active]:text-[#ECECF3]"
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                Matières
+              </TabsTrigger>
+              <TabsTrigger
+                value="account"
+                className="rounded-2xl px-4 py-2 text-[#A9ACBA] data-[state=active]:bg-[#10131B] data-[state=active]:text-[#ECECF3]"
+              >
+                <KeyRound className="w-4 h-4 mr-2" />
+                Compte
+              </TabsTrigger>
+            </TabsList>
 
-          <div className="flex flex-wrap gap-2">
             <Button
               onClick={onBack}
               variant="ghost"
@@ -288,49 +308,15 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               <ArrowLeft className="w-4 h-4 mr-2" />
               Retour
             </Button>
-            <Button
-              onClick={handleSaveProfile}
-              className="rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {saved ? 'Sauvegardé' : 'Sauvegarder le profil'}
-            </Button>
           </div>
-        </div>
-
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="flex h-auto flex-wrap gap-2 rounded-3xl border border-[#1F2230] bg-[#161924] p-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_8px_18px_rgba(0,0,0,0.25),0_1px_0_rgba(255,255,255,0.04)]">
-            <TabsTrigger
-              value="profile"
-              className="rounded-2xl px-4 py-2 text-[#A9ACBA] data-[state=active]:bg-[#10131B] data-[state=active]:text-[#ECECF3]"
-            >
-              <CircleUserRound className="w-4 h-4 mr-2" />
-              Profil
-            </TabsTrigger>
-            <TabsTrigger
-              value="subjects"
-              className="rounded-2xl px-4 py-2 text-[#A9ACBA] data-[state=active]:bg-[#10131B] data-[state=active]:text-[#ECECF3]"
-            >
-              <BookOpen className="w-4 h-4 mr-2" />
-              Matières
-            </TabsTrigger>
-            <TabsTrigger
-              value="account"
-              className="rounded-2xl px-4 py-2 text-[#A9ACBA] data-[state=active]:bg-[#10131B] data-[state=active]:text-[#ECECF3]"
-            >
-              <KeyRound className="w-4 h-4 mr-2" />
-              Compte
-            </TabsTrigger>
-          </TabsList>
 
           <TabsContent value="profile" className="mt-4">
-            <Card className={`${cardClassName} space-y-3`}>
+            <Card className={`${cardClassName} space-y-2`}>
               <div>
                 <h2 className="text-xl font-semibold text-[#ECECF3]">Profil scolaire</h2>
-                <p className="text-sm text-[#A9ACBA]">Ces informations personnalisent ton tableau de bord et tes recommandations.</p>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid gap-2 md:grid-cols-2">
                 <div>
                   <Label htmlFor="name" className="text-[#ECECF3]">
                     Prénom
@@ -381,6 +367,16 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                   {profileMessage}
                 </div>
               ) : null}
+
+              <div className="pt-1">
+                <Button
+                  onClick={handleSaveProfile}
+                  className="rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {saved ? 'Sauvegardé' : 'Sauvegarder le profil'}
+                </Button>
+              </div>
             </Card>
           </TabsContent>
 
