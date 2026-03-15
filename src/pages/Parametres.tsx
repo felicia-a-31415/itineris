@@ -305,7 +305,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               <Button
                 onClick={onBack}
                 variant="ghost"
-                className="h-[52px] rounded-2xl border border-[#1F2230] bg-[#161924] px-5 text-[#ECECF3] hover:bg-[#1B2030]"
+                className="h-11 rounded-xl border border-[#1F2230] bg-[#161924] px-4 text-sm text-[#ECECF3] hover:bg-[#1B2030]"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Retour
@@ -313,7 +313,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               {activeTab === 'profile' ? (
                 <Button
                   onClick={handleSaveProfile}
-                  className="h-[52px] rounded-2xl bg-[#4169E1] px-5 text-white hover:bg-[#3557C1]"
+                  className="h-11 rounded-xl bg-[#4169E1] px-4 text-sm text-white hover:bg-[#3557C1]"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   {saved ? 'Sauvegardé' : 'Sauvegarder'}

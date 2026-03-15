@@ -215,7 +215,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [taskDetailsId, setTaskDetailsId] = useState<string | null>(null);
   const ignoreCalendarClickUntilRef = useRef(0);
   const [taskPopoverSide, setTaskPopoverSide] = useState<'left' | 'right'>('right');
+  const [deleteCompletedMenuOpen, setDeleteCompletedMenuOpen] = useState(false);
   const taskPopoverAnchorRef = useRef<HTMLDivElement | null>(null);
+  const taskListItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const taskListPositionsRef = useRef<Record<string, number>>({});
+  const pendingTaskMotionRef = useRef<{ id: string; direction: 'down' | 'up' } | null>(null);
   const [showCompletedTasks, setShowCompletedTasks] = useState(true);
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -551,9 +555,36 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   };
 
   const toggleTask = (id: string) => {
+    const targetTask = tasks.find((task) => task.id === id);
+    if (targetTask) {
+      pendingTaskMotionRef.current = {
+        id,
+        direction: targetTask.completed ? 'up' : 'down',
+      };
+    }
+
     setTasks((prev) =>
       prev.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task))
     );
+  };
+
+  const deleteCompletedTasks = (ageInMonths?: number) => {
+    const now = new Date();
+    const cutoff = ageInMonths
+      ? new Date(now.getFullYear(), now.getMonth() - ageInMonths, now.getDate())
+      : null;
+
+    setTasks((prev) =>
+      prev.filter((task) => {
+        if (!task.completed) return true;
+        if (!cutoff) return false;
+        if (!task.date) return true;
+
+        const taskDate = new Date(`${task.date}T00:00`);
+        return taskDate > cutoff;
+      })
+    );
+    setDeleteCompletedMenuOpen(false);
   };
 
   const isToday = (date: Date) => {
@@ -691,6 +722,53 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setTaskPopoverSide(spaceRight < estimatedPopoverWidth ? 'left' : 'right');
   }, [showAddDialog, modalTaskId, timeView, calendarMode]);
 
+  useLayoutEffect(() => {
+    const nextPositions: Record<string, number> = {};
+
+    visibleTasks.forEach((task) => {
+      const node = taskListItemRefs.current[task.id];
+      if (!node) return;
+
+      const nextTop = node.getBoundingClientRect().top;
+      const previousTop = taskListPositionsRef.current[task.id];
+      nextPositions[task.id] = nextTop;
+
+      if (previousTop === undefined) return;
+
+      const deltaY = previousTop - nextTop;
+      if (Math.abs(deltaY) < 1) return;
+
+      const isTargetTask = pendingTaskMotionRef.current?.id === task.id;
+      const direction = pendingTaskMotionRef.current?.direction;
+
+      node.animate(
+        isTargetTask && direction === 'down'
+          ? [
+              { transform: `translateY(${deltaY}px)`, offset: 0 },
+              { transform: 'translateY(8px)', offset: 0.84 },
+              { transform: 'translateY(0)', offset: 1 },
+            ]
+          : isTargetTask && direction === 'up'
+            ? [
+                { transform: `translateY(${deltaY}px)`, offset: 0 },
+                { transform: 'translateY(-6px)', offset: 0.82 },
+                { transform: 'translateY(0)', offset: 1 },
+              ]
+            : [
+                { transform: `translateY(${deltaY}px)` },
+                { transform: 'translateY(0)' },
+              ],
+        {
+          duration: isTargetTask ? 420 : 280,
+          easing: isTargetTask ? 'cubic-bezier(0.18, 0.9, 0.2, 1)' : 'cubic-bezier(0.22, 1, 0.36, 1)',
+        }
+      );
+    });
+
+    taskListPositionsRef.current = nextPositions;
+    pendingTaskMotionRef.current = null;
+  }, [visibleTasks]);
+
   const tasksListContent = (
     <div className="space-y-0.5">
       {agendaTasks.length === 0 ? (
@@ -705,6 +783,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             return (
               <div
                 key={task.id}
+                ref={(node) => {
+                  taskListItemRefs.current[task.id] = node;
+                }}
                 className={`group relative flex items-start gap-2 py-2 ${task.completed ? 'opacity-60' : ''}`}
               >
                 <div className="mt-0.5">
@@ -736,16 +817,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       className="h-7 px-2 text-sm rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
                     />
                   ) : (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => startEditingName(task)}
-                      className={`h-auto p-0 text-sm font-medium text-left break-words ${
+                    <div
+                      className={`text-sm font-medium text-left break-words ${
                         task.completed ? 'line-through' : ''
-                      } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'} hover:bg-transparent`}
+                      } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
                     >
                       {task.name || 'Tâche sans titre'}
-                    </Button>
+                    </div>
                   )}
                   <div className={`mt-0.5 text-xs text-[#A9ACBA] ${task.completed ? 'line-through' : ''}`}>
                     {displayDate} {task.time ? `· ${task.time}` : ''}
@@ -897,15 +975,56 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             {showCompletedTasks ? 'Masquer' : 'Afficher'}
           </Button>
           <span>•</span>
-          <Button
-            type="button"
-            onClick={() => setTasks((prev) => prev.filter((task) => !task.completed))}
-            variant="ghost"
-            className="h-auto p-0 text-[#E16941] hover:text-[#F18B6B]"
-            disabled={completedTasksCount === 0}
-          >
-            Supprimer
-          </Button>
+          <Popover open={deleteCompletedMenuOpen} onOpenChange={setDeleteCompletedMenuOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-auto p-0 text-[#E16941] hover:text-[#F18B6B]"
+                disabled={completedTasksCount === 0}
+              >
+                Supprimer
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              side="top"
+              sideOffset={10}
+              className="w-[260px] rounded-[24px] border border-white/10 bg-[#2B2F3A]/92 p-2 text-[#ECECF3] backdrop-blur-xl shadow-[0_32px_80px_rgba(0,0,0,0.55)]"
+              onOpenAutoFocus={(e) => e.preventDefault()}
+            >
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => deleteCompletedTasks(1)}
+                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#ECECF3] transition hover:bg-white/[0.06]"
+                >
+                  Plus vieux qu’un mois
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deleteCompletedTasks(3)}
+                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#ECECF3] transition hover:bg-white/[0.06]"
+                >
+                  Plus vieux que 3 mois
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deleteCompletedTasks(12)}
+                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#ECECF3] transition hover:bg-white/[0.06]"
+                >
+                  Plus vieux qu’un an
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deleteCompletedTasks()}
+                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#E16941] transition hover:bg-[rgba(225,105,65,0.08)]"
+                >
+                  Tout supprimer
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
     </div>
@@ -1184,9 +1303,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         {/* Agenda en ligne */}
         <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
-          <div className="flex flex-col gap-4">
-            <p className="text-sm text-[#A9ACBA]">Agenda en ligne</p>
-            <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className={`flex flex-col ${calendarMode === 'tasks' ? 'gap-2' : 'gap-4'}`}>
+            {calendarMode === 'calendar' ? <p className="text-sm text-[#A9ACBA]">Agenda en ligne</p> : null}
+            <div className="flex flex-wrap items-start justify-between gap-3">
               {calendarMode === 'calendar' ? (
                 <div className="flex flex-wrap items-center gap-3">
                   <Button
@@ -1222,80 +1341,76 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   </div>
                   <div className="text-2xl font-semibold text-[#ECECF3] capitalize">{monthRangeLabel}</div>
                 </div>
-              ) : calendarMode === 'tasks' ? (
+              ) : (
                 <div className="text-2xl font-semibold text-[#ECECF3]">Tâches à faire</div>
-              ) : null}
+              )}
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  {calendarMode === 'calendar' ? (
-                    <Select value={timeView} onValueChange={(value: 'week' | 'month') => setTimeView(value)}>
-                      <SelectTrigger className="h-11 min-h-11 w-[128px] rounded-full border-[#2B3550] bg-[#0F1117] px-4 text-sm font-semibold text-[#ECECF3] hover:bg-[#1A1D26] focus-visible:border-[#2B3550] focus-visible:ring-0 data-[size=default]:h-11">
-                        <SelectValue>{timeView === 'week' ? 'Semaine' : 'Mois'}</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border border-[#1F2230] bg-[#161924] text-[#ECECF3] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
-                        <SelectItem value="week" className="rounded-lg py-2 text-sm">
-                          Semaine
-                        </SelectItem>
-                        <SelectItem value="month" className="rounded-lg py-2 text-sm">
-                          Mois
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : null}
-                  <div className="relative inline-flex items-center h-11 w-[102px] rounded-full border border-[#2B3550] bg-[#0F1117] overflow-hidden">
-                    <div
-                      className={`absolute top-0 bottom-0 w-1/2 bg-[#9FD0FF] ${
-                        calendarMode === 'calendar'
-                          ? 'left-0 rounded-l-full rounded-r-none'
-                          : 'left-1/2 rounded-r-full rounded-l-none'
-                      }`}
-                    />
-                    <Button
-                      type="button"
-                      onClick={() => setCalendarMode('calendar')}
-                      variant="ghost"
-                      className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
-                        calendarMode === 'calendar'
-                          ? 'text-[#0B0D10]'
-                          : 'text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-white/5'
-                      }`}
-                      aria-label="Vue calendrier"
-                    >
-                      <Calendar className="w-5 h-5" />
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => setCalendarMode('tasks')}
-                      variant="ghost"
-                      className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
-                        calendarMode === 'tasks'
-                          ? 'text-[#0B0D10]'
-                          : 'text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-white/5'
-                      }`}
-                      aria-label="Vue liste"
-                    >
-                      <List className="w-5 h-5" />
-                    </Button>
-                  </div>
-                  <Button asChild variant="ghost" className="h-11 px-4 rounded-full border border-[#2B3550] bg-[#0F1117] text-sm font-semibold text-[#ECECF3] hover:bg-[#1A1D26]">
-                    <label htmlFor="agendaUpload" className="flex items-center gap-2 cursor-pointer">
-                      <Upload className="w-4 h-4" />
-                      Importer une photo
-                    </label>
-                  </Button>
-                  <input
-                    id="agendaUpload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleAgendaImageUpload(e.target.files?.[0])}
+                {calendarMode === 'calendar' ? (
+                  <Select value={timeView} onValueChange={(value: 'week' | 'month') => setTimeView(value)}>
+                    <SelectTrigger className="h-11 min-h-11 w-[128px] rounded-full border-[#2B3550] bg-[#0F1117] px-4 text-sm font-semibold text-[#ECECF3] hover:bg-[#1A1D26] focus-visible:border-[#2B3550] focus-visible:ring-0 data-[size=default]:h-11">
+                      <SelectValue>{timeView === 'week' ? 'Semaine' : 'Mois'}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border border-[#1F2230] bg-[#161924] text-[#ECECF3] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
+                      <SelectItem value="week" className="rounded-lg py-2 text-sm">
+                        Semaine
+                      </SelectItem>
+                      <SelectItem value="month" className="rounded-lg py-2 text-sm">
+                        Mois
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : null}
+                <div className="relative inline-flex items-center h-11 w-[102px] rounded-full border border-[#2B3550] bg-[#0F1117] overflow-hidden">
+                  <div
+                    className={`absolute top-0 bottom-0 w-1/2 bg-[#9FD0FF] ${
+                      calendarMode === 'calendar'
+                        ? 'left-0 rounded-l-full rounded-r-none'
+                        : 'left-1/2 rounded-r-full rounded-l-none'
+                    }`}
                   />
+                  <Button
+                    type="button"
+                    onClick={() => setCalendarMode('calendar')}
+                    variant="ghost"
+                    className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
+                      calendarMode === 'calendar'
+                        ? 'text-[#0B0D10]'
+                        : 'text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-white/5'
+                    }`}
+                    aria-label="Vue calendrier"
+                  >
+                    <Calendar className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setCalendarMode('tasks')}
+                    variant="ghost"
+                    className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
+                      calendarMode === 'tasks'
+                        ? 'text-[#0B0D10]'
+                        : 'text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-white/5'
+                    }`}
+                    aria-label="Vue liste"
+                  >
+                    <List className="w-5 h-5" />
+                  </Button>
                 </div>
-                {calendarMode === 'tasks' ? null : null}
+                <Button asChild variant="ghost" className="h-11 px-4 rounded-full border border-[#2B3550] bg-[#0F1117] text-sm font-semibold text-[#ECECF3] hover:bg-[#1A1D26]">
+                  <label htmlFor="agendaUpload" className="flex items-center gap-2 cursor-pointer">
+                    <Upload className="w-4 h-4" />
+                    Importer une photo
+                  </label>
+                </Button>
+                <input
+                  id="agendaUpload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleAgendaImageUpload(e.target.files?.[0])}
+                />
               </div>
             </div>
-
           </div>
 
           {uploadNotice && (
@@ -1536,16 +1651,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       align="start"
                                       sideOffset={12}
                                       collisionPadding={16}
-                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[28px] border border-[rgba(150,180,255,0.16)] bg-[rgba(22,25,36,0.78)] text-[#ECECF3] text-sm p-5 backdrop-blur-2xl shadow-[0_28px_70px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)]"
+                                      className="w-[320px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/88 text-[#ECECF3] text-sm p-4 backdrop-blur-xl shadow-[0_32px_80px_rgba(0,0,0,0.55)]"
                                       onOpenAutoFocus={(e) => e.preventDefault()}
                                     >
-                                      <div className="flex items-start justify-between gap-4">
-                                        <div className="flex items-center gap-3 min-w-0">
+                                      <div className="flex items-start justify-between gap-3">
+                                        <div className="flex items-center gap-2.5 min-w-0">
                                           <span
-                                            className="h-4 w-4 rounded-[6px] shrink-0"
+                                            className="h-3.5 w-3.5 rounded-[6px] shrink-0"
                                             style={{ backgroundColor: task.color }}
                                           />
-                                          <div className="text-[28px] leading-none font-semibold truncate">
+                                          <div className="text-[19px] leading-tight font-semibold truncate">
                                             {task.name || '(Titre)'}
                                           </div>
                                         </div>
@@ -1556,7 +1671,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                               e.stopPropagation();
                                               startEditingName(task);
                                             }}
-                                            className="h-10 w-10 rounded-2xl border border-[rgba(150,180,255,0.16)] bg-[rgba(10,13,18,0.35)] flex items-center justify-center hover:bg-[rgba(65,105,225,0.14)] hover:text-[#ECECF3] transition"
+                                            className="h-9 w-9 rounded-[18px] border border-white/10 bg-white/[0.03] flex items-center justify-center hover:bg-white/[0.06] hover:text-[#ECECF3] transition"
                                             aria-label="Modifier la tâche"
                                           >
                                             <Pencil className="w-4 h-4" />
@@ -1568,14 +1683,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                               setTasks((prev) => prev.filter((t) => t.id !== task.id));
                                               setTaskDetailsId(null);
                                             }}
-                                            className="h-10 w-10 rounded-2xl border border-[rgba(225,105,65,0.22)] bg-[rgba(225,105,65,0.08)] text-[#E16941] flex items-center justify-center hover:bg-[rgba(225,105,65,0.14)] transition"
+                                            className="h-9 w-9 rounded-[18px] border border-[rgba(225,105,65,0.22)] bg-[rgba(225,105,65,0.06)] text-[#E16941] flex items-center justify-center hover:bg-[rgba(225,105,65,0.14)] transition"
                                             aria-label="Supprimer la tâche"
                                           >
                                             <Trash2 className="w-4 h-4" />
                                           </button>
                                         </div>
                                       </div>
-                                      <div className="mt-4 rounded-2xl border border-[rgba(150,180,255,0.12)] bg-[rgba(10,13,18,0.38)] px-4 py-3 text-sm text-[#C6CAD8] backdrop-blur-xl">
+                                      <div className="mt-3 rounded-[20px] border border-white/8 bg-[#10131B]/72 px-4 py-2.5 text-[15px] text-[#C9CDDA]">
                                         <span>{taskDateLabel}</span>
                                         {taskTimeLabel ? <span>{` • ${taskTimeLabel}`}</span> : null}
                                       </div>
