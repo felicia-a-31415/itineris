@@ -33,10 +33,15 @@ Deno.serve(async (request) => {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized.' }), {
+      return new Response(
+        JSON.stringify({
+          error: userError?.message ?? 'Unauthorized.',
+        }),
+        {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+        }
+      );
     }
 
     const { message, context } = await request.json();
