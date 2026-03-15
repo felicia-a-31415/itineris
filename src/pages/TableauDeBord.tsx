@@ -1200,8 +1200,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     <Button
                       type="button"
                       onClick={handlePrevRange}
-                      variant="outline"
-                      className="h-11 w-11 rounded-full border-[#2B3550] bg-[#0F1117] text-[#ECECF3] hover:bg-[#1A1D26] p-0"
+                      variant="ghost"
+                      className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#ECECF3] hover:bg-[#0F1117] hover:border-[#2B3550] p-0"
                       aria-label="Période précédente"
                     >
                       <ChevronLeft className="w-5 h-5" />
@@ -1209,8 +1209,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                     <Button
                       type="button"
                       onClick={handleNextRange}
-                      variant="outline"
-                      className="h-11 w-11 rounded-full border-[#2B3550] bg-[#0F1117] text-[#ECECF3] hover:bg-[#1A1D26] p-0"
+                      variant="ghost"
+                      className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#ECECF3] hover:bg-[#0F1117] hover:border-[#2B3550] p-0"
                       aria-label="Période suivante"
                     >
                       <ChevronRight className="w-5 h-5" />
@@ -1226,7 +1226,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 <div className="flex flex-wrap items-center gap-2">
                   {calendarMode === 'calendar' ? (
                     <Select value={timeView} onValueChange={(value: 'week' | 'month') => setTimeView(value)}>
-                      <SelectTrigger className="h-11 w-[128px] rounded-full border-[#2B3550] bg-[#0F1117] px-4 text-sm font-semibold text-[#ECECF3] focus:border-[#4169E1]">
+                      <SelectTrigger className="h-11 min-h-11 w-[128px] rounded-full border-[#2B3550] bg-[#0F1117] px-4 text-sm font-semibold text-[#ECECF3] hover:bg-[#1A1D26] data-[size=default]:h-11">
                         <SelectValue>{timeView === 'week' ? 'Semaine' : 'Mois'}</SelectValue>
                       </SelectTrigger>
                       <SelectContent className="rounded-xl border border-[#1F2230] bg-[#161924] text-[#ECECF3] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
@@ -1247,7 +1247,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                           : 'left-1/2 rounded-r-full rounded-l-none'
                       }`}
                     />
-                    <div className="absolute top-2 bottom-2 left-1/2 z-10 w-px -translate-x-1/2 bg-[#2B3550]" />
                     <Button
                       type="button"
                       onClick={() => setCalendarMode('calendar')}
