@@ -1392,32 +1392,24 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                             const taskCard = (
                               <div
                                 ref={shouldShowEditor ? taskPopoverAnchorRef : undefined}
-                                className={`text-xs shadow-[0_4px_12px_rgba(65,105,225,0.06)] ${
-                                  isMonthView
-                                    ? 'rounded-xl px-2.5 py-2 bg-[#EEF3FF] text-[#101524]'
-                                    : 'rounded-2xl p-3 bg-[#182032] border border-[#2B3550]'
-                                }`}
+                                className="rounded-xl px-2.5 py-1.5 text-xs bg-[#182032] border border-[#2B3550] text-[#ECECF3] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
                                 style={{
                                   borderLeft: `${isMonthView ? 3 : 4}px solid ${task.color}`,
                                 }}
                               >
-                                <div className={`flex items-center ${isMonthView ? 'gap-2 min-h-5' : 'gap-3 min-h-6'}`}>
+                                <div className="flex items-center gap-2 min-h-[18px]">
                                   <div className="flex items-center justify-center">
                                     <Checkbox
                                       checked={task.completed}
                                       onClick={(e) => e.stopPropagation()}
                                       onCheckedChange={() => toggleTask(task.id)}
-                                      className={`rounded-sm h-4 w-4 border-2 ${
-                                        isMonthView
-                                          ? 'border-[#4F5F8B] bg-white/90 data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#4169E1]'
-                                          : 'border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]'
-                                      }`}
+                                      className="rounded-sm h-4 w-4 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
                                     />
                                   </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className={`flex items-center gap-1 ${isMonthView ? 'mb-0' : 'mb-1'}`}>
+                                  <div className="flex-1 min-w-0 flex items-center">
+                                    <div className="flex items-center gap-1">
                                       {task.time && (
-                                        <span className={`text-[10px] ${isMonthView ? 'text-[#5C6787]' : 'text-[#A9ACBA]'}`}>
+                                        <span className="text-[10px] text-[#A9ACBA]">
                                           {task.time}
                                         </span>
                                       )}
@@ -1443,9 +1435,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       />
                                     ) : (
                                       <div
-                                        className={`text-left text-xs break-words ${
+                                        className={`text-left text-xs leading-none break-words ${
                                           task.completed ? 'line-through opacity-50' : ''
-                                        } ${task.urgent ? 'text-red-400' : isMonthView ? 'text-[#101524]' : 'text-[#ECECF3]'}`}
+                                        } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
                                       >
                                         {task.name}
                                       </div>
