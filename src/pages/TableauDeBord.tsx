@@ -1226,7 +1226,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 <div className="flex flex-wrap items-center gap-2">
                   {calendarMode === 'calendar' ? (
                     <Select value={timeView} onValueChange={(value: 'week' | 'month') => setTimeView(value)}>
-                      <SelectTrigger className="h-11 w-[180px] rounded-xl border-[#1F2230] bg-[#0F1117] px-4 text-sm text-[#ECECF3] focus:border-[#4169E1]">
+                      <SelectTrigger className="h-11 w-[128px] rounded-full border-[#2B3550] bg-[#0F1117] px-4 text-sm font-semibold text-[#ECECF3] focus:border-[#4169E1]">
                         <SelectValue>{timeView === 'week' ? 'Semaine' : 'Mois'}</SelectValue>
                       </SelectTrigger>
                       <SelectContent className="rounded-xl border border-[#1F2230] bg-[#161924] text-[#ECECF3] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
@@ -1241,11 +1241,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   ) : null}
                   <div className="relative inline-flex items-center h-11 w-[102px] rounded-full border border-[#2B3550] bg-[#0F1117] overflow-hidden">
                     <div
-                      className={`absolute top-1 bottom-1 w-[calc(50%-6px)] rounded-full bg-[#9FD0FF] transition-all ${
-                        calendarMode === 'calendar' ? 'left-1' : 'left-[calc(50%+2px)]'
+                      className={`absolute top-0 bottom-0 w-1/2 bg-[#9FD0FF] transition-all ${
+                        calendarMode === 'calendar'
+                          ? 'left-0 rounded-l-full rounded-r-none'
+                          : 'left-1/2 rounded-r-full rounded-l-none'
                       }`}
                     />
-                    <div className="absolute top-2 bottom-2 left-1/2 w-px -translate-x-1/2 bg-[#2B3550]" />
+                    <div className="absolute top-2 bottom-2 left-1/2 z-10 w-px -translate-x-1/2 bg-[#2B3550]" />
                     <Button
                       type="button"
                       onClick={() => setCalendarMode('calendar')}
