@@ -311,12 +311,13 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
           </div>
 
           <TabsContent value="profile" className="mt-4">
+            <div className="space-y-3">
             <Card className={`${cardClassName} space-y-2`}>
               <div>
                 <h2 className="text-xl font-semibold text-[#ECECF3]">Profil scolaire</h2>
               </div>
 
-              <div className="grid gap-2 md:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-3">
                 <div>
                   <Label htmlFor="name" className="text-[#ECECF3]">
                     Prénom
@@ -347,19 +348,19 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div>
-                <Label htmlFor="goals" className="text-[#ECECF3]">
-                  Objectifs
-                </Label>
-                <Textarea
-                  id="goals"
-                  value={formData.lifeGoals}
-                  onChange={(event) => setFormData((current) => ({ ...current, lifeGoals: event.target.value }))}
-                  placeholder="Décris tes ambitions, tes projets ou ce que tu veux accomplir cette année."
-                  className={`${inputClassName} min-h-[132px]`}
-                />
+                <div>
+                  <Label htmlFor="goals" className="text-[#ECECF3]">
+                    Objectifs
+                  </Label>
+                  <Textarea
+                    id="goals"
+                    value={formData.lifeGoals}
+                    onChange={(event) => setFormData((current) => ({ ...current, lifeGoals: event.target.value }))}
+                    placeholder="Décris tes ambitions, tes projets ou ce que tu veux accomplir cette année."
+                    className={`${inputClassName} min-h-[132px]`}
+                  />
+                </div>
               </div>
 
               {profileMessage ? (
@@ -367,8 +368,8 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                   {profileMessage}
                 </div>
               ) : null}
-
-              <div className="pt-1 flex justify-end">
+            </Card>
+              <div className="flex justify-end">
                 <Button
                   onClick={handleSaveProfile}
                   className="rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
@@ -377,7 +378,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                   {saved ? 'Sauvegardé' : 'Sauvegarder'}
                 </Button>
               </div>
-            </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="subjects" className="mt-4">
@@ -413,7 +414,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
           <TabsContent value="account" className="mt-4">
             <div className="grid gap-3 lg:grid-cols-3">
-              <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5">
+              <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5 h-full flex flex-col">
                 <div>
                   <h2 className="text-lg font-semibold text-[#ECECF3]">Changer l’email</h2>
                   <p className="text-xs leading-5 text-[#A9ACBA]">
@@ -439,16 +440,18 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                   </div>
                 </div>
 
-                <Button
-                  onClick={handleEmailUpdate}
-                  disabled={!user || isUpdatingEmail}
-                  className="w-full h-10 rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
-                >
-                  {isUpdatingEmail ? 'Mise à jour...' : 'Mettre à jour l’email'}
-                </Button>
+                <div className="pt-2 mt-auto">
+                  <Button
+                    onClick={handleEmailUpdate}
+                    disabled={!user || isUpdatingEmail}
+                    className="w-full h-10 rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
+                  >
+                    {isUpdatingEmail ? 'Mise à jour...' : 'Mettre à jour l’email'}
+                  </Button>
+                </div>
               </Card>
 
-              <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5">
+              <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5 h-full flex flex-col">
                 <div>
                   <h2 className="text-lg font-semibold text-[#ECECF3]">Changer le mot de passe</h2>
                 </div>
@@ -483,17 +486,19 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                   />
                 </div>
 
-                <Button
-                  onClick={handlePasswordUpdate}
-                  disabled={!user || isUpdatingPassword}
-                  className="w-full h-10 rounded-xl bg-[#6B9AC4] hover:bg-[#5A89B3] text-white"
-                >
-                  {isUpdatingPassword ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
-                </Button>
+                <div className="pt-2 mt-auto">
+                  <Button
+                    onClick={handlePasswordUpdate}
+                    disabled={!user || isUpdatingPassword}
+                    className="w-full h-10 rounded-xl bg-[#6B9AC4] hover:bg-[#5A89B3] text-white"
+                  >
+                    {isUpdatingPassword ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
+                  </Button>
+                </div>
               </Card>
 
               {accountError ? (
-                <div className="lg:col-span-2 rounded-2xl border border-[#4C2A2A] bg-[#2A1B1B] px-4 py-3 text-sm text-[#E16941]">
+                <div className="lg:col-span-2 rounded-2xl bg-[#11141D] px-4 py-3 text-sm text-[#E16941]">
                   {accountError}
                 </div>
               ) : null}
@@ -510,9 +515,9 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </div>
               ) : null}
 
-              <Card className="bg-[#161924] border border-[#4C2A2A] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5">
+              <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5 h-full flex flex-col">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-[#2A1B1B] border border-[#4C2A2A] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-2xl bg-[#10131B] border border-[#1F2230] flex items-center justify-center shrink-0">
                     <OctagonAlert className="w-4 h-4 text-[#E16941]" />
                   </div>
                   <div>
@@ -537,13 +542,15 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                   />
                 </div>
 
-                <Button
-                  onClick={handleDeleteAccount}
-                  disabled={!user || isDeletingAccount || deleteConfirmation.trim() !== 'SUPPRIMER'}
-                  className="w-full h-10 rounded-xl bg-[#E16941] hover:bg-[#c95735] text-white"
-                >
-                  {isDeletingAccount ? 'Suppression...' : 'Supprimer définitivement le compte'}
-                </Button>
+                <div className="pt-2 mt-auto">
+                  <Button
+                    onClick={handleDeleteAccount}
+                    disabled={!user || isDeletingAccount || deleteConfirmation.trim() !== 'SUPPRIMER'}
+                    className="w-full h-10 rounded-xl bg-[#E16941] hover:bg-[#c95735] text-white"
+                  >
+                    {isDeletingAccount ? 'Suppression...' : 'Supprimer définitivement le compte'}
+                  </Button>
+                </div>
               </Card>
             </div>
           </TabsContent>
