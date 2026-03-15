@@ -1306,7 +1306,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           )}
 
           {calendarMode === 'tasks' ? (
-            <div className="mt-2">{tasksListContent}</div>
+            <div className="mt-0">{tasksListContent}</div>
           ) : (
             <div className="mt-2 overflow-x-auto">
               <div className="w-[1104px] min-w-[1104px] shrink-0">
@@ -1536,16 +1536,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       align="start"
                                       sideOffset={12}
                                       collisionPadding={16}
-                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[28px] border border-[#2B3550] bg-[#161924]/98 text-[#ECECF3] text-sm p-5 shadow-[0_28px_70px_rgba(0,0,0,0.6),0_8px_24px_rgba(0,0,0,0.35)]"
+                                      className="w-[300px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-[#2B3550] bg-[#161924]/98 text-[#ECECF3] text-sm p-4 shadow-[0_22px_60px_rgba(0,0,0,0.5),0_8px_20px_rgba(0,0,0,0.3)]"
                                       onOpenAutoFocus={(e) => e.preventDefault()}
                                     >
                                       <div className="flex items-start justify-between gap-4">
                                         <div className="flex items-center gap-3 min-w-0">
                                           <span
-                                            className="h-4 w-4 rounded-[6px] shrink-0"
+                                            className="h-3.5 w-3.5 rounded-[5px] shrink-0"
                                             style={{ backgroundColor: task.color }}
                                           />
-                                          <div className="text-[28px] leading-none font-semibold truncate">
+                                          <div className="text-xl leading-none font-semibold truncate">
                                             {task.name || '(Titre)'}
                                           </div>
                                         </div>
@@ -1556,7 +1556,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                               e.stopPropagation();
                                               startEditingName(task);
                                             }}
-                                            className="h-10 w-10 rounded-2xl border border-[#2B3550] bg-[#10131B] flex items-center justify-center hover:bg-[#1B2030] hover:text-[#ECECF3] transition"
+                                            className="h-9 w-9 rounded-xl border border-[#2B3550] bg-[#10131B] flex items-center justify-center hover:bg-[#1B2030] hover:text-[#ECECF3] transition"
                                             aria-label="Modifier la tâche"
                                           >
                                             <Pencil className="w-4 h-4" />
@@ -1568,14 +1568,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                               setTasks((prev) => prev.filter((t) => t.id !== task.id));
                                               setTaskDetailsId(null);
                                             }}
-                                            className="h-10 w-10 rounded-2xl border border-[#4C2A2A] bg-[#201416] text-[#E16941] flex items-center justify-center hover:bg-[#2A1B1B] transition"
+                                            className="h-9 w-9 rounded-xl border border-[#4C2A2A] bg-[#201416] text-[#E16941] flex items-center justify-center hover:bg-[#2A1B1B] transition"
                                             aria-label="Supprimer la tâche"
                                           >
                                             <Trash2 className="w-4 h-4" />
                                           </button>
                                         </div>
                                       </div>
-                                      <div className="mt-4 rounded-2xl border border-[#1F2230] bg-[#10131B] px-4 py-3 text-sm text-[#A9ACBA]">
+                                      <div className="mt-3 rounded-xl border border-[#1F2230] bg-[#10131B] px-3 py-2 text-sm text-[#A9ACBA]">
                                         <span>{taskDateLabel}</span>
                                         {taskTimeLabel ? <span>{` • ${taskTimeLabel}`}</span> : null}
                                       </div>
