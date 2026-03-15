@@ -1048,23 +1048,47 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setChatInput('');
     setIsSendingChat(true);
 
-    const { data, error } = await supabase.functions.invoke('study-chat', {
-      body: {
-        message,
-        context: {
-          tasks,
+    try {
+      const { data, error } = await supabase.functions.invoke('study-chat', {
+        body: {
+          message,
+          context: {
+            tasks,
+          },
         },
-      },
-    });
+      });
 
-    setIsSendingChat(false);
+      if (error) {
+        let errorMessage = error.message;
 
-    if (error) {
-      setMessages((prev) => [...prev, { role: 'assistant', content: 'Erreur serveur. Reessaie.' }]);
-      return;
+        if ('context' in error && error.context) {
+          try {
+            const errorData = await error.context.json();
+            if (typeof errorData?.error === 'string') {
+              errorMessage = errorData.error;
+            }
+          } catch {
+            try {
+              errorMessage = await error.context.text();
+            } catch {
+              // Keep the original error message if the response body can't be read.
+            }
+          }
+        }
+
+        setMessages((prev) => [...prev, { role: 'assistant', content: errorMessage }]);
+        return;
+      }
+
+      setMessages((prev) => [...prev, { role: 'assistant', content: data?.reply ?? 'Aucune reponse.' }]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: error instanceof Error ? error.message : 'Erreur inconnue.' },
+      ]);
+    } finally {
+      setIsSendingChat(false);
     }
-
-    setMessages((prev) => [...prev, { role: 'assistant', content: data?.reply ?? 'Aucune reponse.' }]);
   };
 
   return (

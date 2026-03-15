@@ -41,6 +41,13 @@ Deno.serve(async (request) => {
 
     const { message, context } = await request.json();
 
+    if (typeof message !== 'string' || !message.trim()) {
+      return new Response(JSON.stringify({ error: 'Message is required.' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const studyContext = [
       `Niveau scolaire: ${context?.year ?? 'inconnu'}`,
       `Matieres: ${(context?.subjects ?? []).join(', ') || 'aucune'}`,
@@ -70,14 +77,31 @@ Deno.serve(async (request) => {
 
     if (!anthropicResponse.ok) {
       const errorText = await anthropicResponse.text();
-      return new Response(JSON.stringify({ error: errorText }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          error: `Anthropic API error (${anthropicResponse.status}): ${errorText}`,
+        }),
+        {
+          status: anthropicResponse.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     const data = await anthropicResponse.json();
-    const reply = data?.content?.[0]?.text ?? 'Aucune reponse.';
+    const reply = Array.isArray(data?.content)
+      ? data.content
+          .filter((item: { type?: string; text?: string }) => item?.type === 'text' && typeof item.text === 'string')
+          .map((item: { text: string }) => item.text)
+          .join('\n\n')
+      : '';
+
+    if (!reply) {
+      return new Response(JSON.stringify({ error: 'Anthropic returned no text content.' }), {
+        status: 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     return new Response(JSON.stringify({ reply }), {
       status: 200,
