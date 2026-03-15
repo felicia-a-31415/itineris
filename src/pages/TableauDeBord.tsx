@@ -27,7 +27,6 @@ import { Switch } from '../ui/switch';
 import { TaskEditor } from '../components/TaskModal';
 import alarmSound from '../assets/Gentle-little-bell-ringing-sound-effect.mp3';
 import { useAuth } from '../lib/auth';
-import { supabase } from '../lib/supabaseClient';
 import {
   clearUserData,
   loadDashboardDataFromLocal,
@@ -1049,38 +1048,48 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setIsSendingChat(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('study-chat', {
-        body: {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
           message,
           context: {
             tasks,
           },
-        },
+        }),
       });
 
-      if (error) {
-        let errorMessage = error.message;
+      const responseText = await response.text();
+      let payload: { reply?: string; error?: string } | null = null;
 
-        if ('context' in error && error.context) {
-          try {
-            const errorData = await error.context.json();
-            if (typeof errorData?.error === 'string') {
-              errorMessage = errorData.error;
-            }
-          } catch {
-            try {
-              errorMessage = await error.context.text();
-            } catch {
-              // Keep the original error message if the response body can't be read.
-            }
-          }
-        }
+      try {
+        payload = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        payload = null;
+      }
+
+      if (!response.ok) {
+        const errorMessage =
+          payload?.error ??
+          responseText ??
+          `Edge Function returned status ${response.status}.`;
 
         setMessages((prev) => [...prev, { role: 'assistant', content: errorMessage }]);
         return;
       }
 
-      setMessages((prev) => [...prev, { role: 'assistant', content: data?.reply ?? 'Aucune reponse.' }]);
+      if (!payload?.reply) {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: 'La fonction a repondu sans message exploitable.' },
+        ]);
+        return;
+      }
+
+      setMessages((prev) => [...prev, { role: 'assistant', content: payload.reply }]);
     } catch (error) {
       setMessages((prev) => [
         ...prev,
