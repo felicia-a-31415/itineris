@@ -173,7 +173,7 @@ const createDefaultSessionsByDay = () => {
 
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
-  const { signOut, user, session, loading } = useAuth();
+  const { signOut, user, loading } = useAuth();
   const [weekOffset, setWeekOffset] = useState(0);
   const weekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
   const currentWeekStart = formatDate(getCurrentWeekDates(0)[0]);
@@ -1043,10 +1043,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const handleSendChat = async () => {
     const message = chatInput.trim();
     if (!message || isSendingChat) return;
-    if (!session?.access_token) {
-      setMessages((prev) => [...prev, { role: 'assistant', content: 'Session utilisateur introuvable. Reconnecte-toi.' }]);
-      return;
-    }
 
     setMessages((prev) => [...prev, { role: 'user', content: message }]);
     setChatInput('');
@@ -1054,9 +1050,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
     try {
       const { data, error } = await supabase.functions.invoke('study-chat', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
         body: {
           message,
           context: {
