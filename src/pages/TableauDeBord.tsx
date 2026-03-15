@@ -1536,27 +1536,27 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       align="start"
                                       sideOffset={12}
                                       collisionPadding={16}
-                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 text-[#ECECF3] text-sm p-4 shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
+                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[28px] border border-[#2B3550] bg-[#161924]/98 text-[#ECECF3] text-sm p-5 shadow-[0_28px_70px_rgba(0,0,0,0.6),0_8px_24px_rgba(0,0,0,0.35)]"
                                       onOpenAutoFocus={(e) => e.preventDefault()}
                                     >
                                       <div className="flex items-start justify-between gap-4">
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-3 min-w-0">
                                           <span
-                                            className="h-4 w-4 rounded-[6px]"
+                                            className="h-4 w-4 rounded-[6px] shrink-0"
                                             style={{ backgroundColor: task.color }}
                                           />
-                                          <div className="text-lg font-semibold">
+                                          <div className="text-[28px] leading-none font-semibold truncate">
                                             {task.name || '(Titre)'}
                                           </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-[#A9ACBA]">
+                                        <div className="flex items-center gap-2 text-[#A9ACBA] shrink-0">
                                           <button
                                             type="button"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               startEditingName(task);
                                             }}
-                                            className="p-2 rounded-full hover:bg-white/5"
+                                            className="h-10 w-10 rounded-2xl border border-[#2B3550] bg-[#10131B] flex items-center justify-center hover:bg-[#1B2030] hover:text-[#ECECF3] transition"
                                             aria-label="Modifier la tâche"
                                           >
                                             <Pencil className="w-4 h-4" />
@@ -1568,16 +1568,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                               setTasks((prev) => prev.filter((t) => t.id !== task.id));
                                               setTaskDetailsId(null);
                                             }}
-                                            className="p-2 rounded-full hover:bg-white/5"
+                                            className="h-10 w-10 rounded-2xl border border-[#4C2A2A] bg-[#201416] text-[#E16941] flex items-center justify-center hover:bg-[#2A1B1B] transition"
                                             aria-label="Supprimer la tâche"
                                           >
                                             <Trash2 className="w-4 h-4" />
                                           </button>
                                         </div>
                                       </div>
-                                      <div className="mt-3 text-sm text-[#A9ACBA]">
-                                        {taskDateLabel}
-                                        {taskTimeLabel ? ` • ${taskTimeLabel}` : ''}
+                                      <div className="mt-4 rounded-2xl border border-[#1F2230] bg-[#10131B] px-4 py-3 text-sm text-[#A9ACBA]">
+                                        <span>{taskDateLabel}</span>
+                                        {taskTimeLabel ? <span>{` • ${taskTimeLabel}`}</span> : null}
                                       </div>
                                     </PopoverContent>
                                   </Popover>
