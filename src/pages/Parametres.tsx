@@ -416,8 +416,8 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
           </TabsContent>
 
           <TabsContent value="account" className="mt-4">
-            <div className="grid gap-4 lg:grid-cols-2">
-              <Card className={`${cardClassName} space-y-4`}>
+            <div className="grid gap-3 lg:grid-cols-2">
+              <Card className={`${cardClassName} space-y-3`}>
                 <div>
                   <h2 className="text-xl font-semibold text-[#ECECF3]">Changer l’email</h2>
                   <p className="text-sm text-[#A9ACBA]">
@@ -452,7 +452,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </Button>
               </Card>
 
-              <Card className={`${cardClassName} space-y-4`}>
+              <Card className={`${cardClassName} space-y-3`}>
                 <div>
                   <h2 className="text-xl font-semibold text-[#ECECF3]">Changer le mot de passe</h2>
                   <p className="text-sm text-[#A9ACBA]">
@@ -517,7 +517,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </div>
               ) : null}
 
-              <Card className={`${cardClassName} space-y-4 lg:col-span-2 border-[#4C2A2A]`}>
+              <Card className={`${cardClassName} space-y-3 lg:col-span-2 border-[#4C2A2A]`}>
                 <div className="flex items-start gap-3">
                   <div className="w-11 h-11 rounded-2xl bg-[#2A1B1B] border border-[#4C2A2A] flex items-center justify-center shrink-0">
                     <OctagonAlert className="w-5 h-5 text-[#E16941]" />
@@ -530,7 +530,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-[#4C2A2A] bg-[#2A1B1B] px-4 py-3 text-sm text-[#F1B2A1]">
+                <div className="rounded-2xl border border-[#4C2A2A] bg-[#2A1B1B] px-3 py-2 text-sm text-[#F1B2A1]">
                   Tes données locales seront effacées sur cet appareil. La suppression du compte lui-même passe par une Edge Function sécurisée côté Supabase.
                 </div>
 

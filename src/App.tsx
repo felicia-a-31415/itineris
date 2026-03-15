@@ -25,7 +25,8 @@ export default function App() {
   const { user, loading } = useAuth();
   const [hasOnboardingData, setHasOnboardingData] = useState(Boolean(loadUserData()));
   const [isUserDataLoading, setIsUserDataLoading] = useState(true);
-  const isAppLoading = loading || isUserDataLoading;
+  const [hasFinishedInitialLoad, setHasFinishedInitialLoad] = useState(false);
+  const isInitialAppLoading = !hasFinishedInitialLoad && (loading || isUserDataLoading);
 
   const defaultUserData: UserData = {
     name: '',
@@ -62,6 +63,7 @@ export default function App() {
 
       if (isMounted) {
         setIsUserDataLoading(false);
+        setHasFinishedInitialLoad(true);
       }
     };
 
@@ -97,7 +99,7 @@ export default function App() {
         <Route
           path="/"
           element={
-            isAppLoading ? null : hasOnboardingData ? (
+            isInitialAppLoading ? null : hasOnboardingData ? (
               <Navigate to="/tableaudebord" replace />
             ) : (
               <Bienvenue
@@ -112,13 +114,13 @@ export default function App() {
         <Route
           path="/onboarding"
           element={
-            isAppLoading ? null : hasOnboardingData ? <Navigate to="/tableaudebord" replace /> : <Onboarding onComplete={handleOnboardingComplete} />
+            isInitialAppLoading ? null : hasOnboardingData ? <Navigate to="/tableaudebord" replace /> : <Onboarding onComplete={handleOnboardingComplete} />
           }
         />
         <Route
           path="/tableaudebord"
           element={
-            isAppLoading ? null : hasOnboardingData ? (
+            isInitialAppLoading ? null : hasOnboardingData ? (
               <TableauDeBord userName={userData?.name} />
             ) : user ? (
               <Navigate to="/onboarding" replace />
@@ -130,7 +132,7 @@ export default function App() {
         <Route
           path="/parametres"
           element={
-            isAppLoading ? null : hasOnboardingData ? (
+            isInitialAppLoading ? null : hasOnboardingData ? (
               <Parametres
                 onBack={() => navigate('/tableaudebord')}
                 userData={userData ?? defaultUserData}
