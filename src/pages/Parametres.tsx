@@ -416,17 +416,17 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
           </TabsContent>
 
           <TabsContent value="account" className="mt-4">
-            <div className="grid gap-3 lg:grid-cols-2">
-              <Card className={`${cardClassName} space-y-3`}>
+            <div className="grid gap-3 lg:grid-cols-3">
+              <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5">
                 <div>
-                  <h2 className="text-xl font-semibold text-[#ECECF3]">Changer l’email</h2>
-                  <p className="text-sm text-[#A9ACBA]">
-                    Supabase enverra une confirmation à la nouvelle adresse avant le changement définitif.
+                  <h2 className="text-lg font-semibold text-[#ECECF3]">Changer l’email</h2>
+                  <p className="text-xs leading-5 text-[#A9ACBA]">
+                    Une confirmation à la nouvelle adresse sera envoyee avant le changement définitif.
                   </p>
                 </div>
 
                 <div>
-                  <Label htmlFor="account-email" className="text-[#ECECF3]">
+                  <Label htmlFor="account-email" className="text-[#ECECF3] text-sm">
                     Adresse email
                   </Label>
                   <div className="relative mt-2">
@@ -446,22 +446,19 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 <Button
                   onClick={handleEmailUpdate}
                   disabled={!user || isUpdatingEmail}
-                  className="w-full rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
+                  className="w-full h-10 rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
                 >
                   {isUpdatingEmail ? 'Mise à jour...' : 'Mettre à jour l’email'}
                 </Button>
               </Card>
 
-              <Card className={`${cardClassName} space-y-3`}>
+              <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5">
                 <div>
-                  <h2 className="text-xl font-semibold text-[#ECECF3]">Changer le mot de passe</h2>
-                  <p className="text-sm text-[#A9ACBA]">
-                    Utilise un mot de passe plus long et unique pour protéger ton compte Itineris.
-                  </p>
+                  <h2 className="text-lg font-semibold text-[#ECECF3]">Changer le mot de passe</h2>
                 </div>
 
                 <div>
-                  <Label htmlFor="new-password" className="text-[#ECECF3]">
+                  <Label htmlFor="new-password" className="text-[#ECECF3] text-sm">
                     Nouveau mot de passe
                   </Label>
                   <Input
@@ -476,7 +473,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </div>
 
                 <div>
-                  <Label htmlFor="confirm-password" className="text-[#ECECF3]">
+                  <Label htmlFor="confirm-password" className="text-[#ECECF3] text-sm">
                     Confirme le mot de passe
                   </Label>
                   <Input
@@ -493,7 +490,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 <Button
                   onClick={handlePasswordUpdate}
                   disabled={!user || isUpdatingPassword}
-                  className="w-full rounded-xl bg-[#6B9AC4] hover:bg-[#5A89B3] text-white"
+                  className="w-full h-10 rounded-xl bg-[#6B9AC4] hover:bg-[#5A89B3] text-white"
                 >
                   {isUpdatingPassword ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
                 </Button>
@@ -512,30 +509,26 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               ) : null}
 
               {!user ? (
-                <div className="lg:col-span-2 rounded-2xl border border-[#1F2230] bg-[#11141D] px-4 py-4 text-sm text-[#A9ACBA]">
+                <div className="lg:col-span-3 rounded-2xl border border-[#1F2230] bg-[#11141D] px-4 py-4 text-sm text-[#A9ACBA]">
                   Les réglages de sécurité du compte sont disponibles seulement après connexion à Supabase.
                 </div>
               ) : null}
 
-              <Card className={`${cardClassName} space-y-3 lg:col-span-2 border-[#4C2A2A]`}>
+              <Card className="bg-[#161924] border border-[#4C2A2A] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5">
                 <div className="flex items-start gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-[#2A1B1B] border border-[#4C2A2A] flex items-center justify-center shrink-0">
-                    <OctagonAlert className="w-5 h-5 text-[#E16941]" />
+                  <div className="w-10 h-10 rounded-2xl bg-[#2A1B1B] border border-[#4C2A2A] flex items-center justify-center shrink-0">
+                    <OctagonAlert className="w-4 h-4 text-[#E16941]" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold text-[#ECECF3]">Supprimer le compte</h2>
-                    <p className="text-sm text-[#A9ACBA]">
-                      Cette action est définitive. Elle supprimera l’utilisateur Supabase et tu perdras l’accès à ton compte.
+                    <h2 className="text-lg font-semibold text-[#ECECF3]">Supprimer le compte</h2>
+                    <p className="text-xs leading-5 text-[#A9ACBA]">
+                      Cette action est définitive et tu perdras l’accès à ton compte.
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-[#4C2A2A] bg-[#2A1B1B] px-3 py-2 text-sm text-[#F1B2A1]">
-                  Tes données locales seront effacées sur cet appareil. La suppression du compte lui-même passe par une Edge Function sécurisée côté Supabase.
-                </div>
-
                 <div>
-                  <Label htmlFor="delete-confirmation" className="text-[#ECECF3]">
+                  <Label htmlFor="delete-confirmation" className="text-[#ECECF3] text-sm">
                     Tape SUPPRIMER pour confirmer
                   </Label>
                   <Input
@@ -551,7 +544,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 <Button
                   onClick={handleDeleteAccount}
                   disabled={!user || isDeletingAccount || deleteConfirmation.trim() !== 'SUPPRIMER'}
-                  className="w-full rounded-xl bg-[#E16941] hover:bg-[#c95735] text-white"
+                  className="w-full h-10 rounded-xl bg-[#E16941] hover:bg-[#c95735] text-white"
                 >
                   {isDeletingAccount ? 'Suppression...' : 'Supprimer définitivement le compte'}
                 </Button>

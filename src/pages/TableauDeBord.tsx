@@ -999,12 +999,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         <div className="grid gap-6 items-stretch md:grid-cols-2">
           {/* Pomodoro */}
-          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
-            <div className="mb-2">
+          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl px-4 pt-4 pb-5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
+            <div className="mb-1">
               <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-[1.1fr,1fr] items-center">
-              <div className="flex flex-col items-center justify-center gap-9">
+            <div className="grid gap-3 sm:grid-cols-[1.1fr,1fr] items-center">
+              <div className="flex flex-col items-center justify-center gap-5">
                 <div className="flex gap-2">
                   {(
                     [
