@@ -1304,7 +1304,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         {/* Agenda en ligne */}
         <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
           <div className={`flex flex-col ${calendarMode === 'tasks' ? 'gap-2' : 'gap-4'}`}>
-            {calendarMode === 'calendar' ? <p className="text-sm text-[#A9ACBA]">Agenda en ligne</p> : null}
+            <p className="text-sm text-[#A9ACBA]">Agenda en ligne</p>
             <div className="flex flex-wrap items-start justify-between gap-3">
               {calendarMode === 'calendar' ? (
                 <div className="flex flex-wrap items-center gap-3">
@@ -1651,30 +1651,30 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       align="start"
                                       sideOffset={12}
                                       collisionPadding={16}
-                                      className="w-[320px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/88 text-[#ECECF3] text-sm p-4 backdrop-blur-xl shadow-[0_32px_80px_rgba(0,0,0,0.55)]"
+                                      className="w-[248px] max-w-[calc(100vw-2rem)] rounded-[20px] border border-white/10 bg-[#2B2F3A]/72 p-3 text-[#ECECF3] backdrop-blur-2xl shadow-[0_24px_56px_rgba(0,0,0,0.42)]"
                                       onOpenAutoFocus={(e) => e.preventDefault()}
                                     >
-                                      <div className="flex items-start justify-between gap-3">
-                                        <div className="flex items-center gap-2.5 min-w-0">
+                                      <div className="flex items-start justify-between gap-2.5">
+                                        <div className="flex items-center gap-2 min-w-0">
                                           <span
-                                            className="h-3.5 w-3.5 rounded-[6px] shrink-0"
+                                            className="h-3 w-3 rounded-full shrink-0"
                                             style={{ backgroundColor: task.color }}
                                           />
-                                          <div className="text-[19px] leading-tight font-semibold truncate">
+                                          <div className="text-[14px] leading-[1.2] font-semibold truncate">
                                             {task.name || '(Titre)'}
                                           </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-[#A9ACBA] shrink-0">
+                                        <div className="flex items-center gap-1.5 text-[#A9ACBA] shrink-0">
                                           <button
                                             type="button"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               startEditingName(task);
                                             }}
-                                            className="h-9 w-9 rounded-[18px] border border-white/10 bg-white/[0.03] flex items-center justify-center hover:bg-white/[0.06] hover:text-[#ECECF3] transition"
+                                            className="h-8 w-8 rounded-[16px] border border-white/10 bg-white/[0.03] flex items-center justify-center hover:bg-white/[0.06] hover:text-[#ECECF3] transition"
                                             aria-label="Modifier la tâche"
                                           >
-                                            <Pencil className="w-4 h-4" />
+                                            <Pencil className="w-3.5 h-3.5" />
                                           </button>
                                           <button
                                             type="button"
@@ -1683,14 +1683,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                               setTasks((prev) => prev.filter((t) => t.id !== task.id));
                                               setTaskDetailsId(null);
                                             }}
-                                            className="h-9 w-9 rounded-[18px] border border-[rgba(225,105,65,0.22)] bg-[rgba(225,105,65,0.06)] text-[#E16941] flex items-center justify-center hover:bg-[rgba(225,105,65,0.14)] transition"
+                                            className="h-8 w-8 rounded-[16px] border border-[rgba(225,105,65,0.22)] bg-[rgba(225,105,65,0.06)] text-[#E16941] flex items-center justify-center hover:bg-[rgba(225,105,65,0.14)] transition"
                                             aria-label="Supprimer la tâche"
                                           >
-                                            <Trash2 className="w-4 h-4" />
+                                            <Trash2 className="w-3.5 h-3.5" />
                                           </button>
                                         </div>
                                       </div>
-                                      <div className="mt-3 rounded-[20px] border border-white/8 bg-[#10131B]/72 px-4 py-2.5 text-[15px] text-[#C9CDDA]">
+                                      <div className="mt-2.5 inline-flex max-w-full items-center rounded-full border border-white/8 bg-[#10131B]/48 px-2.5 py-1 text-[11px] leading-none text-[#C9CDDA]">
                                         <span>{taskDateLabel}</span>
                                         {taskTimeLabel ? <span>{` • ${taskTimeLabel}`}</span> : null}
                                       </div>
