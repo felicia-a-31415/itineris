@@ -27,6 +27,7 @@ import { Switch } from '../ui/switch';
 import { TaskEditor } from '../components/TaskModal';
 import alarmSound from '../assets/Gentle-little-bell-ringing-sound-effect.mp3';
 import { useAuth } from '../lib/auth';
+import { supabase } from '../lib/supabaseClient';
 import {
   clearUserData,
   loadDashboardDataFromLocal,
@@ -229,6 +230,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const hasInitializedStreakRef = useRef(false);
   const hasHydratedStreakRef = useRef(false);
   const [isDashboardHydrated, setIsDashboardHydrated] = useState(false);
+  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([
+    { role: 'assistant', content: "Salut, dis-moi ce que tu dois etudier et je t'aide a faire un plan." },
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [isSendingChat, setIsSendingChat] = useState(false);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
   const ringColor = TIMER_MODES[timerMode].color;
@@ -1034,6 +1040,33 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     </div>
   );
 
+  const handleSendChat = async () => {
+    const message = chatInput.trim();
+    if (!message || isSendingChat) return;
+
+    setMessages((prev) => [...prev, { role: 'user', content: message }]);
+    setChatInput('');
+    setIsSendingChat(true);
+
+    const { data, error } = await supabase.functions.invoke('study-chat', {
+      body: {
+        message,
+        context: {
+          tasks,
+        },
+      },
+    });
+
+    setIsSendingChat(false);
+
+    if (error) {
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Erreur serveur. Reessaie.' }]);
+      return;
+    }
+
+    setMessages((prev) => [...prev, { role: 'assistant', content: data?.reply ?? 'Aucune reponse.' }]);
+  };
+
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-10">
       <style>{`
@@ -1290,15 +1323,35 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               <p className="text-sm text-[#A9ACBA]">Chat IA</p>
               <span className="text-xs text-[#7F869A]">Bêta</span>
             </div>
-            <div className="flex-1 rounded-2xl border border-[#1F2230] bg-[#0F1117] p-4 text-sm text-[#A9ACBA]">
-              Commence une conversation pour obtenir de l&apos;aide sur tes tâches ou ton planning.
+            <div className="flex-1 rounded-2xl border border-[#1F2230] bg-[#0F1117] p-4 text-sm text-[#A9ACBA] overflow-y-auto space-y-3">
+              {messages.map((message, index) => (
+                <div
+                  key={`${message.role}-${index}`}
+                  className={message.role === 'user' ? 'text-right text-[#ECECF3]' : 'text-left text-[#A9ACBA]'}
+                >
+                  {message.content}
+                </div>
+              ))}
+              {isSendingChat ? <div className="text-left text-[#7F869A]">L&apos;IA ecrit...</div> : null}
             </div>
             <div className="mt-2 flex items-center gap-2">
               <Input
+                value={chatInput}
+                onChange={(event) => setChatInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    void handleSendChat();
+                  }
+                }}
                 placeholder="Écris ta question..."
                 className="h-10 rounded-xl border-[#1F2230] bg-[#0F1117] text-[#ECECF3]"
               />
-              <Button className="h-10 rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white px-4">
+              <Button
+                onClick={() => void handleSendChat()}
+                disabled={isSendingChat || !chatInput.trim()}
+                className="h-10 rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white px-4"
+              >
                 Envoyer
               </Button>
             </div>
