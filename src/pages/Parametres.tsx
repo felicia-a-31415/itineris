@@ -10,7 +10,6 @@ import {
   Save,
 } from 'lucide-react';
 
-import { BrandLogo } from '../components/BrandLogo';
 import { deleteAccount } from '../lib/account';
 import { useAuth } from '../lib/auth';
 import { clearDashboardDataFromLocal, clearUserData } from '../lib/storage';
@@ -41,7 +40,7 @@ interface ParametresScreenProps {
 const years = ['Secondaire 1', 'Secondaire 2', 'Secondaire 3', 'Secondaire 4', 'Secondaire 5'];
 
 const cardClassName =
-  'bg-[#161924] border border-[#1F2230] rounded-3xl p-6 md:p-8 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]';
+  'bg-[#161924] border border-[#1F2230] rounded-3xl p-4 md:p-5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]';
 
 const inputClassName =
   'mt-2 rounded-xl bg-[#0F1117] border-[#1F2230] text-[#ECECF3] placeholder:text-[#6F7487] focus:border-[#4169E1]';
@@ -115,7 +114,7 @@ function SubjectSection({
   onToggle: (subject: string) => void;
 }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <Label className="text-[#ECECF3] block">{title}</Label>
       <div className="flex flex-wrap gap-2">
         {subjects.map((subject) => {
@@ -274,13 +273,10 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-4">
-            <BrandLogo className="w-14 h-14 shrink-0" />
-            <div>
-              <h1 className="text-2xl md:text-3xl font-semibold text-[#ECECF3]">Paramètres du compte</h1>
-            </div>
+      <div className="max-w-6xl mx-auto space-y-4">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-xl md:text-2xl font-semibold text-[#ECECF3]">Paramètres du compte</h1>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -303,7 +299,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="flex h-auto flex-wrap gap-2 rounded-3xl border border-[#1F2230] bg-[#161924] p-2 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_8px_18px_rgba(0,0,0,0.25),0_1px_0_rgba(255,255,255,0.04)]">
+          <TabsList className="flex h-auto flex-wrap gap-2 rounded-3xl border border-[#1F2230] bg-[#161924] p-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_8px_18px_rgba(0,0,0,0.25),0_1px_0_rgba(255,255,255,0.04)]">
             <TabsTrigger
               value="profile"
               className="rounded-2xl px-4 py-2 text-[#A9ACBA] data-[state=active]:bg-[#10131B] data-[state=active]:text-[#ECECF3]"
@@ -327,14 +323,14 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile" className="mt-6">
-            <Card className={`${cardClassName} space-y-5 p-5 md:p-6`}>
+          <TabsContent value="profile" className="mt-4">
+            <Card className={`${cardClassName} space-y-4`}>
               <div>
                 <h2 className="text-xl font-semibold text-[#ECECF3]">Profil scolaire</h2>
                 <p className="text-sm text-[#A9ACBA]">Ces informations personnalisent ton tableau de bord et tes recommandations.</p>
               </div>
 
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="name" className="text-[#ECECF3]">
                     Prénom
@@ -388,8 +384,8 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             </Card>
           </TabsContent>
 
-          <TabsContent value="subjects" className="mt-6">
-            <Card className={`${cardClassName} space-y-5 p-5 md:p-6`}>
+          <TabsContent value="subjects" className="mt-4">
+            <Card className={`${cardClassName} space-y-4`}>
               <div>
                 <h2 className="text-xl font-semibold text-[#ECECF3]">Préférences de matières</h2>
                 <p className="text-sm text-[#A9ACBA]">Ajuste tes matières pour garder le tableau de bord et l’onboarding synchronisés.</p>
@@ -419,9 +415,9 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             </Card>
           </TabsContent>
 
-          <TabsContent value="account" className="mt-6">
-            <div className="grid gap-6 lg:grid-cols-2">
-              <Card className={`${cardClassName} space-y-5 p-5 md:p-6`}>
+          <TabsContent value="account" className="mt-4">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card className={`${cardClassName} space-y-4`}>
                 <div>
                   <h2 className="text-xl font-semibold text-[#ECECF3]">Changer l’email</h2>
                   <p className="text-sm text-[#A9ACBA]">
@@ -456,7 +452,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </Button>
               </Card>
 
-              <Card className={`${cardClassName} space-y-5 p-5 md:p-6`}>
+              <Card className={`${cardClassName} space-y-4`}>
                 <div>
                   <h2 className="text-xl font-semibold text-[#ECECF3]">Changer le mot de passe</h2>
                   <p className="text-sm text-[#A9ACBA]">
@@ -521,7 +517,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </div>
               ) : null}
 
-              <Card className={`${cardClassName} space-y-5 p-5 md:p-6 lg:col-span-2 border-[#4C2A2A]`}>
+              <Card className={`${cardClassName} space-y-4 lg:col-span-2 border-[#4C2A2A]`}>
                 <div className="flex items-start gap-3">
                   <div className="w-11 h-11 rounded-2xl bg-[#2A1B1B] border border-[#4C2A2A] flex items-center justify-center shrink-0">
                     <OctagonAlert className="w-5 h-5 text-[#E16941]" />
