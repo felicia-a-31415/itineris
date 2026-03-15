@@ -138,35 +138,7 @@ const TIMER_MODES = {
 } as const;
 
 const createDefaultTasks = () => {
-  const initialWeek = getCurrentWeekDates();
-  return [
-    {
-      id: '1',
-      name: 'Réviser les notes de mathématiques',
-      completed: false,
-      color: '#6B9AC4',
-      urgent: false,
-      date: formatDate(new Date()),
-    },
-    {
-      id: '2',
-      name: 'Terminer le devoir de chimie',
-      completed: false,
-      color: '#4169E1',
-      urgent: false,
-      date: formatDate(initialWeek[2]),
-      time: '09:00',
-    },
-    {
-      id: '3',
-      name: "Réunion d'équipe",
-      completed: false,
-      color: '#6B9AC4',
-      urgent: false,
-      date: formatDate(initialWeek[3]),
-      time: '14:00',
-    },
-  ];
+  return [];
 };
 
 const createDefaultStudyData = (weekStart: string) => ({
@@ -1464,7 +1436,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
               </div>
 
-              <div className="space-y-6 pt-6">
+              <div className="flex h-full flex-col justify-end gap-6 pt-6">
                 <div className="flex gap-3">
                   <Button
                     onClick={() => {
@@ -1541,7 +1513,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               ))}
               {isSendingChat ? <div className="text-left text-[#7F869A]">L&apos;IA ecrit...</div> : null}
             </div>
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-6 flex items-center gap-2">
               <Input
                 value={chatInput}
                 onChange={(event) => setChatInput(event.target.value)}
