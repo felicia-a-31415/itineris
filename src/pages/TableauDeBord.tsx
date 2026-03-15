@@ -1176,14 +1176,21 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               completedToday: sessionsCompletedToday,
               byDay: sessionsByDay,
             },
-            currentDate: new Intl.DateTimeFormat('fr-CA', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            }).format(new Date()),
+            currentDate: {
+              iso: new Date().toISOString(),
+              locale: new Intl.DateTimeFormat('fr-CA', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZoneName: 'short',
+              }).format(new Date()),
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              unixMs: Date.now(),
+            },
           },
         }),
       });
@@ -1361,9 +1368,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <div className="mb-2">
               <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-[1.1fr,1fr] items-start">
-              <div className="flex flex-col items-center justify-start gap-5 pt-1">
-                <div className="flex gap-3">
+            <div className="grid gap-6 sm:grid-cols-[1.1fr,1fr] items-start">
+              <div className="flex flex-col items-center justify-start gap-7 pt-2">
+                <div className="flex flex-wrap justify-center gap-3.5">
                   {(
                     [
                       { key: 'focus', label: 'Focus' },
@@ -1457,8 +1464,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
               </div>
 
-              <div className="space-y-4 pt-4">
-                <div className="flex gap-2">
+              <div className="space-y-6 pt-6">
+                <div className="flex gap-3">
                   <Button
                     onClick={() => {
                       setIsRunning((running) => {
@@ -1497,7 +1504,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   </Button>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-[#A9ACBA]">
+                <div className="flex items-center justify-between rounded-2xl border border-[#1F2230] bg-[#10131B] px-4 py-3 text-sm text-[#A9ACBA]">
                   <span className="text-sm text-[#A9ACBA]">
                     {sessionsCompletedToday} sessions terminées aujourd&apos;hui
                   </span>
