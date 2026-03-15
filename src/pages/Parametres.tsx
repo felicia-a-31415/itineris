@@ -7,9 +7,7 @@ import {
   OctagonAlert,
   KeyRound,
   Mail,
-  Palette,
   Save,
-  ShieldCheck,
 } from 'lucide-react';
 
 import { BrandLogo } from '../components/BrandLogo';
@@ -281,11 +279,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
           <div className="flex items-center gap-4">
             <BrandLogo className="w-14 h-14 shrink-0" />
             <div>
-              <p className="text-sm text-[#A9ACBA]">Centre de réglages</p>
               <h1 className="text-2xl md:text-3xl font-semibold text-[#ECECF3]">Paramètres du compte</h1>
-              <p className="text-sm text-[#A9ACBA]">
-                Mets à jour ton profil, tes préférences scolaires et la sécurité de ton compte.
-              </p>
             </div>
           </div>
 
@@ -306,49 +300,6 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               {saved ? 'Sauvegardé' : 'Sauvegarder le profil'}
             </Button>
           </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className={`${cardClassName} gap-3`}>
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-[#10131B] border border-[#1F2230] flex items-center justify-center">
-                <CircleUserRound className="w-5 h-5 text-[#9DD0FF]" />
-              </div>
-              <div>
-                <p className="text-sm text-[#A9ACBA]">Profil</p>
-                <p className="text-base font-medium">{formData.name || 'Nom à compléter'}</p>
-              </div>
-            </div>
-            <p className="text-sm text-[#A9ACBA]">{formData.year || 'Niveau scolaire non défini'}</p>
-          </Card>
-
-          <Card className={`${cardClassName} gap-3`}>
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-[#10131B] border border-[#1F2230] flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-[#6B9AC4]" />
-              </div>
-              <div>
-                <p className="text-sm text-[#A9ACBA]">Matières suivies</p>
-                <p className="text-base font-medium">{subjects.length} disponibles</p>
-              </div>
-            </div>
-            <p className="text-sm text-[#A9ACBA]">
-              {formData.favoriteSubjects.length} favorites, {formData.strongSubjects.length} fortes, {formData.weakSubjects.length} à améliorer
-            </p>
-          </Card>
-
-          <Card className={`${cardClassName} gap-3`}>
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-[#10131B] border border-[#1F2230] flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5 text-[#41E169]" />
-              </div>
-              <div>
-                <p className="text-sm text-[#A9ACBA]">Compte</p>
-                <p className="text-base font-medium">{user ? 'Supabase connecté' : 'Mode invité'}</p>
-              </div>
-            </div>
-            <p className="text-sm text-[#A9ACBA]">{user?.email ?? 'Connecte-toi pour modifier email et mot de passe.'}</p>
-          </Card>
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
@@ -374,17 +325,10 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               <KeyRound className="w-4 h-4 mr-2" />
               Compte
             </TabsTrigger>
-            <TabsTrigger
-              value="appearance"
-              className="rounded-2xl px-4 py-2 text-[#A9ACBA] data-[state=active]:bg-[#10131B] data-[state=active]:text-[#ECECF3]"
-            >
-              <Palette className="w-4 h-4 mr-2" />
-              Apparence
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="mt-6">
-            <Card className={`${cardClassName} space-y-6`}>
+            <Card className={`${cardClassName} space-y-5 p-5 md:p-6`}>
               <div>
                 <h2 className="text-xl font-semibold text-[#ECECF3]">Profil scolaire</h2>
                 <p className="text-sm text-[#A9ACBA]">Ces informations personnalisent ton tableau de bord et tes recommandations.</p>
@@ -445,7 +389,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
           </TabsContent>
 
           <TabsContent value="subjects" className="mt-6">
-            <Card className={`${cardClassName} space-y-6`}>
+            <Card className={`${cardClassName} space-y-5 p-5 md:p-6`}>
               <div>
                 <h2 className="text-xl font-semibold text-[#ECECF3]">Préférences de matières</h2>
                 <p className="text-sm text-[#A9ACBA]">Ajuste tes matières pour garder le tableau de bord et l’onboarding synchronisés.</p>
@@ -477,7 +421,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
           <TabsContent value="account" className="mt-6">
             <div className="grid gap-6 lg:grid-cols-2">
-              <Card className={`${cardClassName} space-y-5`}>
+              <Card className={`${cardClassName} space-y-5 p-5 md:p-6`}>
                 <div>
                   <h2 className="text-xl font-semibold text-[#ECECF3]">Changer l’email</h2>
                   <p className="text-sm text-[#A9ACBA]">
@@ -512,7 +456,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </Button>
               </Card>
 
-              <Card className={`${cardClassName} space-y-5`}>
+              <Card className={`${cardClassName} space-y-5 p-5 md:p-6`}>
                 <div>
                   <h2 className="text-xl font-semibold text-[#ECECF3]">Changer le mot de passe</h2>
                   <p className="text-sm text-[#A9ACBA]">
@@ -577,7 +521,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 </div>
               ) : null}
 
-              <Card className={`${cardClassName} space-y-5 lg:col-span-2 border-[#4C2A2A]`}>
+              <Card className={`${cardClassName} space-y-5 p-5 md:p-6 lg:col-span-2 border-[#4C2A2A]`}>
                 <div className="flex items-start gap-3">
                   <div className="w-11 h-11 rounded-2xl bg-[#2A1B1B] border border-[#4C2A2A] flex items-center justify-center shrink-0">
                     <OctagonAlert className="w-5 h-5 text-[#E16941]" />
@@ -619,17 +563,6 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             </div>
           </TabsContent>
 
-          <TabsContent value="appearance" className="mt-6">
-            <Card className={`${cardClassName} text-center py-12 space-y-3`}>
-              <div className="w-14 h-14 rounded-2xl bg-[#10131B] shadow-inner border border-[#1F2230] mx-auto flex items-center justify-center">
-                <Palette className="w-7 h-7 text-[#4169E1]" />
-              </div>
-              <h2 className="text-xl font-semibold text-[#ECECF3]">Apparence</h2>
-              <p className="text-[#A9ACBA] max-w-2xl mx-auto text-sm">
-                Cette section est prête pour les prochaines options visuelles. Le style a déjà été aligné avec le tableau de bord pour garder la même identité dans tout le produit.
-              </p>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </div>
