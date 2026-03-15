@@ -22,6 +22,7 @@ import { Card } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Switch } from '../ui/switch';
 import { TaskEditor } from '../components/TaskModal';
 import alarmSound from '../assets/Gentle-little-bell-ringing-sound-effect.mp3';
@@ -640,6 +641,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   };
   const agendaTasks = useMemo(() => {
     return [...tasks].sort((a, b) => {
+      if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1;
+      }
       const aDate = new Date(`${a.date || formatDate(new Date())}T${a.time || '00:00'}`);
       const bDate = new Date(`${b.date || formatDate(new Date())}T${b.time || '00:00'}`);
       return aDate.getTime() - bDate.getTime();
@@ -690,8 +694,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const tasksListContent = (
     <div className="space-y-3">
       <div>
-        <div className="text-sm text-[#A9ACBA]">Tâches à faire</div>
-        <div className="mt-1 flex items-center gap-2 text-sm text-[#A9ACBA]">
+        <div className="flex items-center gap-2 text-sm text-[#A9ACBA]">
           <span>{completedTasksCount} terminées</span>
           <span>•</span>
           <Button
@@ -701,6 +704,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             className="h-auto p-0 text-[#F43F5E] hover:text-[#FF5E7A]"
           >
             {showCompletedTasks ? 'Masquer' : 'Afficher'}
+          </Button>
+          <span>•</span>
+          <Button
+            type="button"
+            onClick={() => setTasks((prev) => prev.filter((task) => !task.completed))}
+            variant="ghost"
+            className="h-auto p-0 text-[#E16941] hover:text-[#F18B6B]"
+            disabled={completedTasksCount === 0}
+          >
+            Supprimer
           </Button>
         </div>
       </div>
@@ -1000,11 +1013,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         <div className="grid gap-6 items-stretch md:grid-cols-2">
           {/* Pomodoro */}
           <Card className="bg-[#161924] border-[#1F2230] rounded-3xl px-4 pt-4 pb-5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
-            <div className="mb-1">
+            <div className="mb-2">
               <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-[1.1fr,1fr] items-center">
-              <div className="flex flex-col items-center justify-center gap-5">
+            <div className="grid gap-3 sm:grid-cols-[1.1fr,1fr] items-start">
+              <div className="flex flex-col items-center justify-start gap-3 pt-1">
                 <div className="flex gap-2">
                   {(
                     [
@@ -1099,7 +1112,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
               </div>
 
-              <div className="space-y-3 pt-9">
+              <div className="space-y-3 pt-2">
                 <div className="flex gap-2">
                   <Button
                     onClick={() => {
@@ -1149,7 +1162,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </Card>
 
           {/* Chat IA */}
-          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full flex flex-col">
+          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl px-4 pt-4 pb-5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full flex flex-col">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm text-[#A9ACBA]">Chat IA</p>
               <span className="text-xs text-[#7F869A]">Bêta</span>
@@ -1157,7 +1170,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <div className="flex-1 rounded-2xl border border-[#1F2230] bg-[#0F1117] p-4 text-sm text-[#A9ACBA]">
               Commence une conversation pour obtenir de l&apos;aide sur tes tâches ou ton planning.
             </div>
-            <div className="mt-4 flex items-center gap-2">
+            <div className="mt-2 flex items-center gap-2">
               <Input
                 placeholder="Écris ta question..."
                 className="h-10 rounded-xl border-[#1F2230] bg-[#0F1117] text-[#ECECF3]"
@@ -1174,36 +1187,40 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           <div className="flex flex-col gap-4">
             <p className="text-sm text-[#A9ACBA]">Agenda en ligne</p>
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <Button
-                  variant="outline"
-                  className="h-11 rounded-full border-[#2B3550] bg-[#0F1117] text-[#ECECF3] hover:bg-[#1A1D26] px-5"
-                  onClick={handleToday}
-                >
-                  Aujourd&apos;hui
-                </Button>
-                <div className="inline-flex items-center gap-1 rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
+              {calendarMode === 'calendar' ? (
+                <div className="flex flex-wrap items-center gap-3">
                   <Button
-                    type="button"
-                    onClick={handlePrevRange}
-                    variant="ghost"
-                    className="h-9 w-9 rounded-full text-[#ECECF3] hover:bg-[#1A1D26] p-0"
-                    aria-label="Période précédente"
+                    variant="outline"
+                    className="h-11 rounded-full border-[#2B3550] bg-[#0F1117] text-[#ECECF3] hover:bg-[#1A1D26] px-5"
+                    onClick={handleToday}
                   >
-                    <ChevronLeft className="w-5 h-5" />
+                    Aujourd&apos;hui
                   </Button>
-                  <Button
-                    type="button"
-                    onClick={handleNextRange}
-                    variant="ghost"
-                    className="h-9 w-9 rounded-full text-[#ECECF3] hover:bg-[#1A1D26] p-0"
-                    aria-label="Période suivante"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      onClick={handlePrevRange}
+                      variant="outline"
+                      className="h-11 w-11 rounded-full border-[#2B3550] bg-[#0F1117] text-[#ECECF3] hover:bg-[#1A1D26] p-0"
+                      aria-label="Période précédente"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleNextRange}
+                      variant="outline"
+                      className="h-11 w-11 rounded-full border-[#2B3550] bg-[#0F1117] text-[#ECECF3] hover:bg-[#1A1D26] p-0"
+                      aria-label="Période suivante"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </Button>
+                  </div>
+                  <div className="text-2xl font-semibold text-[#ECECF3] capitalize">{monthRangeLabel}</div>
                 </div>
-                <div className="text-2xl font-semibold text-[#ECECF3] capitalize">{monthRangeLabel}</div>
-              </div>
+              ) : calendarMode === 'tasks' ? (
+                <div className="text-2xl font-semibold text-[#ECECF3]">Tâches à faire</div>
+              ) : null}
 
               <div
                 className={
@@ -1214,41 +1231,34 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               >
                 <div className="flex flex-wrap items-center gap-2">
                   {calendarMode === 'calendar' ? (
-                    <div className="inline-flex items-center rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
-                      <Button
-                        type="button"
-                        onClick={() => setTimeView('week')}
-                        variant="ghost"
-                        className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
-                          timeView === 'week'
-                            ? 'bg-[#E8E3D6] text-[#0B0D10] hover:bg-[#E8E3D6] hover:text-[#0B0D10]'
-                            : 'text-[#A9ACBA] hover:text-[#ECECF3]'
-                        }`}
-                      >
-                        Semaine
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={() => setTimeView('month')}
-                        variant="ghost"
-                        className={`h-9 px-4 text-sm font-semibold rounded-full transition ${
-                          timeView === 'month'
-                            ? 'bg-[#E8E3D6] text-[#0B0D10] hover:bg-[#E8E3D6] hover:text-[#0B0D10]'
-                            : 'text-[#A9ACBA] hover:text-[#ECECF3]'
-                        }`}
-                      >
-                        Mois
-                      </Button>
-                    </div>
+                    <Select value={timeView} onValueChange={(value: 'week' | 'month') => setTimeView(value)}>
+                      <SelectTrigger className="h-11 min-w-[170px] rounded-full border-[#2B3550] bg-[#0F1117] px-5 text-base font-semibold text-[#ECECF3]">
+                        <SelectValue>{timeView === 'week' ? 'Semaine' : 'Mois'}</SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-[24px] border border-[#2B3550] bg-[#F3F6FB] text-[#0B0D10] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
+                        <SelectItem value="week" className="rounded-2xl py-3 text-base">
+                          Semaine
+                        </SelectItem>
+                        <SelectItem value="month" className="rounded-2xl py-3 text-base">
+                          Mois
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   ) : null}
-                  <div className="inline-flex items-center rounded-full border border-[#2B3550] bg-[#0F1117] p-1 h-11">
+                  <div className="relative inline-flex items-center h-11 w-[102px] rounded-full border border-[#2B3550] bg-[#0F1117] overflow-hidden">
+                    <div
+                      className={`absolute top-1 bottom-1 w-[calc(50%-6px)] rounded-full bg-[#9FD0FF] transition-all ${
+                        calendarMode === 'calendar' ? 'left-1' : 'left-[calc(50%+2px)]'
+                      }`}
+                    />
+                    <div className="absolute top-2 bottom-2 left-1/2 w-px -translate-x-1/2 bg-[#2B3550]" />
                     <Button
                       type="button"
                       onClick={() => setCalendarMode('calendar')}
                       variant="ghost"
-                      className={`h-9 w-11 rounded-full flex items-center justify-center transition ${
+                      className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
                         calendarMode === 'calendar'
-                          ? 'bg-[#9FD0FF] text-[#0B0D10]'
+                          ? 'text-[#0B0D10]'
                           : 'text-[#A9ACBA] hover:text-[#ECECF3]'
                       }`}
                       aria-label="Vue calendrier"
@@ -1259,9 +1269,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                       type="button"
                       onClick={() => setCalendarMode('tasks')}
                       variant="ghost"
-                      className={`h-9 w-11 rounded-full flex items-center justify-center transition ${
+                      className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
                         calendarMode === 'tasks'
-                          ? 'bg-[#9FD0FF] text-[#0B0D10]'
+                          ? 'text-[#0B0D10]'
                           : 'text-[#A9ACBA] hover:text-[#ECECF3]'
                       }`}
                       aria-label="Vue liste"
@@ -1297,9 +1307,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           )}
 
           {calendarMode === 'tasks' ? (
-            <div className="mt-4">{tasksListContent}</div>
+            <div className="mt-2">{tasksListContent}</div>
           ) : (
-            <div className="mt-6 overflow-x-auto">
+            <div className="mt-2 overflow-x-auto">
               <div className="w-[1104px] min-w-[1104px] shrink-0">
                 <div className="grid grid-cols-7 border-b border-[#1F2230]">
                   {headerDates.map((date, index) => (
