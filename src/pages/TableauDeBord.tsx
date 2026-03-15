@@ -1651,16 +1651,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       align="start"
                                       sideOffset={12}
                                       collisionPadding={16}
-                                      className="w-[248px] max-w-[calc(100vw-2rem)] rounded-[20px] border border-white/10 bg-[#2B2F3A]/72 p-3 text-[#ECECF3] backdrop-blur-2xl shadow-[0_24px_56px_rgba(0,0,0,0.42)]"
+                                      className="w-[288px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/92 p-4 text-[#ECECF3] backdrop-blur-xl shadow-[0_32px_80px_rgba(0,0,0,0.52)]"
                                       onOpenAutoFocus={(e) => e.preventDefault()}
                                     >
-                                      <div className="flex items-start justify-between gap-2.5">
-                                        <div className="flex items-center gap-2 min-w-0">
+                                      <div className="flex items-start justify-between gap-3">
+                                        <div className="flex items-center gap-2.5 min-w-0">
                                           <span
-                                            className="h-3 w-3 rounded-full shrink-0"
+                                            className="h-3.5 w-3.5 rounded-full shrink-0"
                                             style={{ backgroundColor: task.color }}
                                           />
-                                          <div className="text-[14px] leading-[1.2] font-semibold truncate">
+                                          <div className="text-[16px] leading-tight font-semibold truncate">
                                             {task.name || '(Titre)'}
                                           </div>
                                         </div>
@@ -1671,7 +1671,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                               e.stopPropagation();
                                               startEditingName(task);
                                             }}
-                                            className="h-8 w-8 rounded-[16px] border border-white/10 bg-white/[0.03] flex items-center justify-center hover:bg-white/[0.06] hover:text-[#ECECF3] transition"
+                                            className="h-7 w-7 rounded-full bg-transparent flex items-center justify-center hover:bg-white/[0.06] hover:text-[#ECECF3] transition"
                                             aria-label="Modifier la tâche"
                                           >
                                             <Pencil className="w-3.5 h-3.5" />
@@ -1683,14 +1683,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                               setTasks((prev) => prev.filter((t) => t.id !== task.id));
                                               setTaskDetailsId(null);
                                             }}
-                                            className="h-8 w-8 rounded-[16px] border border-[rgba(225,105,65,0.22)] bg-[rgba(225,105,65,0.06)] text-[#E16941] flex items-center justify-center hover:bg-[rgba(225,105,65,0.14)] transition"
+                                            className="h-7 w-7 rounded-full bg-transparent text-[#E16941] flex items-center justify-center hover:bg-[rgba(225,105,65,0.14)] transition"
                                             aria-label="Supprimer la tâche"
                                           >
                                             <Trash2 className="w-3.5 h-3.5" />
                                           </button>
                                         </div>
                                       </div>
-                                      <div className="mt-2.5 inline-flex max-w-full items-center rounded-full border border-white/8 bg-[#10131B]/48 px-2.5 py-1 text-[11px] leading-none text-[#C9CDDA]">
+                                      <div className="mt-3 inline-flex max-w-full items-center rounded-full border border-[#2B3550] bg-[#10131B]/72 px-3 py-1.5 text-xs leading-none text-[#C9CDDA]">
                                         <span>{taskDateLabel}</span>
                                         {taskTimeLabel ? <span>{` • ${taskTimeLabel}`}</span> : null}
                                       </div>
