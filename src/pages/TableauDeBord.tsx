@@ -1012,7 +1012,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         <div className="grid gap-6 items-stretch md:grid-cols-2">
           {/* Pomodoro */}
-          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl px-8 pt-8 pb-8 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
+          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
             <div className="mb-4">
               <p className="text-sm text-[#A9ACBA]">Minuteur</p>
             </div>
@@ -1162,7 +1162,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </Card>
 
           {/* Chat IA */}
-          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl px-6 pt-6 pb-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full flex flex-col">
+          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full flex flex-col">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm text-[#A9ACBA]">Chat IA</p>
               <span className="text-xs text-[#7F869A]">Bêta</span>
@@ -1226,14 +1226,14 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 <div className="flex flex-wrap items-center gap-2">
                   {calendarMode === 'calendar' ? (
                     <Select value={timeView} onValueChange={(value: 'week' | 'month') => setTimeView(value)}>
-                      <SelectTrigger className="h-11 w-[180px] rounded-full border-[#2B3550] bg-[#0F1117] px-5 text-base font-semibold text-[#ECECF3]">
+                      <SelectTrigger className="h-11 w-[180px] rounded-xl border-[#1F2230] bg-[#0F1117] px-4 text-sm text-[#ECECF3] focus:border-[#4169E1]">
                         <SelectValue>{timeView === 'week' ? 'Semaine' : 'Mois'}</SelectValue>
                       </SelectTrigger>
-                      <SelectContent className="rounded-[24px] border border-[#2B3550] bg-[#F3F6FB] text-[#0B0D10] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
-                        <SelectItem value="week" className="rounded-2xl py-3 text-base">
+                      <SelectContent className="rounded-xl border border-[#1F2230] bg-[#161924] text-[#ECECF3] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
+                        <SelectItem value="week" className="rounded-lg py-2 text-sm">
                           Semaine
                         </SelectItem>
-                        <SelectItem value="month" className="rounded-2xl py-3 text-base">
+                        <SelectItem value="month" className="rounded-lg py-2 text-sm">
                           Mois
                         </SelectItem>
                       </SelectContent>
