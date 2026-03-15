@@ -114,7 +114,7 @@ function SubjectSection({
   onToggle: (subject: string) => void;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <Label className="text-[#ECECF3] block">{title}</Label>
       <div className="flex flex-wrap gap-2">
         {subjects.map((subject) => {
@@ -324,13 +324,13 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
           </TabsList>
 
           <TabsContent value="profile" className="mt-4">
-            <Card className={`${cardClassName} space-y-4`}>
+            <Card className={`${cardClassName} space-y-3`}>
               <div>
                 <h2 className="text-xl font-semibold text-[#ECECF3]">Profil scolaire</h2>
                 <p className="text-sm text-[#A9ACBA]">Ces informations personnalisent ton tableau de bord et tes recommandations.</p>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2">
                 <div>
                   <Label htmlFor="name" className="text-[#ECECF3]">
                     Prénom
@@ -372,7 +372,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                   value={formData.lifeGoals}
                   onChange={(event) => setFormData((current) => ({ ...current, lifeGoals: event.target.value }))}
                   placeholder="Décris tes ambitions, tes projets ou ce que tu veux accomplir cette année."
-                  className={`${inputClassName} min-h-[160px]`}
+                  className={`${inputClassName} min-h-[132px]`}
                 />
               </div>
 
@@ -385,7 +385,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
           </TabsContent>
 
           <TabsContent value="subjects" className="mt-4">
-            <Card className={`${cardClassName} space-y-4`}>
+            <Card className={`${cardClassName} space-y-3`}>
               <div>
                 <h2 className="text-xl font-semibold text-[#ECECF3]">Préférences de matières</h2>
                 <p className="text-sm text-[#A9ACBA]">Ajuste tes matières pour garder le tableau de bord et l’onboarding synchronisés.</p>
