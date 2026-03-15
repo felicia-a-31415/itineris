@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <circle cx="100" cy="100" r="100" fill="#4A5FD4"/>
+  <!-- Outer ring -->
+  <circle cx="100" cy="100" r="62" fill="none" stroke="white" stroke-width="8"/>
+  <!-- Inner diamond/compass rose -->
+  <path d="M100 60 L116 100 L100 140 L84 100 Z" fill="white"/>
+  <path d="M60 100 L100 84 L140 100 L100 116 Z" fill="white"/>
+  <!-- Center cutout -->
+  <circle cx="100" cy="100" r="14" fill="#4A5FD4"/>
+  <!-- Small diamond center -->
+  <path d="M100 89 L107 100 L100 111 L93 100 Z" fill="white"/>
+</svg>

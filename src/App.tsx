@@ -25,6 +25,7 @@ export default function App() {
   const { user, loading } = useAuth();
   const [hasOnboardingData, setHasOnboardingData] = useState(Boolean(loadUserData()));
   const [isUserDataLoading, setIsUserDataLoading] = useState(true);
+  const isAppLoading = loading || isUserDataLoading;
 
   const defaultUserData: UserData = {
     name: '',
@@ -96,7 +97,7 @@ export default function App() {
         <Route
           path="/"
           element={
-            hasOnboardingData ? (
+            isAppLoading ? null : hasOnboardingData ? (
               <Navigate to="/tableaudebord" replace />
             ) : (
               <Bienvenue
@@ -110,12 +111,14 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route
           path="/onboarding"
-          element={hasOnboardingData ? <Navigate to="/tableaudebord" replace /> : <Onboarding onComplete={handleOnboardingComplete} />}
+          element={
+            isAppLoading ? null : hasOnboardingData ? <Navigate to="/tableaudebord" replace /> : <Onboarding onComplete={handleOnboardingComplete} />
+          }
         />
         <Route
           path="/tableaudebord"
           element={
-            hasOnboardingData ? (
+            isAppLoading ? null : hasOnboardingData ? (
               <TableauDeBord userName={userData?.name} />
             ) : user ? (
               <Navigate to="/onboarding" replace />
@@ -127,7 +130,7 @@ export default function App() {
         <Route
           path="/parametres"
           element={
-            hasOnboardingData ? (
+            isAppLoading ? null : hasOnboardingData ? (
               <Parametres
                 onBack={() => navigate('/tableaudebord')}
                 userData={userData ?? defaultUserData}

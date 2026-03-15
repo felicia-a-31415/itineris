@@ -1,5 +1,5 @@
-import { Compass } from 'lucide-react';
 import { Button } from '../ui/button';
+import { BrandLogo } from '../components/BrandLogo';
 
 interface BienvenueProps {
   onGetStarted: () => void;
@@ -11,9 +11,7 @@ export function Bienvenue({ onGetStarted, onLogin, onContinueWithoutAccount }: B
   return (
     <div className="flex flex-col items-center justify-center min-h-screen w-full p-6 bg-[#0B0D10] text-[#ECECF3]">
       <div className="flex flex-col items-center max-w-md text-center space-y-8">
-        <div className="w-32 h-32 rounded-full bg-[#4169E1] shadow-lg flex items-center justify-center">
-          <Compass className="w-16 h-16 text-white" strokeWidth={2} />
-        </div>
+        <BrandLogo className="w-32 h-32 shadow-lg" />
 
         <div className="space-y-2">
           <h1 className="text-5xl text-[#ECECF3] tracking-tight">Itineris</h1>

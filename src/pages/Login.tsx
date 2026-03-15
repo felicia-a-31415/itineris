@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Compass, Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { useAuth } from '../lib/auth';
+import { BrandLogo } from '../components/BrandLogo';
 
 type LocationState = {
   from?: Location;
@@ -135,9 +136,7 @@ export function Login() {
       <div className="flex flex-col items-center justify-center flex-1">
         <div className="w-full max-w-md">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-20 h-20 rounded-full bg-[#4169E1] shadow-lg flex items-center justify-center mb-4">
-              <Compass className="w-10 h-10 text-white" strokeWidth={2} />
-            </div>
+            <BrandLogo className="w-20 h-20 shadow-lg mb-4" />
             <h1 className="text-4xl text-[#ECECF3] tracking-tight mb-2">Itineris</h1>
             <p className="text-[#A9ACBA]">
               {isRecoveryMode

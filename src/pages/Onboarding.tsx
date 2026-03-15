@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Compass, ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
+import { BrandLogo } from '../components/BrandLogo';
 
 interface OnboardingData {
   name: string;
@@ -138,9 +139,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       <div className="max-w-4xl mx-auto w-full">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-[#4169E1] mx-auto mb-4 flex items-center justify-center">
-            <Compass className="w-8 h-8 text-white" />
-          </div>
+          <BrandLogo className="w-16 h-16 mx-auto mb-4" />
           <h1 className="text-3xl text-[#ECECF3] mb-2">Bienvenue sur Itineris</h1>
           <p className="text-[#A9ACBA]">Personnalisons votre expérience d'apprentissage</p>
         </div>
