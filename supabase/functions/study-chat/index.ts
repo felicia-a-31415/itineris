@@ -16,32 +16,34 @@ Deno.serve(async (request) => {
     const authHeader = request.headers.get('Authorization');
     const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
 
-    if (!supabaseUrl || !supabaseAnonKey || !authHeader || !anthropicKey) {
+    if (!supabaseUrl || !supabaseAnonKey || !anthropicKey) {
       return new Response(JSON.stringify({ error: 'Missing server configuration.' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    if (authHeader) {
+      const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    if (userError || !user) {
-      return new Response(
-        JSON.stringify({
-          error: userError?.message ?? 'Unauthorized.',
-        }),
-        {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      if (userError || !user) {
+        return new Response(
+          JSON.stringify({
+            error: userError?.message ?? 'Unauthorized.',
+          }),
+          {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
     }
 
     const { message, context } = await request.json();
