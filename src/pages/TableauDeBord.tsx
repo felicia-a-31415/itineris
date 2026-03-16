@@ -114,6 +114,13 @@ const formatDate = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
+const parseLocalDateString = (value?: string) => {
+  if (!value) return null;
+  const [year, month, day] = value.split('-').map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day);
+};
+
 const getDayName = (date: Date) => {
   const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
   return days[date.getDay()];
@@ -1114,7 +1121,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       ) : (
         <div className="mt-3 divide-y divide-[#25293A]">
           {visibleTasks.map((task) => {
-            const taskDate = task.date ? new Date(task.date) : null;
+            const taskDate = parseLocalDateString(task.date);
             const displayDate = taskDate
               ? taskDate.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' })
               : 'Date à définir';
@@ -1932,8 +1939,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                               </div>
                             );
 
-                            const taskDateLabel = task.date
-                              ? new Date(task.date).toLocaleDateString('fr-FR', {
+                            const parsedTaskDate = parseLocalDateString(task.date);
+                            const taskDateLabel = parsedTaskDate
+                              ? parsedTaskDate.toLocaleDateString('fr-FR', {
                                   weekday: 'long',
                                   day: '2-digit',
                                   month: 'long',
