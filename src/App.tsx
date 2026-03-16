@@ -19,6 +19,17 @@ import {
 } from './lib/storage';
 import { useAuth } from './lib/auth';
 
+type WakeLockSentinelLike = {
+  released: boolean;
+  release: () => Promise<void>;
+};
+
+type WakeLockNavigator = Navigator & {
+  wakeLock?: {
+    request: (type: 'screen') => Promise<WakeLockSentinelLike>;
+  };
+};
+
 export default function App() {
   const [userData, setUserData] = useState<UserData | null>(() => loadUserData() ?? null);
   const navigate = useNavigate();
@@ -73,6 +84,40 @@ export default function App() {
       isMounted = false;
     };
   }, [user, loading]);
+
+  useEffect(() => {
+    const wakeLockNavigator = navigator as WakeLockNavigator;
+    if (!wakeLockNavigator.wakeLock?.request) return;
+
+    let wakeLock: WakeLockSentinelLike | null = null;
+    let cancelled = false;
+
+    const requestWakeLock = async () => {
+      if (cancelled || document.visibilityState !== 'visible') return;
+
+      try {
+        wakeLock = await wakeLockNavigator.wakeLock.request('screen');
+      } catch (error) {
+        console.error('Unable to acquire screen wake lock.', error);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !wakeLock?.released) return;
+      void requestWakeLock();
+    };
+
+    void requestWakeLock();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (wakeLock && !wakeLock.released) {
+        void wakeLock.release();
+      }
+    };
+  }, []);
 
   // 2) Quand l’onboarding est terminé: sauver + rediriger
   const handleOnboardingComplete = async (data: UserData) => {
