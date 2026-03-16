@@ -29,11 +29,20 @@ export type DashboardChatMessage = {
   content: string;
 };
 
+export type DashboardTimerState = {
+  mode: 'focus' | 'short' | 'long';
+  minutes: number;
+  remainingSeconds: number;
+  isRunning: boolean;
+  updatedAt: number;
+};
+
 export type DashboardData = {
   tasks: DashboardTask[];
   studyData: Record<string, number[]>;
   sessionsByDay: Record<string, number>;
   chatMessages?: DashboardChatMessage[];
+  timerState?: DashboardTimerState;
 };
 
 export function loadUserData(): UserData | null {

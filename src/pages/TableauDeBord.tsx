@@ -29,7 +29,9 @@ import alarmSound from '../assets/Gentle-little-bell-ringing-sound-effect.mp3';
 import { useAuth } from '../lib/auth';
 import {
   clearUserData,
+  type DashboardData,
   type DashboardChatMessage,
+  type DashboardTimerState,
   loadDashboardDataFromLocal,
   loadDashboardDataFromSupabase,
   saveDashboardDataToLocal,
@@ -47,6 +49,48 @@ type ChatTaskAction = {
 };
 
 const TASK_COLORS = ['#6B9AC4', '#4169E1', '#8B8680', '#E16941', '#41E169', '#9B59B6', '#F39C12', '#E91E63'];
+const REMOTE_DASHBOARD_SAVE_INTERVAL_MS = 30_000;
+
+const getWeekStartKeyForDate = (date: Date) => {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  const dayOfWeek = normalized.getDay();
+  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  normalized.setDate(normalized.getDate() + diff);
+  return formatDate(normalized);
+};
+
+const getWeekdayArrayIndex = (date: Date) => {
+  const day = date.getDay();
+  return day === 0 ? 6 : day - 1;
+};
+
+const addElapsedStudySeconds = (
+  prevData: Record<string, number[]>,
+  startMs: number,
+  endMs: number
+) => {
+  if (endMs <= startMs) return prevData;
+
+  const nextData = { ...prevData };
+  let cursor = startMs;
+
+  while (cursor < endMs) {
+    const segmentStart = new Date(cursor);
+    const nextMidnight = new Date(segmentStart);
+    nextMidnight.setHours(24, 0, 0, 0);
+    const segmentEnd = Math.min(endMs, nextMidnight.getTime());
+    const weekKey = getWeekStartKeyForDate(segmentStart);
+    const dayIndex = getWeekdayArrayIndex(segmentStart);
+    const weekArray = [...(nextData[weekKey] ?? [0, 0, 0, 0, 0, 0, 0])];
+
+    weekArray[dayIndex] = (weekArray[dayIndex] ?? 0) + (segmentEnd - cursor) / 60000;
+    nextData[weekKey] = weekArray;
+    cursor = segmentEnd;
+  }
+
+  return nextData;
+};
 
 const getCurrentWeekDates = (offsetWeeks = 0) => {
   const today = new Date();
@@ -302,14 +346,72 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [messages, setMessages] = useState<DashboardChatMessage[]>(DEFAULT_CHAT_MESSAGES);
   const [chatInput, setChatInput] = useState('');
   const [isSendingChat, setIsSendingChat] = useState(false);
+  const pendingRemoteSaveRef = useRef<DashboardData | null>(null);
+  const pendingRemoteSaveUserIdRef = useRef<string | null>(null);
+  const timerStateHydratedRef = useRef(false);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
   const ringColor = TIMER_MODES[timerMode].color;
   const currentWeekKey = currentWeekStart;
   const weekTotal = (studyData[currentWeekKey] || []).reduce((sum, n) => sum + n, 0);
 
+  const buildTimerState = (): DashboardTimerState => ({
+    mode: timerMode,
+    minutes: safeMinutes,
+    remainingSeconds: Math.max(0, timeLeft),
+    isRunning,
+    updatedAt: Date.now(),
+  });
+
+  const hydrateTimerState = (persistedTimerState?: DashboardTimerState | null) => {
+    if (timerStateHydratedRef.current || !persistedTimerState) return false;
+    if (!['focus', 'short', 'long'].includes(persistedTimerState.mode)) return false;
+
+    timerStateHydratedRef.current = true;
+
+    const nextMinutes = Math.min(120, Math.max(5, persistedTimerState.minutes || TIMER_MODES[persistedTimerState.mode].minutes));
+    const cappedRemainingSeconds = Math.min(
+      nextMinutes * 60,
+      Math.max(0, persistedTimerState.remainingSeconds || 0)
+    );
+
+    setTimerMode(persistedTimerState.mode);
+    setTimerMinutes(nextMinutes);
+    setEditingTimerValue(nextMinutes.toString());
+
+    if (!persistedTimerState.isRunning) {
+      setIsRunning(false);
+      setTimeLeft(cappedRemainingSeconds);
+      return true;
+    }
+
+    const elapsedSeconds = Math.max(0, (Date.now() - persistedTimerState.updatedAt) / 1000);
+    const effectiveElapsedSeconds = Math.min(cappedRemainingSeconds, elapsedSeconds);
+    const remainingAfterResume = Math.max(0, cappedRemainingSeconds - elapsedSeconds);
+
+    if (persistedTimerState.mode === 'focus' && effectiveElapsedSeconds > 0) {
+      const elapsedEndMs = persistedTimerState.updatedAt + effectiveElapsedSeconds * 1000;
+      setStudyData((prev) => addElapsedStudySeconds(prev, persistedTimerState.updatedAt, elapsedEndMs));
+    }
+
+    if (remainingAfterResume <= 0) {
+      if (persistedTimerState.mode === 'focus' && effectiveElapsedSeconds > 0) {
+        const completionDate = formatDate(new Date(persistedTimerState.updatedAt + cappedRemainingSeconds * 1000));
+        setSessionsByDay((prev) => ({ ...prev, [completionDate]: (prev[completionDate] ?? 0) + 1 }));
+      }
+      setIsRunning(false);
+      setTimeLeft(nextMinutes * 60);
+      return true;
+    }
+
+    setTimeLeft(remainingAfterResume);
+    setIsRunning(true);
+    return true;
+  };
+
   useEffect(() => {
     let isMounted = true;
+    timerStateHydratedRef.current = false;
 
     const hydrateDashboardData = async () => {
       if (loading) return;
@@ -321,7 +423,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         if (Array.isArray(cached.chatMessages) && cached.chatMessages.length > 0) {
           setMessages(cached.chatMessages);
         }
+        hydrateTimerState(cached.timerState);
         setIsDashboardHydrated(true);
+        return;
       }
       if (!user) {
         setTasks(createDefaultTasks());
@@ -352,6 +456,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             ? remoteData.chatMessages
             : DEFAULT_CHAT_MESSAGES
         );
+        hydrateTimerState(remoteData.timerState);
         saveDashboardDataToLocal(user.id, remoteData);
       }
 
@@ -367,12 +472,41 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
   useEffect(() => {
     if (loading || !isDashboardHydrated) return;
-    const payload = { tasks, studyData, sessionsByDay, chatMessages: messages };
+    const payload = { tasks, studyData, sessionsByDay, chatMessages: messages, timerState: buildTimerState() };
     saveDashboardDataToLocal(user?.id, payload);
     if (user) {
-      saveDashboardDataToSupabase(user.id, payload);
+      pendingRemoteSaveRef.current = payload;
+      pendingRemoteSaveUserIdRef.current = user.id;
     }
-  }, [user, tasks, studyData, sessionsByDay, messages, isDashboardHydrated, loading]);
+  }, [user, tasks, studyData, sessionsByDay, messages, timerMode, safeMinutes, timeLeft, isRunning, isDashboardHydrated, loading]);
+
+  useEffect(() => {
+    if (loading || !isDashboardHydrated || !user) return;
+
+    const flushRemoteSave = () => {
+      const pendingPayload = pendingRemoteSaveRef.current;
+      const pendingUserId = pendingRemoteSaveUserIdRef.current;
+      if (!pendingPayload || !pendingUserId) return;
+
+      pendingRemoteSaveRef.current = null;
+      void saveDashboardDataToSupabase(pendingUserId, pendingPayload);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        flushRemoteSave();
+      }
+    };
+
+    const intervalId = window.setInterval(flushRemoteSave, REMOTE_DASHBOARD_SAVE_INTERVAL_MS);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      flushRemoteSave();
+    };
+  }, [user, isDashboardHydrated, loading]);
 
   useEffect(() => {
     if (!chatScrollRef.current) return;
