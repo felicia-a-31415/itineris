@@ -50,7 +50,7 @@ Deno.serve(async (request) => {
         injectedContext = true;
         return {
           role: item.role,
-          content: `Contexte:\n${studyContext}\n\nQuestion de l'eleve:\n${item.content}`,
+          content: `Instruction importante:\nAvant de repondre, verifie toujours d'abord la date actuelle, le jour actuel et l'heure actuelle dans le champ currentDate du contexte.\n\nContexte:\n${studyContext}\n\nQuestion de l'eleve:\n${item.content}`,
         };
       }
 
