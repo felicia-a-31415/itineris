@@ -91,7 +91,7 @@ export function Login() {
 
     if (isSigningUp) {
       setIsSubmitting(false);
-      navigate('/onboarding', { replace: true });
+      navigate('/tableaudebord', { replace: true });
       return;
     }
 

@@ -5,7 +5,6 @@ import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 
 import { Bienvenue } from './pages/Bienvenue';
 import { Login } from './pages/Login';
-import { Onboarding } from './pages/Onboarding';
 import { Parametres } from './pages/Parametres';
 import { TableauDeBord } from './pages/TableauDeBord';
 import Erreur from './pages/Erreur';
@@ -34,7 +33,6 @@ export default function App() {
   const [userData, setUserData] = useState<UserData | null>(() => loadUserData() ?? null);
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const [hasOnboardingData, setHasOnboardingData] = useState(Boolean(loadUserData()));
   const [isUserDataLoading, setIsUserDataLoading] = useState(true);
   const [hasFinishedInitialLoad, setHasFinishedInitialLoad] = useState(false);
   const isInitialAppLoading = !hasFinishedInitialLoad && (loading || isUserDataLoading);
@@ -61,15 +59,12 @@ export default function App() {
         if (!isMounted) return;
         if (remoteData) {
           setUserData(remoteData);
-          setHasOnboardingData(true);
           saveUserData(remoteData);
         } else {
-          setUserData(null);
-          setHasOnboardingData(false);
+          setUserData(defaultUserData);
         }
       } else {
         setUserData(localData);
-        setHasOnboardingData(Boolean(localData));
       }
 
       if (isMounted) {
@@ -119,17 +114,6 @@ export default function App() {
     };
   }, []);
 
-  // 2) Quand l’onboarding est terminé: sauver + rediriger
-  const handleOnboardingComplete = async (data: UserData) => {
-    setUserData(data);
-    setHasOnboardingData(true);
-    if (user) {
-      await saveUserDataToSupabase(user.id, data);
-    }
-    saveUserData(data);
-    navigate('/tableaudebord');
-  };
-
   const handleSettingsSave = async (data: UserData) => {
     setUserData(data);
     if (user) {
@@ -144,47 +128,33 @@ export default function App() {
         <Route
           path="/"
           element={
-            isInitialAppLoading ? null : hasOnboardingData ? (
+            isInitialAppLoading ? null : user ? (
               <Navigate to="/tableaudebord" replace />
             ) : (
               <Bienvenue
                 onGetStarted={() => navigate('/login', { state: { mode: 'signup' } })}
                 onLogin={() => navigate('/login')}
-                onContinueWithoutAccount={() => navigate('/onboarding')}
+                onContinueWithoutAccount={() => navigate('/tableaudebord')}
               />
             )
           }
         />
         <Route path="/login" element={<Login />} />
         <Route
-          path="/onboarding"
-          element={
-            isInitialAppLoading ? null : hasOnboardingData ? <Navigate to="/tableaudebord" replace /> : <Onboarding onComplete={handleOnboardingComplete} />
-          }
-        />
-        <Route
           path="/tableaudebord"
           element={
-            isInitialAppLoading ? null : hasOnboardingData ? (
-              <TableauDeBord userName={userData?.name} />
-            ) : user ? (
-              <Navigate to="/onboarding" replace />
-            ) : (
-              <Navigate to="/" replace />
-            )
+            isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />
           }
         />
         <Route
           path="/parametres"
           element={
-            isInitialAppLoading ? null : hasOnboardingData ? (
+            isInitialAppLoading ? null : (
               <Parametres
                 onBack={() => navigate('/tableaudebord')}
                 userData={userData ?? defaultUserData}
                 onSave={handleSettingsSave}
               />
-            ) : (
-              <Navigate to="/onboarding" replace />
             )
           }
         />
