@@ -81,6 +81,51 @@ type ChatAction = ChatTaskAction | ChatDeleteTaskAction | ChatUpdateTaskAction |
 const TASK_COLORS = ['#6B9AC4', '#4169E1', '#8B8680', '#E16941', '#41E169', '#9B59B6', '#F39C12', '#E91E63'];
 const REMOTE_DASHBOARD_SAVE_INTERVAL_MS = 30_000;
 
+const normalizeFrenchText = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+const parseTimerActionFromMessage = (message: string): ChatTimerAction | null => {
+  const normalized = normalizeFrenchText(message);
+  const hasTimerContext =
+    /\b(timer|minuteur|pomodoro|chrono|focus|pause)\b/.test(normalized) ||
+    /\b(lance|demarre|arrete|stop|pause|reprend|relance|reinitialise|reset)\b/.test(normalized);
+
+  if (!hasTimerContext) return null;
+
+  const minutesMatch = normalized.match(/\b(\d{1,3})\s*(min|mins|minute|minutes)\b/);
+  const parsedMinutes = minutesMatch ? Number(minutesMatch[1]) : undefined;
+  const minutes = Number.isFinite(parsedMinutes) ? Math.min(120, Math.max(5, Math.round(parsedMinutes!))) : undefined;
+
+  const mode = /\b(courte pause|pause courte|short)\b/.test(normalized)
+    ? 'short'
+    : /\b(longue pause|pause longue|long)\b/.test(normalized)
+      ? 'long'
+      : /\b(focus)\b/.test(normalized)
+        ? 'focus'
+        : undefined;
+
+  if (/\b(pause|mets en pause|arrete|stop)\b/.test(normalized)) {
+    return { tool: 'set_timer', action: 'pause' };
+  }
+
+  if (/\b(reinitialise|reinitialiser|remets? a zero|reset|remet le timer a zero)\b/.test(normalized)) {
+    return { tool: 'set_timer', action: 'reset', mode, minutes };
+  }
+
+  if (/\b(regle|mets|configure|change|set)\b/.test(normalized) && (minutes !== undefined || mode)) {
+    return { tool: 'set_timer', action: 'set', mode, minutes };
+  }
+
+  if (/\b(lance|demarre|reprend|relance|start)\b/.test(normalized) || mode || minutes !== undefined) {
+    return { tool: 'set_timer', action: 'start', mode, minutes };
+  }
+
+  return null;
+};
+
 const getWeekStartKeyForDate = (date: Date) => {
   const normalized = new Date(date);
   normalized.setHours(0, 0, 0, 0);
@@ -142,6 +187,53 @@ const formatDate = (date: Date) => {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+};
+
+const formatTime24 = (date: Date) => {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+};
+
+const addDays = (date: Date, days: number) => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+};
+
+const buildCurrentDateContext = () => {
+  const now = new Date();
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const weekdayFr = new Intl.DateTimeFormat('fr-CA', { weekday: 'long' }).format(now);
+  const localDate = formatDate(now);
+  const localTime24 = formatTime24(now);
+
+  return {
+    localDate,
+    localTime24,
+    localDateTime: `${localDate} ${localTime24}`,
+    weekdayFr,
+    timezone,
+    timezoneOffsetMinutes: -now.getTimezoneOffset(),
+    today: localDate,
+    tomorrow: formatDate(addDays(now, 1)),
+    yesterday: formatDate(addDays(now, -1)),
+    thisWeekMonday: formatDate(getWeekStartMonday(now)),
+    nextWeekMonday: formatDate(addDays(getWeekStartMonday(now), 7)),
+    isoUtc: now.toISOString(),
+    localeFr: new Intl.DateTimeFormat('fr-CA', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short',
+    }).format(now),
+    unixMs: now.getTime(),
+  };
 };
 
 const parseLocalDateString = (value?: string) => {
@@ -253,6 +345,7 @@ const TIMER_MODES = {
   short: { label: 'Courte pause', minutes: 5, color: '#22C55E' },
   long: { label: 'Longue pause', minutes: 15, color: '#8B5CF6' },
 } as const;
+const TIMER_PRESET_MINUTES = [5, 15, 25, 30, 45, 60] as const;
 
 const createDefaultTasks = () => {
   return [];
@@ -731,18 +824,24 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     const parsed = Number(editingTimerValue);
     if (Number.isFinite(parsed)) {
       const clamped = Math.min(120, Math.max(5, parsed));
-      setTimerMinutes(clamped);
-      setTimeLeft(clamped * 60);
+      setCustomTimerMinutes(clamped);
     }
     setIsEditingTimer(false);
   };
 
+  const setCustomTimerMinutes = (nextMinutes: number) => {
+    const clamped = Math.min(120, Math.max(5, Math.round(nextMinutes)));
+    setIsRunning(false);
+    lastTickRef.current = null;
+    setIsEditingTimer(false);
+    setTimerMinutes(clamped);
+    setTimeLeft(clamped * 60);
+    setEditingTimerValue(clamped.toString());
+  };
+
   const applyTimerSettings = (nextMode: keyof typeof TIMER_MODES, nextMinutes: number) => {
     setTimerMode(nextMode);
-    setIsEditingTimer(false);
-    setTimerMinutes(nextMinutes);
-    setTimeLeft(nextMinutes * 60);
-    setEditingTimerValue(nextMinutes.toString());
+    setCustomTimerMinutes(nextMinutes);
   };
 
   const applyChatTimerAction = (timerAction: ChatTimerAction) => {
@@ -1401,21 +1500,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               timeLeft,
               isRunning,
             },
-            currentDate: {
-              iso: new Date().toISOString(),
-              locale: new Intl.DateTimeFormat('fr-CA', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                timeZoneName: 'short',
-              }).format(new Date()),
-              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-              unixMs: Date.now(),
-            },
+            currentDate: buildCurrentDateContext(),
           },
         }),
       });
@@ -1482,6 +1567,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               action.tool === 'set_timer' && typeof action.action === 'string'
           )
         : [];
+      const fallbackTimerAction = timerActions.length === 0 ? parseTimerActionFromMessage(message) : null;
+      const effectiveTimerActions = fallbackTimerAction ? [fallbackTimerAction] : timerActions;
 
       if (taskActions.length > 0) {
         const newTasks: Task[] = taskActions.map((action, index) => ({
@@ -1540,8 +1627,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         });
       }
 
-      if (timerActions.length > 0) {
-        timerActions.forEach((action) => applyChatTimerAction(action));
+      if (effectiveTimerActions.length > 0) {
+        effectiveTimerActions.forEach((action) => applyChatTimerAction(action));
       }
 
       const assistantReply =
@@ -1553,7 +1640,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               ? 'La tache demandee a ete retiree du calendrier.'
               : updateTaskActions.length > 0
                 ? 'La tache demandee a ete modifiee.'
-            : timerActions.length > 0
+            : effectiveTimerActions.length > 0
               ? 'Le minuteur a ete mis a jour.'
             : 'Aucune reponse.';
 
@@ -1728,43 +1815,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   }}
                 >
                   <div className="absolute inset-3 bg-[#0B0D10] rounded-full shadow-inner flex flex-col items-center justify-center">
-                    {isEditingTimer ? (
-                      <Input
-                        type="number"
-                        min={5}
-                        max={120}
-                        value={editingTimerValue}
-                        onChange={(e) => setEditingTimerValue(e.target.value)}
-                        onBlur={commitTimerEdit}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            commitTimerEdit();
-                          }
-                          if (e.key === 'Escape') {
-                            setIsEditingTimer(false);
-                            setEditingTimerValue(timerMinutes.toString());
-                          }
-                        }}
-                        className="w-24 text-center rounded-xl border-[#1F2230]"
-                        autoFocus
-                      />
-                    ) : (
-                      <>
-                        <button
-                          type="button"
-                          className="text-3xl font-semibold text-[#ECECF3]"
-                          onClick={() => {
-                            setIsRunning(false);
-                            setIsEditingTimer(true);
-                            setEditingTimerValue(timerMinutes.toString());
-                          }}
-                        >
-                          {formatTime(timeLeft)}
-                        </button>
-                        <span className="text-xs text-[#A9ACBA]">{timerMinutes} min</span>
-                      </>
-                    )}
+                    <span className="text-3xl font-semibold text-[#ECECF3]">{formatTime(timeLeft)}</span>
+                    <span className="mt-1 text-xs text-[#A9ACBA]">{timerMinutes} min</span>
                   </div>
                 </div>
               </div>
@@ -1809,48 +1861,67 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   </Button>
                 </div>
 
-                <div className="flex items-center justify-between rounded-2xl border border-[#1F2230] bg-[#10131B] px-4 py-3 text-sm text-[#A9ACBA]">
-                  <span className="text-sm text-[#A9ACBA]">Durée du minuteur</span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => {
-                        const nextMinutes = Math.max(5, safeMinutes - 5);
-                        setIsRunning(false);
-                        setTimerMinutes(nextMinutes);
-                        setTimeLeft(nextMinutes * 60);
-                        setEditingTimerValue(nextMinutes.toString());
-                      }}
-                      className="h-8 min-w-10 rounded-xl border border-[#2B3550] bg-[#161924] px-2 text-xs text-[#ECECF3] hover:bg-[#1A1D26]"
-                    >
-                      -5
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => {
-                        setIsRunning(false);
+                <div className="rounded-2xl border border-[#1F2230] bg-[#10131B] px-4 py-4 text-sm text-[#A9ACBA]">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className="text-sm text-[#A9ACBA]">Durée du minuteur</span>
+                    <span className="text-xs text-[#7F869A]">Entre 5 et 120 min</span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {TIMER_PRESET_MINUTES.map((minutes) => {
+                      const isActive = safeMinutes === minutes;
+                      return (
+                        <button
+                          key={minutes}
+                          type="button"
+                          onClick={() => setCustomTimerMinutes(minutes)}
+                          className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
+                            isActive
+                              ? 'border-[#4169E1] bg-[#4169E1] text-white'
+                              : 'border-[#2B3550] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26]'
+                          }`}
+                        >
+                          {minutes} min
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                    <Input
+                      type="number"
+                      min={5}
+                      max={120}
+                      step={5}
+                      value={editingTimerValue}
+                      onFocus={() => {
                         setIsEditingTimer(true);
-                        setEditingTimerValue(timerMinutes.toString());
+                        if (!editingTimerValue) {
+                          setEditingTimerValue(timerMinutes.toString());
+                        }
                       }}
-                      className="h-8 rounded-xl border border-[#2B3550] bg-[#161924] px-3 text-xs text-[#ECECF3] hover:bg-[#1A1D26]"
-                    >
-                      {timerMinutes} min
-                    </Button>
+                      onChange={(e) => setEditingTimerValue(e.target.value)}
+                      onBlur={() => setIsEditingTimer(false)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          commitTimerEdit();
+                        }
+                        if (e.key === 'Escape') {
+                          setIsEditingTimer(false);
+                          setEditingTimerValue(timerMinutes.toString());
+                        }
+                      }}
+                      className="h-10 rounded-xl border-[#1F2230] bg-[#161924] text-[#ECECF3] sm:max-w-[150px]"
+                      placeholder={`${timerMinutes}`}
+                    />
                     <Button
                       type="button"
-                      variant="ghost"
-                      onClick={() => {
-                        const nextMinutes = Math.min(120, safeMinutes + 5);
-                        setIsRunning(false);
-                        setTimerMinutes(nextMinutes);
-                        setTimeLeft(nextMinutes * 60);
-                        setEditingTimerValue(nextMinutes.toString());
-                      }}
-                      className="h-8 min-w-10 rounded-xl border border-[#2B3550] bg-[#161924] px-2 text-xs text-[#ECECF3] hover:bg-[#1A1D26]"
+                      onClick={commitTimerEdit}
+                      variant="outline"
+                      className="h-10 rounded-xl border-[#2B3550] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26]"
                     >
-                      +5
+                      Appliquer
                     </Button>
                   </div>
                 </div>

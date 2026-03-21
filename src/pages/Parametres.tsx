@@ -15,7 +15,6 @@ import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 interface UserData {
   name: string;
@@ -42,7 +41,6 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
   const { user, updateEmail, updatePassword, signOut } = useAuth();
   const [formData, setFormData] = useState<UserData>(userData);
   const [saved, setSaved] = useState(false);
-  const [activeTab, setActiveTab] = useState<'profile' | 'account'>('profile');
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [accountError, setAccountError] = useState<string | null>(null);
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
@@ -162,200 +160,213 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-4">
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'profile' | 'account')} className="w-full">
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <TabsList className="flex h-auto flex-wrap gap-2 rounded-3xl border border-[#1F2230] bg-[#161924] p-1.5 shadow-[0_18px_50px_rgba(0,0,0,0.35),0_8px_18px_rgba(0,0,0,0.25),0_1px_0_rgba(255,255,255,0.04)]">
-              <TabsTrigger
-                value="profile"
-                className="rounded-2xl px-4 py-2 text-[#A9ACBA] data-[state=active]:bg-[#10131B] data-[state=active]:text-[#ECECF3]"
-              >
-                <CircleUserRound className="w-4 h-4 mr-2" />
-                Profil
-              </TabsTrigger>
-              <TabsTrigger
-                value="account"
-                className="rounded-2xl px-4 py-2 text-[#A9ACBA] data-[state=active]:bg-[#10131B] data-[state=active]:text-[#ECECF3]"
-              >
-                <KeyRound className="w-4 h-4 mr-2" />
-                Compte
-              </TabsTrigger>
-            </TabsList>
-
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={onBack}
-                variant="ghost"
-                className="h-11 rounded-xl border border-[#1F2230] bg-[#161924] px-4 text-sm text-[#ECECF3] hover:bg-[#1B2030]"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Retour
-              </Button>
-              {activeTab === 'profile' ? (
-                <Button
-                  onClick={handleSaveProfile}
-                  className="h-11 rounded-xl bg-[#4169E1] px-4 text-sm text-white hover:bg-[#3557C1]"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  {saved ? 'Sauvegardé' : 'Sauvegarder'}
-                </Button>
-              ) : null}
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-[#1F2230] bg-[#161924] px-3 py-2 text-sm text-[#A9ACBA]">
+              <CircleUserRound className="h-4 w-4 text-[#ECECF3]" />
+              Réglages du profil et du compte
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold text-[#ECECF3]">Paramètres</h1>
+              <p className="text-sm text-[#A9ACBA]">
+                Tout est regroupé ici pour éviter d’avoir deux onglets séparés.
+              </p>
             </div>
           </div>
 
-          <TabsContent value="profile" className="mt-4">
-            <Card className={`${cardClassName} space-y-2`}>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={onBack}
+              variant="ghost"
+              className="h-11 rounded-xl border border-[#1F2230] bg-[#161924] px-4 text-sm text-[#ECECF3] hover:bg-[#1B2030]"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Retour
+            </Button>
+            <Button
+              onClick={handleSaveProfile}
+              className="h-11 rounded-xl bg-[#4169E1] px-4 text-sm text-white hover:bg-[#3557C1]"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {saved ? 'Sauvegardé' : 'Sauvegarder'}
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-[1.05fr_1.25fr]">
+          <Card className={`${cardClassName} space-y-4`}>
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#1F2230] bg-[#10131B]">
+                <CircleUserRound className="h-5 w-5 text-[#ECECF3]" />
+              </div>
               <div>
                 <h2 className="text-xl font-semibold text-[#ECECF3]">Profil</h2>
+                <p className="text-sm leading-5 text-[#A9ACBA]">
+                  Les infos visibles dans ton espace de travail.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <div>
+                <Label htmlFor="name" className="text-[#ECECF3]">
+                  Prénom
+                </Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))}
+                  placeholder="Ton prénom"
+                  className={inputClassName}
+                />
               </div>
 
-              <div className="grid gap-3 md:grid-cols-2">
-                <div>
-                  <Label htmlFor="name" className="text-[#ECECF3]">
-                    Prénom
-                  </Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))}
-                    placeholder="Ton prénom"
-                    className={inputClassName}
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-[#ECECF3]">
-                    Compte
-                  </Label>
-                  <div className={`${inputClassName} min-h-[44px] px-4 py-3 text-sm text-[#A9ACBA]`}>
-                    {user?.email ?? 'Mode invité'}
-                  </div>
+              <div>
+                <Label className="text-[#ECECF3]">
+                  Compte
+                </Label>
+                <div className={`${inputClassName} min-h-[44px] px-4 py-3 text-sm text-[#A9ACBA]`}>
+                  {user?.email ?? 'Mode invité'}
                 </div>
               </div>
+            </div>
 
-              {profileMessage ? (
-                <div className="rounded-2xl border border-[#29425B] bg-[#182332] px-4 py-3 text-sm text-[#9DD0FF]">
-                  {profileMessage}
+            {profileMessage ? (
+              <div className="rounded-2xl border border-[#29425B] bg-[#182332] px-4 py-3 text-sm text-[#9DD0FF]">
+                {profileMessage}
+              </div>
+            ) : null}
+          </Card>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-3 h-full flex flex-col">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#1F2230] bg-[#10131B]">
+                  <Mail className="h-4 w-4 text-[#ECECF3]" />
                 </div>
-              ) : null}
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="account" className="mt-4">
-            <div className="grid gap-3 lg:grid-cols-3">
-              <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5 h-full flex flex-col">
                 <div>
-                  <h2 className="text-lg font-semibold text-[#ECECF3]">Changer l’email</h2>
+                  <h2 className="text-lg font-semibold text-[#ECECF3]">Email</h2>
                   <p className="text-xs leading-5 text-[#A9ACBA]">
-                    Une confirmation à la nouvelle adresse sera envoyee avant le changement définitif.
+                    Une confirmation sera envoyée avant le changement définitif.
                   </p>
                 </div>
+              </div>
 
-                <div>
-                  <Label htmlFor="account-email" className="text-[#ECECF3] text-sm">
-                    Adresse email
-                  </Label>
-                  <div className="relative mt-2">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A9ACBA]" />
-                    <Input
-                      id="account-email"
-                      type="email"
-                      value={pendingEmail}
-                      onChange={(event) => setPendingEmail(event.target.value)}
-                      className={`${inputClassName} pl-10 mt-0`}
-                      placeholder="ton@email.com"
-                      disabled={!user || isUpdatingEmail}
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-2 mt-auto">
-                  <Button
-                    onClick={handleEmailUpdate}
+              <div>
+                <Label htmlFor="account-email" className="text-[#ECECF3] text-sm">
+                  Adresse email
+                </Label>
+                <div className="relative mt-2">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A9ACBA]" />
+                  <Input
+                    id="account-email"
+                    type="email"
+                    value={pendingEmail}
+                    onChange={(event) => setPendingEmail(event.target.value)}
+                    className={`${inputClassName} pl-10 mt-0`}
+                    placeholder="ton@email.com"
                     disabled={!user || isUpdatingEmail}
-                    className="w-full h-10 rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
-                  >
-                    {isUpdatingEmail ? 'Mise à jour...' : 'Mettre à jour l’email'}
-                  </Button>
-                </div>
-              </Card>
-
-              <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5 h-full flex flex-col">
-                <div>
-                  <h2 className="text-lg font-semibold text-[#ECECF3]">Changer le mot de passe</h2>
-                </div>
-
-                <div>
-                  <Label htmlFor="new-password" className="text-[#ECECF3] text-sm">
-                    Nouveau mot de passe
-                  </Label>
-                  <Input
-                    id="new-password"
-                    type="password"
-                    value={newPassword}
-                    onChange={(event) => setNewPassword(event.target.value)}
-                    className={inputClassName}
-                    placeholder="Au moins 6 caractères"
-                    disabled={!user || isUpdatingPassword}
                   />
                 </div>
+              </div>
 
+              <div className="pt-1 mt-auto">
+                <Button
+                  onClick={handleEmailUpdate}
+                  disabled={!user || isUpdatingEmail}
+                  className="w-full h-10 rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
+                >
+                  {isUpdatingEmail ? 'Mise à jour...' : 'Mettre à jour l’email'}
+                </Button>
+              </div>
+            </Card>
+
+            <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-3 h-full flex flex-col">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#1F2230] bg-[#10131B]">
+                  <KeyRound className="h-4 w-4 text-[#ECECF3]" />
+                </div>
                 <div>
-                  <Label htmlFor="confirm-password" className="text-[#ECECF3] text-sm">
-                    Confirme le mot de passe
-                  </Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(event) => setConfirmPassword(event.target.value)}
-                    className={inputClassName}
-                    placeholder="Répète le mot de passe"
-                    disabled={!user || isUpdatingPassword}
-                  />
+                  <h2 className="text-lg font-semibold text-[#ECECF3]">Mot de passe</h2>
+                  <p className="text-xs leading-5 text-[#A9ACBA]">
+                    Utilise un mot de passe d’au moins 6 caractères.
+                  </p>
                 </div>
+              </div>
 
-                <div className="pt-2 mt-auto">
-                  <Button
-                    onClick={handlePasswordUpdate}
-                    disabled={!user || isUpdatingPassword}
-                    className="w-full h-10 rounded-xl bg-[#6B9AC4] hover:bg-[#5A89B3] text-white"
-                  >
-                    {isUpdatingPassword ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
-                  </Button>
+              <div>
+                <Label htmlFor="new-password" className="text-[#ECECF3] text-sm">
+                  Nouveau mot de passe
+                </Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  className={inputClassName}
+                  placeholder="Au moins 6 caractères"
+                  disabled={!user || isUpdatingPassword}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="confirm-password" className="text-[#ECECF3] text-sm">
+                  Confirme le mot de passe
+                </Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  className={inputClassName}
+                  placeholder="Répète le mot de passe"
+                  disabled={!user || isUpdatingPassword}
+                />
+              </div>
+
+              <div className="pt-1 mt-auto">
+                <Button
+                  onClick={handlePasswordUpdate}
+                  disabled={!user || isUpdatingPassword}
+                  className="w-full h-10 rounded-xl bg-[#6B9AC4] hover:bg-[#5A89B3] text-white"
+                >
+                  {isUpdatingPassword ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
+                </Button>
+              </div>
+            </Card>
+
+            {accountError ? (
+              <div className="md:col-span-2 rounded-2xl bg-[#11141D] px-4 py-3 text-sm text-[#E16941]">
+                {accountError}
+              </div>
+            ) : null}
+
+            {accountMessage ? (
+              <div className="md:col-span-2 rounded-2xl border border-[#29425B] bg-[#182332] px-4 py-3 text-sm text-[#9DD0FF]">
+                {accountMessage}
+              </div>
+            ) : null}
+
+            {!user ? (
+              <div className="md:col-span-2 rounded-2xl border border-[#1F2230] bg-[#11141D] px-4 py-4 text-sm text-[#A9ACBA]">
+                Les réglages de sécurité du compte sont disponibles seulement après connexion à Supabase.
+              </div>
+            ) : null}
+
+            <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-3 md:col-span-2">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#10131B] border border-[#1F2230] flex items-center justify-center shrink-0">
+                  <OctagonAlert className="w-4 h-4 text-[#E16941]" />
                 </div>
-              </Card>
-
-              {accountError ? (
-                <div className="lg:col-span-2 rounded-2xl bg-[#11141D] px-4 py-3 text-sm text-[#E16941]">
-                  {accountError}
+                <div>
+                  <h2 className="text-lg font-semibold text-[#ECECF3]">Supprimer le compte</h2>
+                  <p className="text-xs leading-5 text-[#A9ACBA]">
+                    Cette action est définitive et tu perdras l’accès à ton compte.
+                  </p>
                 </div>
-              ) : null}
+              </div>
 
-              {accountMessage ? (
-                <div className="lg:col-span-2 rounded-2xl border border-[#29425B] bg-[#182332] px-4 py-3 text-sm text-[#9DD0FF]">
-                  {accountMessage}
-                </div>
-              ) : null}
-
-              {!user ? (
-                <div className="lg:col-span-3 rounded-2xl border border-[#1F2230] bg-[#11141D] px-4 py-4 text-sm text-[#A9ACBA]">
-                  Les réglages de sécurité du compte sont disponibles seulement après connexion à Supabase.
-                </div>
-              ) : null}
-
-              <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-3 md:p-3.5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2.5 h-full flex flex-col">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-[#10131B] border border-[#1F2230] flex items-center justify-center shrink-0">
-                    <OctagonAlert className="w-4 h-4 text-[#E16941]" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-[#ECECF3]">Supprimer le compte</h2>
-                    <p className="text-xs leading-5 text-[#A9ACBA]">
-                      Cette action est définitive et tu perdras l’accès à ton compte.
-                    </p>
-                  </div>
-                </div>
-
+              <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
                 <div>
                   <Label htmlFor="delete-confirmation" className="text-[#ECECF3] text-sm">
                     Tape SUPPRIMER pour confirmer
@@ -370,20 +381,17 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                   />
                 </div>
 
-                <div className="pt-2 mt-auto">
-                  <Button
-                    onClick={handleDeleteAccount}
-                    disabled={!user || isDeletingAccount || deleteConfirmation.trim() !== 'SUPPRIMER'}
-                    className="w-full h-10 rounded-xl bg-[#E16941] hover:bg-[#c95735] text-white"
-                  >
-                    {isDeletingAccount ? 'Suppression...' : 'Supprimer définitivement le compte'}
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          </TabsContent>
-
-        </Tabs>
+                <Button
+                  onClick={handleDeleteAccount}
+                  disabled={!user || isDeletingAccount || deleteConfirmation.trim() !== 'SUPPRIMER'}
+                  className="h-11 rounded-xl bg-[#E16941] px-4 hover:bg-[#c95735] text-white md:min-w-[260px]"
+                >
+                  {isDeletingAccount ? 'Suppression...' : 'Supprimer définitivement le compte'}
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
