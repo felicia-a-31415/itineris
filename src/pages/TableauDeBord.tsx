@@ -41,12 +41,42 @@ import {
 
 type Task = DashboardTask;
 type ChatTaskAction = {
+  tool?: 'add_task';
   name?: string;
   date?: string;
   time?: string;
   urgent?: boolean;
   color?: string;
 };
+
+type ChatDeleteTaskAction = {
+  tool?: 'delete_task';
+  target_name?: string;
+  target_date?: string;
+  target_time?: string;
+};
+
+type ChatUpdateTaskAction = {
+  tool?: 'update_task';
+  target_name?: string;
+  target_date?: string;
+  target_time?: string;
+  new_name?: string;
+  date?: string;
+  time?: string;
+  urgent?: boolean;
+  color?: string;
+  completed?: boolean;
+};
+
+type ChatTimerAction = {
+  tool?: 'set_timer';
+  action?: 'start' | 'pause' | 'reset' | 'set';
+  mode?: keyof typeof TIMER_MODES;
+  minutes?: number;
+};
+
+type ChatAction = ChatTaskAction | ChatDeleteTaskAction | ChatUpdateTaskAction | ChatTimerAction;
 
 const TASK_COLORS = ['#6B9AC4', '#4169E1', '#8B8680', '#E16941', '#41E169', '#9B59B6', '#F39C12', '#E91E63'];
 const REMOTE_DASHBOARD_SAVE_INTERVAL_MS = 30_000;
@@ -119,6 +149,42 @@ const parseLocalDateString = (value?: string) => {
   const [year, month, day] = value.split('-').map(Number);
   if (!year || !month || !day) return null;
   return new Date(year, month - 1, day);
+};
+
+const normalizeTaskText = (value?: string) =>
+  (value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+
+const findMatchingTaskIndex = (
+  tasks: Task[],
+  targetName?: string,
+  targetDate?: string,
+  targetTime?: string
+) => {
+  const normalizedTargetName = normalizeTaskText(targetName);
+  if (!normalizedTargetName) return -1;
+
+  const exactMatchIndex = tasks.findIndex((task) => {
+    if (normalizeTaskText(task.name) !== normalizedTargetName) return false;
+    if (targetDate && task.date !== targetDate) return false;
+    if (targetTime && task.time !== targetTime) return false;
+    return true;
+  });
+
+  if (exactMatchIndex >= 0) return exactMatchIndex;
+
+  return tasks.findIndex((task) => {
+    const normalizedTaskName = normalizeTaskText(task.name);
+    if (!normalizedTaskName.includes(normalizedTargetName) && !normalizedTargetName.includes(normalizedTaskName)) {
+      return false;
+    }
+    if (targetDate && task.date !== targetDate) return false;
+    if (targetTime && task.time !== targetTime) return false;
+    return true;
+  });
 };
 
 const getDayName = (date: Date) => {
@@ -669,6 +735,46 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       setTimeLeft(clamped * 60);
     }
     setIsEditingTimer(false);
+  };
+
+  const applyTimerSettings = (nextMode: keyof typeof TIMER_MODES, nextMinutes: number) => {
+    setTimerMode(nextMode);
+    setIsEditingTimer(false);
+    setTimerMinutes(nextMinutes);
+    setTimeLeft(nextMinutes * 60);
+    setEditingTimerValue(nextMinutes.toString());
+  };
+
+  const applyChatTimerAction = (timerAction: ChatTimerAction) => {
+    const requestedMode =
+      timerAction.mode && timerAction.mode in TIMER_MODES ? (timerAction.mode as keyof typeof TIMER_MODES) : timerMode;
+    const requestedMinutes = Number.isFinite(timerAction.minutes)
+      ? Math.min(120, Math.max(5, Math.round(timerAction.minutes as number)))
+      : timerAction.mode && timerAction.mode in TIMER_MODES
+        ? TIMER_MODES[timerAction.mode as keyof typeof TIMER_MODES].minutes
+        : safeMinutes;
+
+    switch (timerAction.action) {
+      case 'pause':
+        setIsRunning(false);
+        lastTickRef.current = null;
+        return;
+      case 'reset':
+      case 'set':
+        setIsRunning(false);
+        lastTickRef.current = null;
+        applyTimerSettings(requestedMode, requestedMinutes);
+        return;
+      case 'start':
+        if (timerAction.mode || Number.isFinite(timerAction.minutes)) {
+          applyTimerSettings(requestedMode, requestedMinutes);
+        }
+        lastTickRef.current = performance.now();
+        setIsRunning(true);
+        return;
+      default:
+        return;
+    }
   };
 
   useEffect(() => {
@@ -1289,6 +1395,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               completedToday: sessionsCompletedToday,
               byDay: sessionsByDay,
             },
+            timer: {
+              mode: timerMode,
+              minutes: safeMinutes,
+              timeLeft,
+              isRunning,
+            },
             currentDate: {
               iso: new Date().toISOString(),
               locale: new Intl.DateTimeFormat('fr-CA', {
@@ -1309,7 +1421,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       });
 
       const responseText = await response.text();
-      let payload: { reply?: string; error?: string; actions?: ChatTaskAction[] } | null = null;
+      let payload: { reply?: string; error?: string; actions?: ChatAction[] } | null = null;
 
       try {
         payload = responseText ? JSON.parse(responseText) : null;
@@ -1337,12 +1449,42 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         }
       }
 
-      const validActions = Array.isArray(payload?.actions)
-        ? payload.actions.filter((action) => typeof action?.name === 'string' && action.name.trim().length > 0)
+      const taskActions = Array.isArray(payload?.actions)
+        ? payload.actions.filter(
+            (action): action is ChatTaskAction =>
+              (action.tool === 'add_task' || action.tool === undefined) &&
+              typeof action?.name === 'string' &&
+              action.name.trim().length > 0
+          )
         : [];
 
-      if (validActions.length > 0) {
-        const newTasks: Task[] = validActions.map((action, index) => ({
+      const deleteTaskActions = Array.isArray(payload?.actions)
+        ? payload.actions.filter(
+            (action): action is ChatDeleteTaskAction =>
+              action.tool === 'delete_task' &&
+              typeof action.target_name === 'string' &&
+              action.target_name.trim().length > 0
+          )
+        : [];
+
+      const updateTaskActions = Array.isArray(payload?.actions)
+        ? payload.actions.filter(
+            (action): action is ChatUpdateTaskAction =>
+              action.tool === 'update_task' &&
+              typeof action.target_name === 'string' &&
+              action.target_name.trim().length > 0
+          )
+        : [];
+
+      const timerActions = Array.isArray(payload?.actions)
+        ? payload.actions.filter(
+            (action): action is ChatTimerAction =>
+              action.tool === 'set_timer' && typeof action.action === 'string'
+          )
+        : [];
+
+      if (taskActions.length > 0) {
+        const newTasks: Task[] = taskActions.map((action, index) => ({
           id: `ai-${Date.now()}-${index}`,
           name: action.name!.trim(),
           completed: false,
@@ -1358,11 +1500,61 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         setTasks((prev) => [...prev, ...newTasks]);
       }
 
+      if (deleteTaskActions.length > 0) {
+        setTasks((prev) => {
+          const nextTasks = [...prev];
+
+          deleteTaskActions.forEach((action) => {
+            const matchIndex = findMatchingTaskIndex(nextTasks, action.target_name, action.target_date, action.target_time);
+            if (matchIndex >= 0) {
+              nextTasks.splice(matchIndex, 1);
+            }
+          });
+
+          return nextTasks;
+        });
+      }
+
+      if (updateTaskActions.length > 0) {
+        setTasks((prev) => {
+          const nextTasks = [...prev];
+
+          updateTaskActions.forEach((action) => {
+            const matchIndex = findMatchingTaskIndex(nextTasks, action.target_name, action.target_date, action.target_time);
+            if (matchIndex < 0) return;
+
+            const existingTask = nextTasks[matchIndex];
+            nextTasks[matchIndex] = {
+              ...existingTask,
+              name: typeof action.new_name === 'string' && action.new_name.trim() ? action.new_name.trim() : existingTask.name,
+              date: isValidTaskDate(action.date) ? action.date : existingTask.date,
+              time: isValidTaskTime(action.time) ? action.time : existingTask.time,
+              urgent: typeof action.urgent === 'boolean' ? action.urgent : existingTask.urgent,
+              color:
+                typeof action.color === 'string' && TASK_COLORS.includes(action.color) ? action.color : existingTask.color,
+              completed: typeof action.completed === 'boolean' ? action.completed : existingTask.completed,
+            };
+          });
+
+          return nextTasks;
+        });
+      }
+
+      if (timerActions.length > 0) {
+        timerActions.forEach((action) => applyChatTimerAction(action));
+      }
+
       const assistantReply =
         payload?.reply && payload.reply.trim()
           ? payload.reply
-          : validActions.length > 0
-            ? `${validActions.length} tache${validActions.length > 1 ? 's ont ete ajoutees' : ' a ete ajoutee'} au calendrier.`
+          : taskActions.length > 0
+            ? `${taskActions.length} tache${taskActions.length > 1 ? 's ont ete ajoutees' : ' a ete ajoutee'} au calendrier.`
+            : deleteTaskActions.length > 0
+              ? 'La tache demandee a ete retiree du calendrier.'
+              : updateTaskActions.length > 0
+                ? 'La tache demandee a ete modifiee.'
+            : timerActions.length > 0
+              ? 'Le minuteur a ete mis a jour.'
             : 'Aucune reponse.';
 
       setMessages((prev) => [...prev, { role: 'assistant', content: assistantReply }]);
@@ -1618,9 +1810,49 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 </div>
 
                 <div className="flex items-center justify-between rounded-2xl border border-[#1F2230] bg-[#10131B] px-4 py-3 text-sm text-[#A9ACBA]">
-                  <span className="text-sm text-[#A9ACBA]">
-                    {sessionsCompletedToday} sessions terminées aujourd&apos;hui
-                  </span>
+                  <span className="text-sm text-[#A9ACBA]">Durée du minuteur</span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => {
+                        const nextMinutes = Math.max(5, safeMinutes - 5);
+                        setIsRunning(false);
+                        setTimerMinutes(nextMinutes);
+                        setTimeLeft(nextMinutes * 60);
+                        setEditingTimerValue(nextMinutes.toString());
+                      }}
+                      className="h-8 min-w-10 rounded-xl border border-[#2B3550] bg-[#161924] px-2 text-xs text-[#ECECF3] hover:bg-[#1A1D26]"
+                    >
+                      -5
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => {
+                        setIsRunning(false);
+                        setIsEditingTimer(true);
+                        setEditingTimerValue(timerMinutes.toString());
+                      }}
+                      className="h-8 rounded-xl border border-[#2B3550] bg-[#161924] px-3 text-xs text-[#ECECF3] hover:bg-[#1A1D26]"
+                    >
+                      {timerMinutes} min
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => {
+                        const nextMinutes = Math.min(120, safeMinutes + 5);
+                        setIsRunning(false);
+                        setTimerMinutes(nextMinutes);
+                        setTimeLeft(nextMinutes * 60);
+                        setEditingTimerValue(nextMinutes.toString());
+                      }}
+                      className="h-8 min-w-10 rounded-xl border border-[#2B3550] bg-[#161924] px-2 text-xs text-[#ECECF3] hover:bg-[#1A1D26]"
+                    >
+                      +5
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
