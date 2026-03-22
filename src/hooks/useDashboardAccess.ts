@@ -11,6 +11,10 @@ type UseDashboardAccessParams = {
 
 export function useDashboardAccess({ userId, loading, location }: UseDashboardAccessParams) {
   const [hasGuestAccess, setHasGuestAccess] = useState(false);
+  const requestedAuthMode = useMemo(
+    () => ((location.state as { authMode?: 'signup' | 'login' } | null)?.authMode ?? null) as 'signup' | 'login' | null,
+    [location.state]
+  );
 
   useEffect(() => {
     if (userId) {
@@ -22,12 +26,7 @@ export function useDashboardAccess({ userId, loading, location }: UseDashboardAc
     setHasGuestAccess(window.localStorage.getItem(DASHBOARD_GUEST_ACCESS_KEY) === 'true');
   }, [userId]);
 
-  const requestedAuthMode = useMemo(
-    () => ((location.state as { authMode?: 'signup' | 'login' } | null)?.authMode ?? null) as 'signup' | 'login' | null,
-    [location.state]
-  );
-
-  const shouldShowDashboardAuthGate = !loading && !userId && !hasGuestAccess;
+  const shouldShowDashboardAuthGate = !loading && !userId && (!!requestedAuthMode || !hasGuestAccess);
 
   const enableGuestAccess = () => {
     window.localStorage.setItem(DASHBOARD_GUEST_ACCESS_KEY, 'true');

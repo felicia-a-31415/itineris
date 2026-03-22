@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, Eye, EyeOff, Lock, Mail, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../lib/auth';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 
-type AuthMode = 'choice' | 'signup' | 'login';
+type AuthMode = 'choice' | 'signup' | 'login' | 'reset';
 
 type DashboardAuthGateProps = {
   open: boolean;
@@ -19,8 +18,7 @@ export function DashboardAuthGate({
   initialMode,
   onContinueWithoutAccount,
 }: DashboardAuthGateProps) {
-  const navigate = useNavigate();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, requestPasswordReset } = useAuth();
   const [mode, setMode] = useState<AuthMode>(initialMode ?? 'choice');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +36,12 @@ export function DashboardAuthGate({
 
   if (!open) return null;
 
+  const getRecoveryRedirectUrl = () => {
+    const basePath = import.meta.env.BASE_URL ?? '/';
+    const normalizedBasePath = basePath.endsWith('/') ? basePath : `${basePath}/`;
+    return `${window.location.origin}${normalizedBasePath}login?mode=recovery`;
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
@@ -48,6 +52,19 @@ export function DashboardAuthGate({
     if (!trimmedEmail) {
       setError('Entre une adresse email valide.');
       setIsSubmitting(false);
+      return;
+    }
+
+    if (mode === 'reset') {
+      const { error: resetError } = await requestPasswordReset(trimmedEmail, getRecoveryRedirectUrl());
+      setIsSubmitting(false);
+
+      if (resetError) {
+        setError(resetError.message);
+        return;
+      }
+
+      setMessage('Email envoyé. Vérifie ta boite de réception puis ouvre le lien pour choisir un nouveau mot de passe.');
       return;
     }
 
@@ -134,12 +151,16 @@ export function DashboardAuthGate({
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="space-y-2">
-                    <div className="text-sm text-white/56">{mode === 'signup' ? 'Créer un compte' : 'Connexion'}</div>
+                    <div className="text-sm text-white/56">
+                      {mode === 'signup' ? 'Créer un compte' : mode === 'reset' ? 'Réinitialisation' : 'Connexion'}
+                    </div>
                     <h2 className="text-3xl font-semibold text-white">
-                      {mode === 'signup' ? 'Sauvegarde tes progrès' : 'Bon retour'}
+                      {mode === 'signup' ? 'Sauvegarde tes progrès' : mode === 'reset' ? 'Récupère ton accès' : 'Bon retour'}
                     </h2>
                     <p className="text-sm leading-6 text-white/70">
-                      {mode === 'signup'
+                      {mode === 'reset'
+                        ? 'Entre ton email et on t’enverra un lien pour définir un nouveau mot de passe.'
+                        : mode === 'signup'
                         ? 'Ton dashboard sera synchronisé et disponible sur tous tes appareils.'
                         : 'Connecte-toi pour retrouver ton calendrier, ton minuteur et ton historique.'}
                     </p>
@@ -159,26 +180,28 @@ export function DashboardAuthGate({
                       />
                     </div>
 
-                    <div className="relative">
-                      <Lock className="absolute left-0 top-1/2 h-5 w-5 -translate-y-1/2 text-white/48" />
-                      <Input
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={(event) => setPassword(event.target.value)}
-                        placeholder={mode === 'signup' ? 'Créer un mot de passe' : 'Mot de passe'}
-                        className="h-12 rounded-none border-0 border-b border-white/35 bg-transparent pl-8 pr-10 text-base text-white placeholder:text-white/40 focus-visible:ring-0"
-                        disabled={isSubmitting}
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 text-white/55 hover:text-white"
-                        disabled={isSubmitting}
-                      >
-                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                      </button>
-                    </div>
+                    {mode !== 'reset' ? (
+                      <div className="relative">
+                        <Lock className="absolute left-0 top-1/2 h-5 w-5 -translate-y-1/2 text-white/48" />
+                        <Input
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(event) => setPassword(event.target.value)}
+                          placeholder={mode === 'signup' ? 'Créer un mot de passe' : 'Mot de passe'}
+                          className="h-12 rounded-none border-0 border-b border-white/35 bg-transparent pl-8 pr-10 text-base text-white placeholder:text-white/40 focus-visible:ring-0"
+                          disabled={isSubmitting}
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          className="absolute right-0 top-1/2 -translate-y-1/2 text-white/55 hover:text-white"
+                          disabled={isSubmitting}
+                        >
+                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
 
                   {error ? <div className="rounded-2xl bg-[#2A1B1B] px-4 py-3 text-sm text-[#FF9A7B]">{error}</div> : null}
@@ -194,7 +217,13 @@ export function DashboardAuthGate({
                       disabled={isSubmitting}
                       className="h-14 rounded-2xl bg-[#6A39FF] text-base text-white hover:bg-[#5D31E4]"
                     >
-                      {isSubmitting ? 'Chargement...' : mode === 'signup' ? 'Continuer' : 'Se connecter'}
+                      {isSubmitting
+                        ? 'Chargement...'
+                        : mode === 'signup'
+                          ? 'Continuer'
+                          : mode === 'reset'
+                            ? 'Envoyer le lien'
+                            : 'Se connecter'}
                     </Button>
                     <Button
                       type="button"
@@ -206,16 +235,30 @@ export function DashboardAuthGate({
                   </div>
 
                   <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-white/74">
-                    <button type="button" onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')} className="underline underline-offset-4">
-                      {mode === 'signup' ? 'J’ai déjà un compte' : 'Créer un compte'}
-                    </button>
                     <button
                       type="button"
-                      onClick={() => navigate('/login')}
-                      className="underline underline-offset-4 text-white/60 hover:text-white"
+                      onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')}
+                      className="underline underline-offset-4"
                     >
-                      Mot de passe oublié ?
+                      {mode === 'signup' ? 'J’ai déjà un compte' : 'Créer un compte'}
                     </button>
+                    {mode === 'reset' ? (
+                      <button
+                        type="button"
+                        onClick={() => setMode('login')}
+                        className="underline underline-offset-4 text-white/60 hover:text-white"
+                      >
+                        Retour à la connexion
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setMode('reset')}
+                        className="underline underline-offset-4 text-white/60 hover:text-white"
+                      >
+                        Mot de passe oublié ?
+                      </button>
+                    )}
                   </div>
                 </form>
               )}

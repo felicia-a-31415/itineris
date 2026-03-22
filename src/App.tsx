@@ -1,7 +1,7 @@
 import './styles/globals.css';
 
 import { useEffect, useState } from 'react';
-import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { Login } from './pages/Login';
 import { Parametres } from './pages/Parametres';
@@ -34,6 +34,16 @@ function AppFrame() {
       <Outlet />
     </div>
   );
+}
+
+function LoginRoute() {
+  const [searchParams] = useSearchParams();
+
+  if (searchParams.get('mode') === 'recovery') {
+    return <Login />;
+  }
+
+  return <Navigate to="/" replace state={{ authMode: 'login' }} />;
 }
 
 export default function App() {
@@ -146,7 +156,7 @@ export default function App() {
           }
         />
       </Route>
-      <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<LoginRoute />} />
       <Route path="/tableaudebord" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Erreur />} />
     </Routes>

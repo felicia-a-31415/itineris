@@ -422,7 +422,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               </p>
             </div>
             <Button
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/', { state: { authMode: 'login' } })}
               className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4"
             >
               Se connecter

@@ -75,7 +75,7 @@ export function Login() {
       setPassword('');
       setConfirmPassword('');
       setIsSubmitting(false);
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true, state: { authMode: 'login' } });
       return;
     }
 
