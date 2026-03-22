@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Calendar,
@@ -20,6 +20,7 @@ import {
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
+import { Dialog, DialogContent } from '../ui/dialog';
 import { Input } from '../ui/input';
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -345,7 +346,7 @@ const TIMER_MODES = {
   short: { label: 'Courte pause', minutes: 5, color: '#22C55E' },
   long: { label: 'Longue pause', minutes: 15, color: '#8B5CF6' },
 } as const;
-const TIMER_PRESET_MINUTES = [5, 15, 25, 30, 45, 60] as const;
+const TIMER_PRESET_MINUTES = [25, 30, 45, 60] as const;
 
 const createDefaultTasks = () => {
   return [];
@@ -493,9 +494,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const draftTaskIdRef = useRef<string | null>(null);
   const [taskDetailsId, setTaskDetailsId] = useState<string | null>(null);
   const ignoreCalendarClickUntilRef = useRef(0);
-  const [taskPopoverSide, setTaskPopoverSide] = useState<'left' | 'right'>('right');
   const [deleteCompletedMenuOpen, setDeleteCompletedMenuOpen] = useState(false);
-  const taskPopoverAnchorRef = useRef<HTMLDivElement | null>(null);
   const taskListItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const taskListPositionsRef = useRef<Record<string, number>>({});
   const pendingTaskMotionRef = useRef<{ id: string; direction: 'down' | 'up' } | null>(null);
@@ -989,6 +988,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     resetTaskForm();
   };
 
+  const modalTask = modalTaskId ? tasks.find((task) => task.id === modalTaskId) ?? null : null;
+
   const toggleTask = (id: string) => {
     const targetTask = tasks.find((task) => task.id === id);
     if (targetTask) {
@@ -1149,15 +1150,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     prevStreakRef.current = streakDays;
   }, [streakDays]);
 
-  useLayoutEffect(() => {
-    if (!showAddDialog || !modalTaskId || !taskPopoverAnchorRef.current) return;
-    const rect = taskPopoverAnchorRef.current.getBoundingClientRect();
-    const estimatedPopoverWidth = 380;
-    const spaceRight = window.innerWidth - rect.right;
-    setTaskPopoverSide(spaceRight < estimatedPopoverWidth ? 'left' : 'right');
-  }, [showAddDialog, modalTaskId, timeView, calendarMode]);
-
-  useLayoutEffect(() => {
+  useEffect(() => {
     const nextPositions: Record<string, number> = {};
 
     visibleTasks.forEach((task) => {
@@ -1822,7 +1815,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               </div>
 
               <div className="flex h-full flex-col justify-end gap-6 pt-6">
-                <div className="flex gap-3">
+                <div className="flex items-center gap-3">
                   <Button
                     onClick={() => {
                       setIsRunning((running) => {
@@ -1834,7 +1827,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         return true;
                       });
                     }}
-                    className="flex-1 bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-2xl"
+                    className="h-11 min-w-[124px] bg-[#4169E1] px-4 hover:bg-[#3557C1] text-white rounded-2xl"
                   >
                     {isRunning ? (
                       <>
@@ -1851,13 +1844,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   <Button
                     onClick={() => {
                       setIsRunning(false);
+                      lastTickRef.current = null;
                       setTimeLeft(safeMinutes * 60);
                     }}
                     variant="outline"
-                    className="flex-1 rounded-2xl border-[#1F2230]"
+                    className="h-11 w-11 rounded-2xl border-[#1F2230] bg-[#10131B] p-0 text-[#ECECF3] hover:bg-[#161924]"
+                    aria-label="Réinitialiser le minuteur"
+                    title="Réinitialiser le minuteur"
                   >
-                    <RotateCcw className="w-4 h-4 mr-2" />
-                    Réinitialiser
+                    <RotateCcw className="h-5 w-5" />
                   </Button>
                 </div>
 
@@ -1885,45 +1880,62 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         </button>
                       );
                     })}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditingTimer(true);
+                        setEditingTimerValue(timerMinutes.toString());
+                      }}
+                      className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
+                        isEditingTimer || !TIMER_PRESET_MINUTES.includes(safeMinutes as (typeof TIMER_PRESET_MINUTES)[number])
+                          ? 'border-[#4169E1] bg-[#4169E1] text-white'
+                          : 'border-[#2B3550] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26]'
+                      }`}
+                    >
+                      Custom
+                    </button>
                   </div>
 
-                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                    <Input
-                      type="number"
-                      min={5}
-                      max={120}
-                      step={5}
-                      value={editingTimerValue}
-                      onFocus={() => {
-                        setIsEditingTimer(true);
-                        if (!editingTimerValue) {
-                          setEditingTimerValue(timerMinutes.toString());
-                        }
-                      }}
-                      onChange={(e) => setEditingTimerValue(e.target.value)}
-                      onBlur={() => setIsEditingTimer(false)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          commitTimerEdit();
-                        }
-                        if (e.key === 'Escape') {
-                          setIsEditingTimer(false);
-                          setEditingTimerValue(timerMinutes.toString());
-                        }
-                      }}
-                      className="h-10 rounded-xl border-[#1F2230] bg-[#161924] text-[#ECECF3] sm:max-w-[150px]"
-                      placeholder={`${timerMinutes}`}
-                    />
-                    <Button
-                      type="button"
-                      onClick={commitTimerEdit}
-                      variant="outline"
-                      className="h-10 rounded-xl border-[#2B3550] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26]"
-                    >
-                      Appliquer
-                    </Button>
-                  </div>
+                  {isEditingTimer ? (
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                      <Input
+                        type="number"
+                        min={5}
+                        max={120}
+                        step={5}
+                        value={editingTimerValue}
+                        onFocus={() => {
+                          setIsEditingTimer(true);
+                          if (!editingTimerValue) {
+                            setEditingTimerValue(timerMinutes.toString());
+                          }
+                        }}
+                        onChange={(e) => setEditingTimerValue(e.target.value)}
+                        onBlur={() => setIsEditingTimer(false)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            commitTimerEdit();
+                          }
+                          if (e.key === 'Escape') {
+                            setIsEditingTimer(false);
+                            setEditingTimerValue(timerMinutes.toString());
+                          }
+                        }}
+                        className="h-10 rounded-xl border-[#1F2230] bg-[#161924] text-[#ECECF3] sm:max-w-[150px]"
+                        placeholder={`${timerMinutes}`}
+                        autoFocus
+                      />
+                      <Button
+                        type="button"
+                        onClick={commitTimerEdit}
+                        variant="outline"
+                        className="h-10 rounded-xl border-[#2B3550] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26]"
+                      >
+                        Appliquer
+                      </Button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -2181,12 +2193,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                         ) : null}
                         <div className={timeView === 'month' ? 'space-y-2' : 'space-y-3'}>
                           {tasksForDay.map((task) => {
-                            const shouldShowEditor = showAddDialog && modalTaskId === task.id;
                             const isMonthView = timeView === 'month';
 
                             const taskCard = (
                               <div
-                                ref={shouldShowEditor ? taskPopoverAnchorRef : undefined}
                                 className="rounded-xl px-2.5 py-1.5 text-xs bg-[#182032] border border-[#2B3550] text-[#ECECF3] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
                                 style={{
                                   borderLeft: `${isMonthView ? 3 : 4}px solid ${task.color}`,
@@ -2201,7 +2211,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                                       className="rounded-sm h-4 w-4 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
                                     />
                                   </div>
-                                  <div className="flex-1 min-w-0 flex items-center">
+                                  <div className="flex-1 min-w-0 flex flex-col items-start gap-1">
                                     <div className="flex items-center gap-1">
                                       {task.time && (
                                         <span className="text-[10px] text-[#A9ACBA]">
@@ -2254,64 +2264,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
                             return (
                               <div key={task.id}>
-                                {shouldShowEditor ? (
-                                  <Popover
-                                    open={shouldShowEditor}
-                                    onOpenChange={(open) => {
-                                      if (!open) {
-                                        cancelDraftTask(draftTaskIdRef.current);
-                                      }
-                                    }}
-                                  >
-                                    <PopoverAnchor asChild>
-                                      <div onClick={(e) => e.stopPropagation()}>{taskCard}</div>
-                                    </PopoverAnchor>
-                                    <PopoverContent
-                                      side={taskPopoverSide}
-                                      align="start"
-                                      sideOffset={12}
-                                      collisionPadding={16}
-                                      className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 text-[#ECECF3] text-sm p-4 shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
-                                      onOpenAutoFocus={(e) => e.preventDefault()}
-                                    >
-                                      <TaskEditor
-                                        title={newTaskName}
-                                        onTitleChange={(value) => {
-                                          setNewTaskName(value);
-                                          if (modalTaskId) {
-                                            updateTask(modalTaskId, { name: value.trim() || '(Titre)' });
-                                          }
-                                        }}
-                                        titlePlaceholder="Ajouter un titre"
-                                        date={selectedDate}
-                                        onDateChange={(value) => {
-                                          setSelectedDate(value);
-                                          if (modalTaskId) {
-                                            updateTask(modalTaskId, { date: value || undefined });
-                                          }
-                                        }}
-                                        time={selectedTime}
-                                        onTimeChange={(value) => {
-                                          setSelectedTime(value);
-                                          if (modalTaskId) {
-                                            updateTask(modalTaskId, { time: value || undefined });
-                                          }
-                                        }}
-                                        selectedColor={selectedColor}
-                                        colors={TASK_COLORS}
-                                        onColorChange={(value) => {
-                                          setSelectedColor(value);
-                                          if (modalTaskId) {
-                                            updateTask(modalTaskId, { color: value });
-                                          }
-                                        }}
-                                        onClose={() => {
-                                          cancelDraftTask(draftTaskIdRef.current);
-                                        }}
-                                        onSave={saveTask}
-                                      />
-                                    </PopoverContent>
-                                  </Popover>
+                                {showAddDialog && modalTaskId === task.id ? (
+                                  <div onClick={(e) => e.stopPropagation()}>{taskCard}</div>
                                 ) : (
                                   <Popover
                                     open={taskDetailsId === task.id}
@@ -2395,6 +2349,58 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
         </Card>
 
+        <Dialog
+          open={showAddDialog}
+          onOpenChange={(open) => {
+            if (!open) {
+              cancelDraftTask(draftTaskIdRef.current);
+            }
+          }}
+        >
+          <DialogContent
+            className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 p-4 text-sm text-[#ECECF3] shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            {modalTask ? (
+              <TaskEditor
+                title={newTaskName}
+                onTitleChange={(value) => {
+                  setNewTaskName(value);
+                  if (modalTaskId) {
+                    updateTask(modalTaskId, { name: value.trim() || '(Titre)' });
+                  }
+                }}
+                titlePlaceholder="Ajouter un titre"
+                date={selectedDate}
+                onDateChange={(value) => {
+                  setSelectedDate(value);
+                  if (modalTaskId) {
+                    updateTask(modalTaskId, { date: value || undefined });
+                  }
+                }}
+                time={selectedTime}
+                onTimeChange={(value) => {
+                  setSelectedTime(value);
+                  if (modalTaskId) {
+                    updateTask(modalTaskId, { time: value || undefined });
+                  }
+                }}
+                selectedColor={selectedColor}
+                colors={TASK_COLORS}
+                onColorChange={(value) => {
+                  setSelectedColor(value);
+                  if (modalTaskId) {
+                    updateTask(modalTaskId, { color: value });
+                  }
+                }}
+                onClose={() => {
+                  cancelDraftTask(draftTaskIdRef.current);
+                }}
+                onSave={saveTask}
+              />
+            ) : null}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
