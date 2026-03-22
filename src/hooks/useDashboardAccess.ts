@@ -1,0 +1,42 @@
+import { useEffect, useMemo, useState } from 'react';
+import type { Location } from 'react-router-dom';
+
+import { DASHBOARD_GUEST_ACCESS_KEY } from '../lib/dashboard';
+
+type UseDashboardAccessParams = {
+  userId?: string;
+  loading: boolean;
+  location: Location;
+};
+
+export function useDashboardAccess({ userId, loading, location }: UseDashboardAccessParams) {
+  const [hasGuestAccess, setHasGuestAccess] = useState(false);
+
+  useEffect(() => {
+    if (userId) {
+      setHasGuestAccess(false);
+      window.localStorage.removeItem(DASHBOARD_GUEST_ACCESS_KEY);
+      return;
+    }
+
+    setHasGuestAccess(window.localStorage.getItem(DASHBOARD_GUEST_ACCESS_KEY) === 'true');
+  }, [userId]);
+
+  const requestedAuthMode = useMemo(
+    () => ((location.state as { authMode?: 'signup' | 'login' } | null)?.authMode ?? null) as 'signup' | 'login' | null,
+    [location.state]
+  );
+
+  const shouldShowDashboardAuthGate = !loading && !userId && !hasGuestAccess;
+
+  const enableGuestAccess = () => {
+    window.localStorage.setItem(DASHBOARD_GUEST_ACCESS_KEY, 'true');
+    setHasGuestAccess(true);
+  };
+
+  return {
+    requestedAuthMode,
+    shouldShowDashboardAuthGate,
+    enableGuestAccess,
+  };
+}
