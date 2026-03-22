@@ -98,171 +98,154 @@ export function DashboardAuthGate({
       </div>
 
       <div className="relative z-10 flex min-h-screen items-center justify-center p-4 md:p-8">
-        <div className="w-full max-w-4xl rounded-[36px] border border-white/10 bg-[linear-gradient(135deg,rgba(11,13,18,0.96),rgba(60,13,48,0.78),rgba(190,46,88,0.68))] px-6 py-8 text-white shadow-[0_32px_90px_rgba(0,0,0,0.55)] md:px-10 md:py-10">
-          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-            <div className="space-y-5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 py-1 text-xs tracking-[0.2em] text-white/72 uppercase">
-                <Sparkles className="h-3.5 w-3.5" />
-                Itineris
-              </div>
-              <div className="space-y-3">
-                <h1 className="max-w-[12ch] text-4xl font-semibold tracking-tight text-white md:text-6xl">
-                  Let&apos;s get more done
-                </h1>
-                <p className="max-w-xl text-base leading-7 text-white/76 md:text-lg">
-                  Sauvegarde ton planning, tes sessions et tes progres. Ou continue en invite si tu veux tester avant.
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,17,25,0.88),rgba(35,18,38,0.72))] p-6 shadow-[0_24px_70px_rgba(0,0,0,0.35)] md:p-8">
-              {mode === 'choice' ? (
-                <div className="space-y-5">
-                  <div className="space-y-2">
-                    <h2 className="text-3xl font-semibold text-white">Entre dans ton espace</h2>
-                    <p className="text-sm leading-6 text-white/70">
-                      Crée un compte pour synchroniser partout, ou continue sans compte pour utiliser l&apos;app en local.
-                    </p>
-                  </div>
-
-                  <div className="grid gap-3">
-                    <Button
-                      onClick={() => setMode('signup')}
-                      className="h-14 rounded-2xl bg-[#6A39FF] text-base text-white hover:bg-[#5D31E4]"
-                    >
-                      Créer un compte
-                    </Button>
-                    <Button
-                      onClick={onContinueWithoutAccount}
-                      className="h-14 rounded-2xl bg-[#272846] text-base text-white hover:bg-[#303257]"
-                    >
-                      Continuer sans compte
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-
-                  <div className="text-sm text-white/78">
-                    Tu as deja un compte ?{' '}
-                    <button type="button" onClick={() => setMode('login')} className="underline underline-offset-4">
-                      Se connecter
-                    </button>
-                  </div>
+        <div className="w-full max-w-[42rem] rounded-[38px] border border-white/10 bg-[linear-gradient(135deg,rgba(16,13,26,0.96),rgba(76,16,58,0.72),rgba(221,73,102,0.64))] px-6 py-8 text-white shadow-[0_32px_90px_rgba(0,0,0,0.55)] md:min-h-[42rem] md:px-12 md:py-10">
+          <div className="mx-auto flex h-full max-w-[34rem] flex-col justify-center">
+            {mode === 'choice' ? (
+              <div className="space-y-8 text-center">
+                <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 py-1 text-xs tracking-[0.2em] text-white/72 uppercase">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Itineris
                 </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="space-y-2">
-                    <div className="text-sm text-white/56">
-                      {mode === 'signup' ? 'Créer un compte' : mode === 'reset' ? 'Réinitialisation' : 'Connexion'}
-                    </div>
-                    <h2 className="text-3xl font-semibold text-white">
-                      {mode === 'signup' ? 'Sauvegarde tes progrès' : mode === 'reset' ? 'Récupère ton accès' : 'Bon retour'}
-                    </h2>
-                    <p className="text-sm leading-6 text-white/70">
-                      {mode === 'reset'
-                        ? 'Entre ton email et on t’enverra un lien pour définir un nouveau mot de passe.'
-                        : mode === 'signup'
-                        ? 'Ton dashboard sera synchronisé et disponible sur tous tes appareils.'
-                        : 'Connecte-toi pour retrouver ton calendrier, ton minuteur et ton historique.'}
-                    </p>
-                  </div>
+                <div className="space-y-4">
+                  <h1 className="text-6xl font-semibold tracking-tight text-white md:text-7xl">Itineris</h1>
+                  <p className="text-xl text-white/84 md:text-2xl">Votre chemin vers la réussite</p>
+                </div>
+                <div className="grid gap-4 pt-3">
+                  <Button
+                    onClick={() => setMode('signup')}
+                    className="h-16 rounded-[26px] bg-[#6A39FF] text-xl text-white hover:bg-[#5D31E4]"
+                  >
+                    Créer un compte
+                  </Button>
+                  <Button
+                    onClick={onContinueWithoutAccount}
+                    className="h-16 rounded-[26px] bg-[#2b2d56] text-xl text-white hover:bg-[#333663]"
+                  >
+                    Continuer sans compte
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+                </div>
+                <div className="text-lg text-white/80">
+                  Tu as deja un compte ?{' '}
+                  <button type="button" onClick={() => setMode('login')} className="underline underline-offset-4">
+                    Se connecter
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-7 text-center">
+                <div className="space-y-4">
+                  <h1 className="text-6xl font-semibold tracking-tight text-white md:text-7xl">Itineris</h1>
+                  <p className="text-xl text-white/84 md:text-2xl">
+                    {mode === 'reset' ? 'Récupère l’accès à ton compte' : 'Votre chemin vers la réussite'}
+                  </p>
+                </div>
 
-                  <div className="space-y-4">
+                <div className="space-y-6 pt-4 text-left">
+                  {mode === 'signup' ? (
                     <div className="relative">
-                      <Mail className="absolute left-0 top-1/2 h-5 w-5 -translate-y-1/2 text-white/48" />
                       <Input
-                        type="email"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                        placeholder="name@example.com"
-                        className="h-12 rounded-none border-0 border-b border-white/35 bg-transparent pl-8 pr-0 text-base text-white placeholder:text-white/40 focus-visible:ring-0"
-                        disabled={isSubmitting}
-                        required
+                        value=""
+                        readOnly
+                        placeholder="Prénom"
+                        className="h-14 rounded-none border-0 border-b border-white/42 bg-transparent px-0 text-[2.1rem] leading-none text-white placeholder:text-white/46 focus-visible:ring-0"
+                        tabIndex={-1}
                       />
-                    </div>
-
-                    {mode !== 'reset' ? (
-                      <div className="relative">
-                        <Lock className="absolute left-0 top-1/2 h-5 w-5 -translate-y-1/2 text-white/48" />
-                        <Input
-                          type={showPassword ? 'text' : 'password'}
-                          value={password}
-                          onChange={(event) => setPassword(event.target.value)}
-                          placeholder={mode === 'signup' ? 'Créer un mot de passe' : 'Mot de passe'}
-                          className="h-12 rounded-none border-0 border-b border-white/35 bg-transparent pl-8 pr-10 text-base text-white placeholder:text-white/40 focus-visible:ring-0"
-                          disabled={isSubmitting}
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          className="absolute right-0 top-1/2 -translate-y-1/2 text-white/55 hover:text-white"
-                          disabled={isSubmitting}
-                        >
-                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                        </button>
-                      </div>
-                    ) : null}
-                  </div>
-
-                  {error ? <div className="rounded-2xl bg-[#2A1B1B] px-4 py-3 text-sm text-[#FF9A7B]">{error}</div> : null}
-                  {message ? (
-                    <div className="rounded-2xl border border-[#29425B] bg-[#182332] px-4 py-3 text-sm text-[#9DD0FF]">
-                      {message}
                     </div>
                   ) : null}
 
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Button
-                      type="submit"
+                  <div className="relative">
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="Courriel"
+                      className="h-14 rounded-none border-0 border-b border-white/42 bg-transparent px-0 text-[2.1rem] leading-none text-white placeholder:text-white/46 focus-visible:ring-0"
                       disabled={isSubmitting}
-                      className="h-14 rounded-2xl bg-[#6A39FF] text-base text-white hover:bg-[#5D31E4]"
-                    >
-                      {isSubmitting
-                        ? 'Chargement...'
-                        : mode === 'signup'
-                          ? 'Continuer'
-                          : mode === 'reset'
-                            ? 'Envoyer le lien'
-                            : 'Se connecter'}
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={onContinueWithoutAccount}
-                      className="h-14 rounded-2xl bg-[#272846] text-base text-white hover:bg-[#303257]"
-                    >
-                      Continuer sans compte
-                    </Button>
+                      required
+                    />
+                    <Mail className="pointer-events-none absolute right-0 top-1/2 h-5 w-5 -translate-y-1/2 text-white/0" />
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-white/74">
-                    <button
-                      type="button"
-                      onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')}
-                      className="underline underline-offset-4"
-                    >
-                      {mode === 'signup' ? 'J’ai déjà un compte' : 'Créer un compte'}
-                    </button>
-                    {mode === 'reset' ? (
+                  {mode !== 'reset' ? (
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        placeholder="Mot de passe"
+                        className="h-14 rounded-none border-0 border-b border-white/42 bg-transparent px-0 pr-12 text-[2.1rem] leading-none text-white placeholder:text-white/46 focus-visible:ring-0"
+                        disabled={isSubmitting}
+                        required
+                      />
                       <button
                         type="button"
-                        onClick={() => setMode('login')}
-                        className="underline underline-offset-4 text-white/60 hover:text-white"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 text-white/88 hover:text-white"
+                        disabled={isSubmitting}
                       >
-                        Retour à la connexion
+                        {showPassword ? <EyeOff className="h-7 w-7" /> : <Eye className="h-7 w-7" />}
                       </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setMode('reset')}
-                        className="underline underline-offset-4 text-white/60 hover:text-white"
-                      >
-                        Mot de passe oublié ?
-                      </button>
-                    )}
+                    </div>
+                  ) : null}
+                </div>
+
+                {error ? <div className="rounded-2xl bg-[#2A1B1B] px-4 py-3 text-sm text-[#FF9A7B]">{error}</div> : null}
+                {message ? (
+                  <div className="rounded-2xl border border-[#29425B] bg-[#182332] px-4 py-3 text-sm text-[#9DD0FF]">
+                    {message}
                   </div>
-                </form>
-              )}
-            </div>
+                ) : null}
+
+                <div className="flex items-center justify-center gap-3 pt-1 text-lg text-white/78">
+                  <button
+                    type="button"
+                    onClick={() => (mode === 'reset' ? setMode('login') : setMode('reset'))}
+                    className="inline-flex items-center gap-2 underline underline-offset-4"
+                  >
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#6A39FF] text-base font-semibold text-white">
+                      ✓
+                    </span>
+                    {mode === 'reset' ? 'Retour à la connexion' : 'Mot de passe oublié'}
+                  </button>
+                </div>
+
+                <div className="grid gap-4 pt-2 sm:grid-cols-2">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="h-16 rounded-[26px] bg-[#6A39FF] text-xl text-white hover:bg-[#5D31E4]"
+                  >
+                    {isSubmitting
+                      ? 'Chargement...'
+                      : mode === 'signup'
+                        ? 'Continuer'
+                        : mode === 'reset'
+                          ? 'Envoyer le lien'
+                          : 'Se connecter'}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={onContinueWithoutAccount}
+                    className="h-16 rounded-[26px] bg-[#2b2d56] text-xl text-white hover:bg-[#333663]"
+                  >
+                    Continuer sans compte
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+                </div>
+
+                <div className="text-lg text-white/80">
+                  {mode === 'signup' ? 'Tu as déjà un compte ? ' : 'Pas encore de compte ? '}
+                  <button
+                    type="button"
+                    onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')}
+                    className="underline underline-offset-4"
+                  >
+                    {mode === 'signup' ? 'Se connecter' : 'Créer un compte'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </div>
