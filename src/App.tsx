@@ -132,8 +132,8 @@ export default function App() {
               <Navigate to="/tableaudebord" replace />
             ) : (
               <Bienvenue
-                onGetStarted={() => navigate('/login', { state: { mode: 'signup' } })}
-                onLogin={() => navigate('/login')}
+                onGetStarted={() => navigate('/tableaudebord', { state: { authMode: 'signup' } })}
+                onLogin={() => navigate('/tableaudebord', { state: { authMode: 'login' } })}
                 onContinueWithoutAccount={() => navigate('/tableaudebord')}
               />
             )

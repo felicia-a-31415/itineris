@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Calendar,
   ChevronLeft,
@@ -8,10 +8,7 @@ import {
   Info,
   List,
   LogOut,
-  Pause,
   Pencil,
-  Play,
-  RotateCcw,
   Settings,
   Sparkles,
   Trash2,
@@ -20,12 +17,13 @@ import {
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
-import { Dialog, DialogContent } from '../ui/dialog';
 import { Input } from '../ui/input';
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Switch } from '../ui/switch';
-import { TaskEditor } from '../components/TaskModal';
+import { DashboardAuthGate } from '../components/DashboardAuthGate';
+import { TaskCreationDialog } from '../components/dashboard/TaskCreationDialog';
+import { TimerCard } from '../components/dashboard/TimerCard';
 import alarmSound from '../assets/Gentle-little-bell-ringing-sound-effect.mp3';
 import { useAuth } from '../lib/auth';
 import {
@@ -81,6 +79,7 @@ type ChatAction = ChatTaskAction | ChatDeleteTaskAction | ChatUpdateTaskAction |
 
 const TASK_COLORS = ['#6B9AC4', '#4169E1', '#8B8680', '#E16941', '#41E169', '#9B59B6', '#F39C12', '#E91E63'];
 const REMOTE_DASHBOARD_SAVE_INTERVAL_MS = 30_000;
+const DASHBOARD_GUEST_ACCESS_KEY = 'itineris.dashboard.guest-access';
 
 const normalizeFrenchText = (value: string) =>
   value
@@ -452,6 +451,7 @@ const renderFormattedMessage = (content: string) => {
 
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signOut, user, loading } = useAuth();
   const [weekOffset, setWeekOffset] = useState(0);
   const weekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
@@ -511,12 +511,28 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [messages, setMessages] = useState<DashboardChatMessage[]>(DEFAULT_CHAT_MESSAGES);
   const [chatInput, setChatInput] = useState('');
   const [isSendingChat, setIsSendingChat] = useState(false);
+  const [hasGuestAccess, setHasGuestAccess] = useState(false);
   const pendingRemoteSaveRef = useRef<DashboardData | null>(null);
   const pendingRemoteSaveUserIdRef = useRef<string | null>(null);
   const timerStateHydratedRef = useRef(false);
 
   const safeMinutes = Math.max(5, timerMinutes || 5);
   const ringColor = TIMER_MODES[timerMode].color;
+  const requestedAuthMode = ((location.state as { authMode?: 'signup' | 'login' } | null)?.authMode ?? null) as
+    | 'signup'
+    | 'login'
+    | null;
+  const shouldShowDashboardAuthGate = !loading && !user && !hasGuestAccess;
+
+  useEffect(() => {
+    if (user) {
+      setHasGuestAccess(false);
+      window.localStorage.removeItem(DASHBOARD_GUEST_ACCESS_KEY);
+      return;
+    }
+
+    setHasGuestAccess(window.localStorage.getItem(DASHBOARD_GUEST_ACCESS_KEY) === 'true');
+  }, [user]);
   const currentWeekKey = currentWeekStart;
   const weekTotal = (studyData[currentWeekKey] || []).reduce((sum, n) => sum + n, 0);
 
@@ -1748,198 +1764,62 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         ) : null}
 
         <div className="grid gap-6 items-stretch md:grid-cols-2">
-          {/* Pomodoro */}
-          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
-            <div className="mb-2">
-              <p className="text-sm text-[#A9ACBA]">Minuteur</p>
-            </div>
-            <div className="grid gap-6 sm:grid-cols-[1.1fr,1fr] items-start">
-              <div className="flex flex-col items-center justify-start gap-7 pt-2">
-                <div className="flex flex-wrap justify-center gap-3.5">
-                  {(
-                    [
-                      { key: 'focus', label: 'Focus' },
-                      { key: 'short', label: 'Courte pause' },
-                      { key: 'long', label: 'Longue pause' },
-                    ] as const
-                  ).map(({ key, label }) => {
-                    const isActive = timerMode === key;
-                    const color = TIMER_MODES[key].color;
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => {
-                          const next = TIMER_MODES[key];
-                          setTimerMode(key);
-                          setIsRunning(false);
-                          setIsEditingTimer(false);
-                          setTimerMinutes(next.minutes);
-                          setTimeLeft(next.minutes * 60);
-                          setEditingTimerValue(next.minutes.toString());
-                        }}
-                        className="px-3 py-2 rounded-xl text-sm font-semibold transition shadow-sm border"
-                        style={
-                          isActive
-                            ? {
-                                backgroundColor: color,
-                                color: '#0B0D10',
-                                borderColor: color,
-                                boxShadow: `0 0 12px ${color}80`,
-                              }
-                            : {
-                                backgroundColor: '#1A1D26',
-                                color: '#ECECF3',
-                                borderColor: '#1F2230',
-                              }
-                        }
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div
-                  className="relative w-48 h-48 rounded-full flex items-center justify-center"
-                  style={{
-                    background: `conic-gradient(${ringColor} ${progress * 3.6}deg, #1F2230 ${progress * 3.6}deg)`,
-                    boxShadow: `0 0 12px ${ringColor}b3, 0 0 32px ${ringColor}99, 0 0 64px ${ringColor}66`,
-                  }}
-                >
-                  <div className="absolute inset-3 bg-[#0B0D10] rounded-full shadow-inner flex flex-col items-center justify-center">
-                    <span className="text-3xl font-semibold text-[#ECECF3]">{formatTime(timeLeft)}</span>
-                    <span className="mt-1 text-xs text-[#A9ACBA]">{timerMinutes} min</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex h-full flex-col justify-end gap-6 pt-6">
-                <div className="flex items-center gap-3">
-                  <Button
-                    onClick={() => {
-                      setIsRunning((running) => {
-                        if (running) {
-                          lastTickRef.current = null;
-                          return false;
-                        }
-                        lastTickRef.current = performance.now();
-                        return true;
-                      });
-                    }}
-                    className="h-11 min-w-[124px] bg-[#4169E1] px-4 hover:bg-[#3557C1] text-white rounded-2xl"
-                  >
-                    {isRunning ? (
-                      <>
-                        <Pause className="w-4 h-4 mr-2" />
-                        Pause
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-4 h-4 mr-2" />
-                        {isInitialTime ? 'Lancer' : 'Relancer'}
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setIsRunning(false);
-                      lastTickRef.current = null;
-                      setTimeLeft(safeMinutes * 60);
-                    }}
-                    variant="outline"
-                    className="h-11 w-11 rounded-2xl border-[#1F2230] bg-[#10131B] p-0 text-[#ECECF3] hover:bg-[#161924]"
-                    aria-label="Réinitialiser le minuteur"
-                    title="Réinitialiser le minuteur"
-                  >
-                    <RotateCcw className="h-5 w-5" />
-                  </Button>
-                </div>
-
-                <div className="rounded-2xl border border-[#1F2230] bg-[#10131B] px-4 py-4 text-sm text-[#A9ACBA]">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <span className="text-sm text-[#A9ACBA]">Durée du minuteur</span>
-                    <span className="text-xs text-[#7F869A]">Entre 5 et 120 min</span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {TIMER_PRESET_MINUTES.map((minutes) => {
-                      const isActive = safeMinutes === minutes;
-                      return (
-                        <button
-                          key={minutes}
-                          type="button"
-                          onClick={() => setCustomTimerMinutes(minutes)}
-                          className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
-                            isActive
-                              ? 'border-[#4169E1] bg-[#4169E1] text-white'
-                              : 'border-[#2B3550] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26]'
-                          }`}
-                        >
-                          {minutes} min
-                        </button>
-                      );
-                    })}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsEditingTimer(true);
-                        setEditingTimerValue(timerMinutes.toString());
-                      }}
-                      className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
-                        isEditingTimer || !TIMER_PRESET_MINUTES.includes(safeMinutes as (typeof TIMER_PRESET_MINUTES)[number])
-                          ? 'border-[#4169E1] bg-[#4169E1] text-white'
-                          : 'border-[#2B3550] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26]'
-                      }`}
-                    >
-                      Custom
-                    </button>
-                  </div>
-
-                  {isEditingTimer ? (
-                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                      <Input
-                        type="number"
-                        min={5}
-                        max={120}
-                        step={5}
-                        value={editingTimerValue}
-                        onFocus={() => {
-                          setIsEditingTimer(true);
-                          if (!editingTimerValue) {
-                            setEditingTimerValue(timerMinutes.toString());
-                          }
-                        }}
-                        onChange={(e) => setEditingTimerValue(e.target.value)}
-                        onBlur={() => setIsEditingTimer(false)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            commitTimerEdit();
-                          }
-                          if (e.key === 'Escape') {
-                            setIsEditingTimer(false);
-                            setEditingTimerValue(timerMinutes.toString());
-                          }
-                        }}
-                        className="h-10 rounded-xl border-[#1F2230] bg-[#161924] text-[#ECECF3] sm:max-w-[150px]"
-                        placeholder={`${timerMinutes}`}
-                        autoFocus
-                      />
-                      <Button
-                        type="button"
-                        onClick={commitTimerEdit}
-                        variant="outline"
-                        className="h-10 rounded-xl border-[#2B3550] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26]"
-                      >
-                        Appliquer
-                      </Button>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-          </Card>
+          <TimerCard
+            timerMode={timerMode}
+            timerMinutes={timerMinutes}
+            timeLeft={timeLeft}
+            progress={progress}
+            ringColor={ringColor}
+            isRunning={isRunning}
+            isInitialTime={isInitialTime}
+            safeMinutes={safeMinutes}
+            isEditingTimer={isEditingTimer}
+            editingTimerValue={editingTimerValue}
+            presetMinutes={TIMER_PRESET_MINUTES}
+            formatTime={formatTime}
+            onModeSelect={(mode) => {
+              const next = TIMER_MODES[mode];
+              setTimerMode(mode);
+              setIsRunning(false);
+              setIsEditingTimer(false);
+              setTimerMinutes(next.minutes);
+              setTimeLeft(next.minutes * 60);
+              setEditingTimerValue(next.minutes.toString());
+            }}
+            onToggleRunning={() => {
+              setIsRunning((running) => {
+                if (running) {
+                  lastTickRef.current = null;
+                  return false;
+                }
+                lastTickRef.current = performance.now();
+                return true;
+              });
+            }}
+            onReset={() => {
+              setIsRunning(false);
+              lastTickRef.current = null;
+              setTimeLeft(safeMinutes * 60);
+            }}
+            onPresetSelect={setCustomTimerMinutes}
+            onCustomClick={() => {
+              setIsEditingTimer(true);
+              setEditingTimerValue(timerMinutes.toString());
+            }}
+            onEditingValueChange={setEditingTimerValue}
+            onEditingFocus={() => {
+              setIsEditingTimer(true);
+              if (!editingTimerValue) {
+                setEditingTimerValue(timerMinutes.toString());
+              }
+            }}
+            onEditingBlur={() => setIsEditingTimer(false)}
+            onEditingCancel={() => {
+              setIsEditingTimer(false);
+              setEditingTimerValue(timerMinutes.toString());
+            }}
+            onEditingCommit={commitTimerEdit}
+          />
 
           {/* Chat IA */}
           <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full min-h-0 flex flex-col">
@@ -2349,58 +2229,56 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
         </Card>
 
-        <Dialog
-          open={showAddDialog}
+        <TaskCreationDialog
+          open={showAddDialog && !!modalTask}
+          title={newTaskName}
+          date={selectedDate}
+          time={selectedTime}
+          selectedColor={selectedColor}
+          colors={TASK_COLORS}
           onOpenChange={(open) => {
             if (!open) {
               cancelDraftTask(draftTaskIdRef.current);
             }
           }}
-        >
-          <DialogContent
-            className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 p-4 text-sm text-[#ECECF3] shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
-            onOpenAutoFocus={(e) => e.preventDefault()}
-          >
-            {modalTask ? (
-              <TaskEditor
-                title={newTaskName}
-                onTitleChange={(value) => {
-                  setNewTaskName(value);
-                  if (modalTaskId) {
-                    updateTask(modalTaskId, { name: value.trim() || '(Titre)' });
-                  }
-                }}
-                titlePlaceholder="Ajouter un titre"
-                date={selectedDate}
-                onDateChange={(value) => {
-                  setSelectedDate(value);
-                  if (modalTaskId) {
-                    updateTask(modalTaskId, { date: value || undefined });
-                  }
-                }}
-                time={selectedTime}
-                onTimeChange={(value) => {
-                  setSelectedTime(value);
-                  if (modalTaskId) {
-                    updateTask(modalTaskId, { time: value || undefined });
-                  }
-                }}
-                selectedColor={selectedColor}
-                colors={TASK_COLORS}
-                onColorChange={(value) => {
-                  setSelectedColor(value);
-                  if (modalTaskId) {
-                    updateTask(modalTaskId, { color: value });
-                  }
-                }}
-                onClose={() => {
-                  cancelDraftTask(draftTaskIdRef.current);
-                }}
-                onSave={saveTask}
-              />
-            ) : null}
-          </DialogContent>
-        </Dialog>
+          onTitleChange={(value) => {
+            setNewTaskName(value);
+            if (modalTaskId) {
+              updateTask(modalTaskId, { name: value.trim() || '(Titre)' });
+            }
+          }}
+          onDateChange={(value) => {
+            setSelectedDate(value);
+            if (modalTaskId) {
+              updateTask(modalTaskId, { date: value || undefined });
+            }
+          }}
+          onTimeChange={(value) => {
+            setSelectedTime(value);
+            if (modalTaskId) {
+              updateTask(modalTaskId, { time: value || undefined });
+            }
+          }}
+          onColorChange={(value) => {
+            setSelectedColor(value);
+            if (modalTaskId) {
+              updateTask(modalTaskId, { color: value });
+            }
+          }}
+          onClose={() => {
+            cancelDraftTask(draftTaskIdRef.current);
+          }}
+          onSave={saveTask}
+        />
+
+        <DashboardAuthGate
+          open={shouldShowDashboardAuthGate}
+          initialMode={requestedAuthMode}
+          onContinueWithoutAccount={() => {
+            window.localStorage.setItem(DASHBOARD_GUEST_ACCESS_KEY, 'true');
+            setHasGuestAccess(true);
+          }}
+        />
       </div>
     </div>
   );
