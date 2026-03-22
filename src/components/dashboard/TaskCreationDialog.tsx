@@ -1,5 +1,5 @@
 import { Dialog, DialogContent } from '../../ui/dialog';
-import { TaskEditor } from '../TaskModal';
+import { TaskEditor } from './TaskModal';
 
 type TaskCreationDialogProps = {
   open: boolean;

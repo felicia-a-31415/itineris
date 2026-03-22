@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Eye, EyeOff, Lock, Mail, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../lib/auth';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
+import { useAuth } from '../../lib/auth';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
 
 type AuthMode = 'choice' | 'signup' | 'login';
 

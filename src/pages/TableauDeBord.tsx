@@ -4,66 +4,28 @@ import {
   Flame,
   Info,
   LogOut,
-  Pencil,
   Settings,
-  Trash2,
 } from 'lucide-react';
 import { Button } from '../ui/button';
-import { Card } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
-import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Switch } from '../ui/switch';
-import { DashboardAuthGate } from '../components/DashboardAuthGate';
+import { Popover, PopoverAnchor, PopoverTrigger } from '../ui/popover';
+import { DashboardAuthGate } from '../components/dashboard/DashboardAuthGate';
 import { AgendaCard } from '../components/dashboard/AgendaCard';
 import { ChatCard } from '../components/dashboard/ChatCard';
+import { TaskDetailsPopoverContent } from '../components/dashboard/TaskDetailsPopoverContent';
 import { StudyStatsCard } from '../components/dashboard/StudyStatsCard';
 import { TaskCreationDialog } from '../components/dashboard/TaskCreationDialog';
 import { TimerCard } from '../components/dashboard/TimerCard';
 import alarmSound from '../assets/Gentle-little-bell-ringing-sound-effect.mp3';
 import { useAuth } from '../lib/auth';
+import { useDashboardChat } from '../hooks/useDashboardChat';
+import { useDashboardPersistence } from '../hooks/useDashboardPersistence';
+import { useDashboardTasks } from '../hooks/useDashboardTasks';
 import { useDashboardTimer } from '../hooks/useDashboardTimer';
-import {
-  clearUserData,
-  type DashboardData,
-  type DashboardChatMessage,
-  type DashboardTimerState,
-  loadDashboardDataFromLocal,
-  loadDashboardDataFromSupabase,
-  saveDashboardDataToLocal,
-  saveDashboardDataToSupabase,
-  type DashboardTask,
-} from '../lib/storage';
+import { clearUserData, type DashboardChatMessage, type DashboardTask } from '../lib/storage';
 
 type Task = DashboardTask;
-type ChatTaskAction = {
-  tool?: 'add_task';
-  name?: string;
-  date?: string;
-  time?: string;
-  urgent?: boolean;
-  color?: string;
-};
-
-type ChatDeleteTaskAction = {
-  tool?: 'delete_task';
-  target_name?: string;
-  target_date?: string;
-  target_time?: string;
-};
-
-type ChatUpdateTaskAction = {
-  tool?: 'update_task';
-  target_name?: string;
-  target_date?: string;
-  target_time?: string;
-  new_name?: string;
-  date?: string;
-  time?: string;
-  urgent?: boolean;
-  color?: string;
-  completed?: boolean;
-};
 
 type ChatTimerAction = {
   tool?: 'set_timer';
@@ -71,8 +33,6 @@ type ChatTimerAction = {
   mode?: keyof typeof TIMER_MODES;
   minutes?: number;
 };
-
-type ChatAction = ChatTaskAction | ChatDeleteTaskAction | ChatUpdateTaskAction | ChatTimerAction;
 
 const TASK_COLORS = ['#6B9AC4', '#4169E1', '#8B8680', '#E16941', '#41E169', '#9B59B6', '#F39C12', '#E91E63'];
 const REMOTE_DASHBOARD_SAVE_INTERVAL_MS = 30_000;
@@ -463,45 +423,74 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     return base;
   }, [monthOffset]);
   const monthGridDates = useMemo(() => getMonthGridDates(monthAnchor), [monthAnchor]);
-
-  const [tasks, setTasks] = useState<Task[]>(() => createDefaultTasks());
+  const {
+    tasks,
+    setTasks,
+    uploadNotice,
+    showAddDialog,
+    setShowAddDialog,
+    newTaskName,
+    setNewTaskName,
+    selectedColor,
+    setSelectedColor,
+    selectedDate,
+    setSelectedDate,
+    selectedTime,
+    setSelectedTime,
+    infoTaskId,
+    setInfoTaskId,
+    editingNameId,
+    setEditingNameId,
+    editingNameValue,
+    setEditingNameValue,
+    modalTaskId,
+    setModalTaskId,
+    draftTaskId,
+    setDraftTaskId,
+    draftTaskIdRef,
+    taskDetailsId,
+    setTaskDetailsId,
+    ignoreCalendarClickUntilRef,
+    deleteCompletedMenuOpen,
+    setDeleteCompletedMenuOpen,
+    taskListItemRefs,
+    taskListPositionsRef,
+    pendingTaskMotionRef,
+    showCompletedTasks,
+    setShowCompletedTasks,
+    cancelDraftTask,
+    updateTask,
+    startEditingName,
+    cancelEditingName,
+    commitEditingName,
+    saveTask,
+    createTaskForDate,
+    toggleTask,
+    deleteCompletedTasks,
+    handleAgendaImageUpload,
+    getTasksForDate,
+    agendaTasks,
+    completedTasksCount,
+    visibleTasks,
+    modalTask,
+  } = useDashboardTasks({
+    taskColors: TASK_COLORS,
+    formatDate,
+    weekDates,
+    createDefaultTasks,
+  });
 
   const [sessionsByDay, setSessionsByDay] = useState<Record<string, number>>(() => createDefaultSessionsByDay());
   const [studyData, setStudyData] = useState<Record<string, number[]>>(() =>
     createDefaultStudyData(currentWeekStart)
   );
   const [streakDays, setStreakDays] = useState(1);
-  const [uploadNotice, setUploadNotice] = useState<string | null>(null);
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [newTaskName, setNewTaskName] = useState('');
-  const [selectedColor, setSelectedColor] = useState(TASK_COLORS[0]);
-  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
-  const [selectedTime, setSelectedTime] = useState('');
-  const [infoTaskId, setInfoTaskId] = useState<string | null>(null);
-  const [editingNameId, setEditingNameId] = useState<string | null>(null);
-  const [editingNameValue, setEditingNameValue] = useState('');
-  const [modalTaskId, setModalTaskId] = useState<string | null>(null);
-  const [draftTaskId, setDraftTaskId] = useState<string | null>(null);
-  const draftTaskIdRef = useRef<string | null>(null);
-  const [taskDetailsId, setTaskDetailsId] = useState<string | null>(null);
-  const ignoreCalendarClickUntilRef = useRef(0);
-  const [deleteCompletedMenuOpen, setDeleteCompletedMenuOpen] = useState(false);
-  const taskListItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const taskListPositionsRef = useRef<Record<string, number>>({});
-  const pendingTaskMotionRef = useRef<{ id: string; direction: 'down' | 'up' } | null>(null);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
-  const [showCompletedTasks, setShowCompletedTasks] = useState(true);
   const [streakBump, setStreakBump] = useState(false);
   const prevStreakRef = useRef<number | null>(null);
   const hasInitializedStreakRef = useRef(false);
   const hasHydratedStreakRef = useRef(false);
-  const [isDashboardHydrated, setIsDashboardHydrated] = useState(false);
-  const [messages, setMessages] = useState<DashboardChatMessage[]>(DEFAULT_CHAT_MESSAGES);
-  const [chatInput, setChatInput] = useState('');
-  const [isSendingChat, setIsSendingChat] = useState(false);
   const [hasGuestAccess, setHasGuestAccess] = useState(false);
-  const pendingRemoteSaveRef = useRef<DashboardData | null>(null);
-  const pendingRemoteSaveUserIdRef = useRef<string | null>(null);
   const requestedAuthMode = ((location.state as { authMode?: 'signup' | 'login' } | null)?.authMode ?? null) as
     | 'signup'
     | 'login'
@@ -542,6 +531,34 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setStudyData,
     setSessionsByDay,
   });
+  const {
+    messages,
+    setMessages,
+    chatInput,
+    setChatInput,
+    isSendingChat,
+    handleSendChat,
+  } = useDashboardChat({
+    defaultMessages: DEFAULT_CHAT_MESSAGES,
+    tasks,
+    sessionsByDay,
+    sessionsCompletedToday: sessionsByDay[formatDate(new Date())] ?? 0,
+    timerContext: {
+      mode: timerMode,
+      minutes: safeMinutes,
+      timeLeft,
+      isRunning,
+    },
+    currentDateContext: buildCurrentDateContext(),
+    taskColors: TASK_COLORS,
+    formatDate,
+    isValidTaskDate,
+    isValidTaskTime,
+    findMatchingTaskIndex,
+    parseTimerActionFromMessage,
+    applyChatTimerAction,
+    setTasks,
+  });
 
   useEffect(() => {
     if (user) {
@@ -554,105 +571,27 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   }, [user]);
   const currentWeekKey = currentWeekStart;
   const weekTotal = (studyData[currentWeekKey] || []).reduce((sum, n) => sum + n, 0);
-
-  useEffect(() => {
-    let isMounted = true;
-    resetHydrationGuard();
-
-    const hydrateDashboardData = async () => {
-      if (loading) return;
-      const cached = loadDashboardDataFromLocal(user?.id);
-      if (cached && isMounted) {
-        if (Array.isArray(cached.tasks)) setTasks(cached.tasks);
-        if (cached.studyData && typeof cached.studyData === 'object') setStudyData(cached.studyData);
-        if (cached.sessionsByDay && typeof cached.sessionsByDay === 'object') setSessionsByDay(cached.sessionsByDay);
-        if (Array.isArray(cached.chatMessages) && cached.chatMessages.length > 0) {
-          setMessages(cached.chatMessages);
-        }
-        hydrateTimerState(cached.timerState);
-        setIsDashboardHydrated(true);
-        return;
-      }
-      if (!user) {
-        setTasks(createDefaultTasks());
-        setStudyData(createDefaultStudyData(currentWeekStart));
-        setSessionsByDay(createDefaultSessionsByDay());
-        setMessages(DEFAULT_CHAT_MESSAGES);
-        setIsDashboardHydrated(true);
-        return;
-      }
-
-      const remoteData = await loadDashboardDataFromSupabase(user.id);
-      if (!isMounted) return;
-
-      if (remoteData) {
-        setTasks(Array.isArray(remoteData.tasks) ? remoteData.tasks : createDefaultTasks());
-        setStudyData(
-          remoteData.studyData && typeof remoteData.studyData === 'object'
-            ? remoteData.studyData
-            : createDefaultStudyData(currentWeekStart)
-        );
-        setSessionsByDay(
-          remoteData.sessionsByDay && typeof remoteData.sessionsByDay === 'object'
-            ? remoteData.sessionsByDay
-            : createDefaultSessionsByDay()
-        );
-        setMessages(
-          Array.isArray(remoteData.chatMessages) && remoteData.chatMessages.length > 0
-            ? remoteData.chatMessages
-            : DEFAULT_CHAT_MESSAGES
-        );
-        hydrateTimerState(remoteData.timerState);
-        saveDashboardDataToLocal(user.id, remoteData);
-      }
-
-      setIsDashboardHydrated(true);
-    };
-
-    hydrateDashboardData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user, currentWeekStart, loading, resetHydrationGuard, hydrateTimerState]);
-
-  useEffect(() => {
-    if (loading || !isDashboardHydrated) return;
-    const payload = { tasks, studyData, sessionsByDay, chatMessages: messages, timerState: buildTimerState() };
-    saveDashboardDataToLocal(user?.id, payload);
-    if (user) {
-      pendingRemoteSaveRef.current = payload;
-      pendingRemoteSaveUserIdRef.current = user.id;
-    }
-  }, [user, tasks, studyData, sessionsByDay, messages, timerMode, safeMinutes, timeLeft, isRunning, isDashboardHydrated, loading]);
-
-  useEffect(() => {
-    if (loading || !isDashboardHydrated || !user) return;
-
-    const flushRemoteSave = () => {
-      const pendingPayload = pendingRemoteSaveRef.current;
-      const pendingUserId = pendingRemoteSaveUserIdRef.current;
-      if (!pendingPayload || !pendingUserId) return;
-
-      pendingRemoteSaveRef.current = null;
-      void saveDashboardDataToSupabase(pendingUserId, pendingPayload);
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        flushRemoteSave();
-      }
-    };
-
-    const intervalId = window.setInterval(flushRemoteSave, REMOTE_DASHBOARD_SAVE_INTERVAL_MS);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.clearInterval(intervalId);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      flushRemoteSave();
-    };
-  }, [user, isDashboardHydrated, loading]);
+  const { isDashboardHydrated } = useDashboardPersistence({
+    userId: user?.id,
+    loading,
+    currentWeekStart,
+    tasks,
+    setTasks,
+    studyData,
+    setStudyData,
+    sessionsByDay,
+    setSessionsByDay,
+    messages,
+    setMessages,
+    defaultMessages: DEFAULT_CHAT_MESSAGES,
+    createDefaultTasks,
+    createDefaultStudyData,
+    createDefaultSessionsByDay,
+    buildTimerState,
+    hydrateTimerState,
+    resetHydrationGuard,
+    remoteSaveIntervalMs: REMOTE_DASHBOARD_SAVE_INTERVAL_MS,
+  });
 
   useEffect(() => {
     if (!chatScrollRef.current) return;
@@ -713,19 +652,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     }
     return streak;
   };
-
-
-  const getTasksForDate = (date: string) => {
-    return tasks
-      .filter((task) => task.date === date)
-      .sort((a, b) => {
-        if (a.time && b.time) return a.time.localeCompare(b.time);
-        if (a.time) return -1;
-        if (b.time) return 1;
-        return 0;
-      });
-  };
-
   useEffect(() => {
     const updateStreak = () => {
       const nextStreak = computeStreakFromStudyData(studyData);
@@ -737,134 +663,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     return () => clearInterval(interval);
   }, [studyData]);
 
-  const resetTaskForm = () => {
-    setNewTaskName('');
-    setSelectedColor(TASK_COLORS[0]);
-    setSelectedDate(formatDate(new Date()));
-    setSelectedTime('');
-    setModalTaskId(null);
-    setDraftTaskId(null);
-    draftTaskIdRef.current = null;
-  };
-
-  const cancelDraftTask = (id?: string | null) => {
-    ignoreCalendarClickUntilRef.current = Date.now() + 250;
-    const targetId = id ?? draftTaskIdRef.current ?? draftTaskId;
-    if (targetId) {
-      setTasks((prev) => prev.filter((t) => t.id !== targetId));
-    }
-    setShowAddDialog(false);
-    resetTaskForm();
-  };
-
-  const updateTask = (id: string, updates: Partial<Task>) => {
-    setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, ...updates } : task)));
-  };
-
-  const startEditingName = (task: Task) => {
-    setEditingNameId(task.id);
-    setEditingNameValue(task.name || '');
-  };
-
-  const cancelEditingName = () => {
-    setEditingNameId(null);
-    setEditingNameValue('');
-  };
-
-  const commitEditingName = (id: string) => {
-    const nextName = editingNameValue.trim();
-    if (nextName) {
-      updateTask(id, { name: nextName });
-    }
-    cancelEditingName();
-  };
-
-  const saveTask = () => {
-    ignoreCalendarClickUntilRef.current = Date.now() + 250;
-    const effectiveId = modalTaskId ?? draftTaskIdRef.current ?? draftTaskId;
-    if (effectiveId) {
-      updateTask(effectiveId, {
-        name: newTaskName.trim() || '(Titre)',
-        date: selectedDate || undefined,
-        time: selectedTime || undefined,
-        color: selectedColor,
-      });
-      setShowAddDialog(false);
-      resetTaskForm();
-      return;
-    }
-    if (!newTaskName.trim()) return;
-
-    const newTask: Task = {
-      id: Date.now().toString(),
-      name: newTaskName.trim(),
-      completed: false,
-      color: selectedColor,
-      urgent: false,
-      date: selectedDate || undefined,
-      time: selectedTime || undefined,
-    };
-    setTasks((prev) => [...prev, newTask]);
-
-    setShowAddDialog(false);
-    resetTaskForm();
-  };
-
-  const modalTask = modalTaskId ? tasks.find((task) => task.id === modalTaskId) ?? null : null;
-
-  const toggleTask = (id: string) => {
-    const targetTask = tasks.find((task) => task.id === id);
-    if (targetTask) {
-      pendingTaskMotionRef.current = {
-        id,
-        direction: targetTask.completed ? 'up' : 'down',
-      };
-    }
-
-    setTasks((prev) =>
-      prev.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task))
-    );
-  };
-
-  const deleteCompletedTasks = (ageInMonths?: number) => {
-    const now = new Date();
-    const cutoff = ageInMonths
-      ? new Date(now.getFullYear(), now.getMonth() - ageInMonths, now.getDate())
-      : null;
-
-    setTasks((prev) =>
-      prev.filter((task) => {
-        if (!task.completed) return true;
-        if (!cutoff) return false;
-        if (!task.date) return true;
-
-        const taskDate = new Date(`${task.date}T00:00`);
-        return taskDate > cutoff;
-      })
-    );
-    setDeleteCompletedMenuOpen(false);
-  };
-
   const isToday = (date: Date) => {
     const today = new Date();
     return date.toDateString() === today.toDateString();
-  };
-
-  const handleAgendaImageUpload = (file?: File) => {
-    if (!file) return;
-    const extracted: Task[] = [
-      {
-        id: `photo-${Date.now()}-1`,
-        name: 'Importer le planning photo',
-        completed: false,
-        color: '#F39C12',
-        urgent: false,
-        date: formatDate(weekDates[2]),
-        time: '12:00',
-      },
-    ];
-    setTasks((prev) => [...prev, ...extracted]);
-    setUploadNotice(`Photo importée et analysée (mock) : ${file.name}`);
   };
 
   const totalTasks = tasks.length;
@@ -926,19 +727,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     }
     setWeekOffset(0);
   };
-  const agendaTasks = useMemo(() => {
-    return [...tasks].sort((a, b) => {
-      if (a.completed !== b.completed) {
-        return a.completed ? 1 : -1;
-      }
-      const aDate = new Date(`${a.date || formatDate(new Date())}T${a.time || '00:00'}`);
-      const bDate = new Date(`${b.date || formatDate(new Date())}T${b.time || '00:00'}`);
-      return aDate.getTime() - bDate.getTime();
-    });
-  }, [tasks]);
-  const completedTasksCount = completedTasks;
-  const visibleTasks = showCompletedTasks ? agendaTasks : agendaTasks.filter((task) => !task.completed);
-
   useEffect(() => {
     if (!hasInitializedStreakRef.current) {
       prevStreakRef.current = streakDays;
@@ -1007,118 +795,18 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   }, [visibleTasks]);
 
   const renderTaskInfoPopoverContent = (task: Task, close: () => void) => (
-    <PopoverContent
-      align="end"
-      side="bottom"
-      sideOffset={12}
-      className="w-96 max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 text-[#ECECF3] text-sm shadow-[0_32px_80px_rgba(0,0,0,0.7)] p-4"
-      onOpenAutoFocus={(e) => e.preventDefault()}
-    >
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={(e) => {
-          e.stopPropagation();
-          close();
-        }}
-        className="absolute right-3 top-3 text-[#A9ACBA] hover:text-[#ECECF3] text-2xl leading-none h-8 w-8 p-0"
-        aria-label="Fermer"
-      >
-        ×
-      </Button>
-      <div className="flex items-start gap-3 pt-2 pr-8 pl-1">
-        <div className="min-w-0">
-          <div className="text-sm text-[#A9ACBA]">Modifier la tâche</div>
-          {editingNameId === task.id ? (
-            <Input
-              value={editingNameValue}
-              onChange={(e) => setEditingNameValue(e.target.value)}
-              onBlur={() => commitEditingName(task.id)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  commitEditingName(task.id);
-                }
-                if (e.key === 'Escape') {
-                  e.preventDefault();
-                  cancelEditingName();
-                }
-              }}
-              autoFocus
-              className="mt-1 h-8 px-2 text-base rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
-            />
-          ) : (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => startEditingName(task)}
-              className="mt-1 h-auto p-0 text-base font-semibold text-left text-[#ECECF3] break-words cursor-text hover:bg-transparent"
-            >
-              {task.name || 'Tâche sans titre'}
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-3 space-y-3">
-        <div className="rounded-2xl border border-[#2B3550] bg-[#161924]">
-          <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
-            <div>
-              <div className="text-sm text-[#ECECF3]">Date</div>
-              <div className="text-xs text-[#7F869A]">Définir une date</div>
-            </div>
-            <Input
-              type="date"
-              value={task.date ?? 'yyyy-mm-dd'}
-              onChange={(e) => updateTask(task.id, { date: e.target.value })}
-              className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border-[#2B3550] px-1.5 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-              style={{
-                width: `${Math.max(1, (task.date ?? 'yyyy-mm-dd').length) + 2}ch`,
-              }}
-            />
-          </div>
-          <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 border-b border-[#2B3550]">
-            <div>
-              <div className="text-sm text-[#ECECF3]">Heure</div>
-              <div className="text-xs text-[#7F869A]">Optionnel</div>
-            </div>
-            <Input
-              type="time"
-              value={task.time ?? '00:00'}
-              onChange={(e) => updateTask(task.id, { time: e.target.value })}
-              className="h-7 w-auto bg-[#101524] text-xs text-[#ECECF3] rounded-lg border-[#2B3550] px-2 text-right appearance-none [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:hidden"
-              size={Math.max(1, (task.time ?? '00:00').length)}
-            />
-          </div>
-          <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
-            <div>
-              <div className="text-sm text-[#ECECF3]">Urgent</div>
-              <div className="text-xs text-[#7F869A]">Met le titre en rouge</div>
-            </div>
-            <Switch
-              checked={!!task.urgent}
-              onCheckedChange={(checked) => updateTask(task.id, { urgent: checked })}
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              setTasks((prev) => prev.filter((t) => t.id !== task.id));
-              close();
-            }}
-            className="h-auto p-0 text-red-500 hover:text-red-400"
-            aria-label="Supprimer la tâche"
-          >
-            <Trash2 className="w-5 h-5" />
-          </Button>
-        </div>
-      </div>
-    </PopoverContent>
+    <TaskDetailsPopoverContent
+      task={task}
+      editingNameId={editingNameId}
+      editingNameValue={editingNameValue}
+      onEditingNameValueChange={setEditingNameValue}
+      onCommitEditingName={commitEditingName}
+      onCancelEditingName={cancelEditingName}
+      onStartEditingName={startEditingName}
+      onUpdateTask={updateTask}
+      onDeleteTask={(taskId) => setTasks((prev) => prev.filter((candidate) => candidate.id !== taskId))}
+      onClose={close}
+    />
   );
 
   const tasksListContent = (
@@ -1270,192 +958,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       </div>
     </div>
   );
-
-  const handleSendChat = async () => {
-    const message = chatInput.trim();
-    if (!message || isSendingChat) return;
-    const nextMessages = [...messages, { role: 'user' as const, content: message }];
-
-    setMessages(nextMessages);
-    setChatInput('');
-    setIsSendingChat(true);
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({
-          message,
-          context: {
-            tasks,
-            history: nextMessages.slice(-12),
-            timerSessions: {
-              completedToday: sessionsCompletedToday,
-              byDay: sessionsByDay,
-            },
-            timer: {
-              mode: timerMode,
-              minutes: safeMinutes,
-              timeLeft,
-              isRunning,
-            },
-            currentDate: buildCurrentDateContext(),
-          },
-        }),
-      });
-
-      const responseText = await response.text();
-      let payload: { reply?: string; error?: string; actions?: ChatAction[] } | null = null;
-
-      try {
-        payload = responseText ? JSON.parse(responseText) : null;
-      } catch {
-        payload = null;
-      }
-
-      if (!response.ok) {
-        const errorMessage =
-          payload?.error ??
-          responseText ??
-          `Edge Function returned status ${response.status}.`;
-
-        setMessages((prev) => [...prev, { role: 'assistant', content: errorMessage }]);
-        return;
-      }
-
-      if (!payload?.reply) {
-        if (!Array.isArray(payload?.actions) || payload.actions.length === 0) {
-          setMessages((prev) => [
-            ...prev,
-            { role: 'assistant', content: 'La fonction a repondu sans message exploitable.' },
-          ]);
-          return;
-        }
-      }
-
-      const taskActions = Array.isArray(payload?.actions)
-        ? payload.actions.filter(
-            (action): action is ChatTaskAction =>
-              (action.tool === 'add_task' || action.tool === undefined) &&
-              typeof action?.name === 'string' &&
-              action.name.trim().length > 0
-          )
-        : [];
-
-      const deleteTaskActions = Array.isArray(payload?.actions)
-        ? payload.actions.filter(
-            (action): action is ChatDeleteTaskAction =>
-              action.tool === 'delete_task' &&
-              typeof action.target_name === 'string' &&
-              action.target_name.trim().length > 0
-          )
-        : [];
-
-      const updateTaskActions = Array.isArray(payload?.actions)
-        ? payload.actions.filter(
-            (action): action is ChatUpdateTaskAction =>
-              action.tool === 'update_task' &&
-              typeof action.target_name === 'string' &&
-              action.target_name.trim().length > 0
-          )
-        : [];
-
-      const timerActions = Array.isArray(payload?.actions)
-        ? payload.actions.filter(
-            (action): action is ChatTimerAction =>
-              action.tool === 'set_timer' && typeof action.action === 'string'
-          )
-        : [];
-      const fallbackTimerAction = timerActions.length === 0 ? parseTimerActionFromMessage(message) : null;
-      const effectiveTimerActions = fallbackTimerAction ? [fallbackTimerAction] : timerActions;
-
-      if (taskActions.length > 0) {
-        const newTasks: Task[] = taskActions.map((action, index) => ({
-          id: `ai-${Date.now()}-${index}`,
-          name: action.name!.trim(),
-          completed: false,
-          color:
-            typeof action.color === 'string' && TASK_COLORS.includes(action.color)
-              ? action.color
-              : TASK_COLORS[index % TASK_COLORS.length],
-          urgent: !!action.urgent,
-          date: isValidTaskDate(action.date) ? action.date : formatDate(new Date()),
-          time: isValidTaskTime(action.time) ? action.time : undefined,
-        }));
-
-        setTasks((prev) => [...prev, ...newTasks]);
-      }
-
-      if (deleteTaskActions.length > 0) {
-        setTasks((prev) => {
-          const nextTasks = [...prev];
-
-          deleteTaskActions.forEach((action) => {
-            const matchIndex = findMatchingTaskIndex(nextTasks, action.target_name, action.target_date, action.target_time);
-            if (matchIndex >= 0) {
-              nextTasks.splice(matchIndex, 1);
-            }
-          });
-
-          return nextTasks;
-        });
-      }
-
-      if (updateTaskActions.length > 0) {
-        setTasks((prev) => {
-          const nextTasks = [...prev];
-
-          updateTaskActions.forEach((action) => {
-            const matchIndex = findMatchingTaskIndex(nextTasks, action.target_name, action.target_date, action.target_time);
-            if (matchIndex < 0) return;
-
-            const existingTask = nextTasks[matchIndex];
-            nextTasks[matchIndex] = {
-              ...existingTask,
-              name: typeof action.new_name === 'string' && action.new_name.trim() ? action.new_name.trim() : existingTask.name,
-              date: isValidTaskDate(action.date) ? action.date : existingTask.date,
-              time: isValidTaskTime(action.time) ? action.time : existingTask.time,
-              urgent: typeof action.urgent === 'boolean' ? action.urgent : existingTask.urgent,
-              color:
-                typeof action.color === 'string' && TASK_COLORS.includes(action.color) ? action.color : existingTask.color,
-              completed: typeof action.completed === 'boolean' ? action.completed : existingTask.completed,
-            };
-          });
-
-          return nextTasks;
-        });
-      }
-
-      if (effectiveTimerActions.length > 0) {
-        effectiveTimerActions.forEach((action) => applyChatTimerAction(action));
-      }
-
-      const assistantReply =
-        payload?.reply && payload.reply.trim()
-          ? payload.reply
-          : taskActions.length > 0
-            ? `${taskActions.length} tache${taskActions.length > 1 ? 's ont ete ajoutees' : ' a ete ajoutee'} au calendrier.`
-            : deleteTaskActions.length > 0
-              ? 'La tache demandee a ete retiree du calendrier.'
-              : updateTaskActions.length > 0
-                ? 'La tache demandee a ete modifiee.'
-            : effectiveTimerActions.length > 0
-              ? 'Le minuteur a ete mis a jour.'
-            : 'Aucune reponse.';
-
-      setMessages((prev) => [...prev, { role: 'assistant', content: assistantReply }]);
-    } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: error instanceof Error ? error.message : 'Erreur inconnue.' },
-      ]);
-    } finally {
-      setIsSendingChat(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-10">
