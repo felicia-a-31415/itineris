@@ -161,17 +161,8 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
     <div className="app-shell min-h-screen p-4 text-[#F5F2F7] md:p-8">
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-2">
-            <div className="app-panel-soft inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm app-muted">
-              <CircleUserRound className="h-4 w-4 text-[#F5F2F7]" />
-              Réglages du profil et du compte
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-[#F5F2F7]">Paramètres</h1>
-              <p className="text-sm app-muted">
-                Tout est regroupé ici pour éviter d’avoir deux onglets séparés.
-              </p>
-            </div>
+          <div>
+            <h1 className="text-2xl font-semibold text-[#F5F2F7]">Paramètres</h1>
           </div>
 
           <div className="flex items-center gap-2">

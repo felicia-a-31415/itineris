@@ -62,6 +62,14 @@ export function TimerCard({
   onEditingCommit,
 }: TimerCardProps) {
   const customIsActive = isEditingTimer || !presetMinutes.includes(safeMinutes);
+  const progressDegrees = progress * 3.6;
+  const timerRingGradient = `conic-gradient(
+    from 180deg,
+    #8f6bff 0deg,
+    #ff5f8f ${Math.max(32, progressDegrees * 0.68)}deg,
+    #ffb07c ${progressDegrees}deg,
+    rgba(34,28,48,0.88) ${progressDegrees}deg 360deg
+  )`;
 
   return (
     <Card className="app-panel rounded-3xl p-6 h-full">
@@ -102,8 +110,9 @@ export function TimerCard({
           <div
             className="relative w-48 h-48 rounded-full flex items-center justify-center"
             style={{
-              background: `conic-gradient(${ringColor} ${progress * 3.6}deg, rgba(34,28,48,0.88) ${progress * 3.6}deg)`,
-              boxShadow: `0 0 16px ${ringColor}99, 0 0 36px ${ringColor}55, 0 0 80px rgba(255,95,143,0.14)`,
+              background: timerRingGradient,
+              boxShadow:
+                '0 0 18px rgba(143,107,255,0.52), 0 0 42px rgba(255,95,143,0.34), 0 0 92px rgba(255,176,124,0.18)',
             }}
           >
             <div className="absolute inset-3 rounded-full shadow-inner flex flex-col items-center justify-center bg-[linear-gradient(180deg,rgba(11,12,20,0.96),rgba(21,17,32,0.94))]">
