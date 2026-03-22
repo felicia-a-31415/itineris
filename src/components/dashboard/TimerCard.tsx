@@ -64,9 +64,9 @@ export function TimerCard({
   const customIsActive = isEditingTimer || !presetMinutes.includes(safeMinutes);
 
   return (
-    <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full">
+    <Card className="app-panel rounded-3xl p-6 h-full">
       <div className="mb-2">
-        <p className="text-sm text-[#A9ACBA]">Minuteur</p>
+        <p className="app-muted text-sm">Minuteur</p>
       </div>
       <div className="flex flex-col items-center justify-start gap-7 pt-2">
           <div className="flex flex-wrap justify-center gap-3.5">
@@ -81,15 +81,15 @@ export function TimerCard({
                   style={
                     isActive
                       ? {
-                          backgroundColor: color,
-                          color: '#0B0D10',
+                          background: 'linear-gradient(90deg,#6d42ff 0%,#8c4fff 100%)',
+                          color: '#ffffff',
                           borderColor: color,
-                          boxShadow: `0 0 12px ${color}80`,
+                          boxShadow: '0 0 18px rgba(109,66,255,0.34)',
                         }
                       : {
-                          backgroundColor: '#1A1D26',
-                          color: '#ECECF3',
-                          borderColor: '#1F2230',
+                          backgroundColor: 'rgba(24,20,35,0.9)',
+                          color: '#F5F2F7',
+                          borderColor: 'rgba(124,98,154,0.28)',
                         }
                   }
                 >
@@ -102,20 +102,20 @@ export function TimerCard({
           <div
             className="relative w-48 h-48 rounded-full flex items-center justify-center"
             style={{
-              background: `conic-gradient(${ringColor} ${progress * 3.6}deg, #1F2230 ${progress * 3.6}deg)`,
-              boxShadow: `0 0 12px ${ringColor}b3, 0 0 32px ${ringColor}99, 0 0 64px ${ringColor}66`,
+              background: `conic-gradient(${ringColor} ${progress * 3.6}deg, rgba(34,28,48,0.88) ${progress * 3.6}deg)`,
+              boxShadow: `0 0 16px ${ringColor}99, 0 0 36px ${ringColor}55, 0 0 80px rgba(255,95,143,0.14)`,
             }}
           >
-            <div className="absolute inset-3 bg-[#0B0D10] rounded-full shadow-inner flex flex-col items-center justify-center">
-              <span className="text-3xl font-semibold text-[#ECECF3]">{formatTime(timeLeft)}</span>
-              <span className="mt-1 text-xs text-[#A9ACBA]">{timerMinutes} min</span>
+            <div className="absolute inset-3 rounded-full shadow-inner flex flex-col items-center justify-center bg-[linear-gradient(180deg,rgba(11,12,20,0.96),rgba(21,17,32,0.94))]">
+              <span className="text-3xl font-semibold text-[#F5F2F7]">{formatTime(timeLeft)}</span>
+              <span className="mt-1 text-xs app-muted">{timerMinutes} min</span>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#1F2230] bg-[#10131B] px-4 py-4 text-sm text-[#A9ACBA]">
+          <div className="app-panel-soft rounded-2xl px-4 py-4 text-sm app-muted">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <span className="text-sm text-[#A9ACBA]">Durée du minuteur</span>
-              <span className="text-xs text-[#7F869A]">Entre 5 et 120 min</span>
+              <span className="text-sm app-muted">Durée du minuteur</span>
+              <span className="text-xs text-white/40">Entre 5 et 120 min</span>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -128,8 +128,8 @@ export function TimerCard({
                     onClick={() => onPresetSelect(minutes)}
                     className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
                       isActive
-                        ? 'border-[#4169E1] bg-[#4169E1] text-white'
-                        : 'border-[#2B3550] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26]'
+                        ? 'border-[#6d42ff] bg-[#6d42ff] text-white'
+                        : 'border-white/10 bg-[rgba(20,17,30,0.82)] text-[#F5F2F7] hover:bg-[rgba(40,28,60,0.92)]'
                     }`}
                   >
                     {minutes} min
@@ -141,8 +141,8 @@ export function TimerCard({
                 onClick={onCustomClick}
                 className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
                   customIsActive
-                    ? 'border-[#4169E1] bg-[#4169E1] text-white'
-                    : 'border-[#2B3550] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26]'
+                    ? 'border-[#6d42ff] bg-[#6d42ff] text-white'
+                    : 'border-white/10 bg-[rgba(20,17,30,0.82)] text-[#F5F2F7] hover:bg-[rgba(40,28,60,0.92)]'
                 }`}
               >
                 Custom
@@ -169,7 +169,7 @@ export function TimerCard({
                       onEditingCancel();
                     }
                   }}
-                  className="h-10 rounded-xl border-[#1F2230] bg-[#161924] text-[#ECECF3] sm:max-w-[150px]"
+                  className="h-10 rounded-xl sm:max-w-[150px]"
                   placeholder={`${timerMinutes}`}
                   autoFocus
                 />
@@ -177,7 +177,7 @@ export function TimerCard({
                   type="button"
                   onClick={onEditingCommit}
                   variant="outline"
-                  className="h-10 rounded-xl border-[#2B3550] bg-[#161924] text-[#ECECF3] hover:bg-[#1A1D26]"
+                  className="h-10 rounded-xl"
                 >
                   Appliquer
                 </Button>
@@ -188,7 +188,7 @@ export function TimerCard({
           <div className="flex items-center justify-center gap-3">
             <Button
               onClick={onToggleRunning}
-              className="h-10 min-w-[124px] rounded-xl bg-[#4169E1] px-4 text-white hover:bg-[#3557C1]"
+              className="h-10 min-w-[124px] rounded-xl px-4"
             >
               {isRunning ? (
                 <>
@@ -206,7 +206,7 @@ export function TimerCard({
               onClick={onReset}
               type="button"
               variant="ghost"
-              className="h-10 w-10 rounded-xl p-0 text-white hover:bg-transparent hover:text-white"
+              className="h-10 w-10 rounded-xl p-0 text-white/92 hover:bg-transparent hover:text-white"
               aria-label="Réinitialiser le minuteur"
               title="Réinitialiser le minuteur"
             >

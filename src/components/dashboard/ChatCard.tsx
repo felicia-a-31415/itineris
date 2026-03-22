@@ -25,32 +25,32 @@ export function ChatCard({
   renderFormattedMessage,
 }: ChatCardProps) {
   return (
-    <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full min-h-0 flex flex-col">
+    <Card className="app-panel rounded-3xl p-6 h-full min-h-0 flex flex-col">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-sm text-[#A9ACBA]">Chat IA</p>
-        <span className="text-xs text-[#7F869A]">Bêta</span>
+        <p className="app-muted text-sm">Chat IA</p>
+        <span className="text-xs text-white/40">Bêta</span>
       </div>
       <div
         ref={chatScrollRef}
-        className="h-[340px] overflow-y-auto rounded-2xl border border-[#1F2230] bg-[#0F1117] p-4 text-sm text-[#A9ACBA] space-y-3"
+        className="app-panel-soft h-[340px] overflow-y-auto rounded-2xl p-4 text-sm app-muted space-y-3"
       >
         {messages.map((message, index) => (
           <div
             key={`${message.role}-${index}`}
-            className={message.role === 'user' ? 'text-right text-[#ECECF3]' : 'text-left text-[#A9ACBA]'}
+            className={message.role === 'user' ? 'text-right text-[#F5F2F7]' : 'text-left app-muted'}
           >
             <div
               className={
                 message.role === 'user'
-                  ? 'inline-block max-w-[90%] rounded-2xl bg-[#1C2233] px-3 py-2 text-left'
-                  : 'max-w-[90%] rounded-2xl bg-[#131722] px-3 py-2'
+                  ? 'inline-block max-w-[90%] rounded-2xl bg-[linear-gradient(90deg,rgba(109,66,255,0.22),rgba(95,44,142,0.24))] px-3 py-2 text-left text-[#F5F2F7]'
+                  : 'max-w-[90%] rounded-2xl bg-[rgba(18,16,28,0.88)] px-3 py-2'
               }
             >
               {renderFormattedMessage(message.content)}
             </div>
           </div>
         ))}
-        {isSendingChat ? <div className="text-left text-[#7F869A]">L&apos;IA ecrit...</div> : null}
+        {isSendingChat ? <div className="text-left text-white/46">L&apos;IA ecrit...</div> : null}
       </div>
       <div className="mt-6 flex items-center gap-2">
         <Input
@@ -63,12 +63,12 @@ export function ChatCard({
             }
           }}
           placeholder="Écris ta question..."
-          className="h-10 rounded-xl border-[#1F2230] bg-[#0F1117] text-[#ECECF3]"
+          className="h-10 rounded-xl"
         />
         <Button
           onClick={onSend}
           disabled={isSendingChat || !chatInput.trim()}
-          className="h-10 rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white px-4"
+          className="h-10 rounded-xl px-4"
         >
           Envoyer
         </Button>

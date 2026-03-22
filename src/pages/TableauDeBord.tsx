@@ -332,7 +332,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   );
 
   return (
-    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-6 md:p-10">
+    <div className="app-shell min-h-screen p-6 text-[#F5F2F7] md:p-10">
       <style>{`
         .streak {
           display: inline-flex;
@@ -374,7 +374,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                 <h1 className="text-xl md:text-2xl font-semibold text-[#ECECF3]">
                   {greeting}, {userName} 👋
                 </h1>
-                <p className="text-[#A9ACBA] text-sm">Prêt(e) à continuer ton voyage d&apos;apprentissage ?</p>
+                <p className="app-muted text-sm">Prêt(e) à continuer ton voyage d&apos;apprentissage ?</p>
               </div>
               <div
                 className={`streak text-sm font-bold ${streakBump ? 'streak--bump' : ''}`}
@@ -399,7 +399,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
                   navigate('/');
                 }}
                 variant="ghost"
-                className="text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#1F2230] rounded-xl"
+                className="text-white/72 hover:text-white hover:bg-white/6 rounded-xl"
               >
                 <LogOut className="w-5 h-5" />
               </Button>
@@ -407,23 +407,23 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <Button
               onClick={() => navigate('/parametres')}
               variant="ghost"
-              className="text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-[#1F2230] rounded-xl"
+              className="text-white/72 hover:text-white hover:bg-white/6 rounded-xl"
             >
               <Settings className="w-5 h-5" />
             </Button>
           </div>
         </div>
         {!user ? (
-          <div className="bg-[#161924] border border-[#1F2230] rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3 shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+          <div className="app-panel rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
-              <p className="text-sm text-[#A9ACBA]">Mode invité</p>
-              <p className="text-base text-[#ECECF3]">
+              <p className="text-sm app-muted">Mode invité</p>
+              <p className="text-base text-[#F5F2F7]">
                 Connecte-toi pour sauvegarder et synchroniser tes progrès.
               </p>
             </div>
             <Button
               onClick={() => navigate('/', { state: { authMode: 'login' } })}
-              className="bg-[#4169E1] hover:bg-[#3557C1] text-white rounded-xl px-4"
+              className="rounded-xl px-4"
             >
               Se connecter
             </Button>

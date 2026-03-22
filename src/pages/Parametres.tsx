@@ -32,10 +32,10 @@ interface ParametresScreenProps {
 }
 
 const cardClassName =
-  'bg-[#161924] border border-[#1F2230] rounded-3xl p-4 md:p-5 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)]';
+  'app-panel rounded-3xl p-4 md:p-5';
 
 const inputClassName =
-  'mt-2 rounded-xl bg-[#0F1117] border-[#1F2230] text-[#ECECF3] placeholder:text-[#6F7487] focus:border-[#4169E1]';
+  'app-input mt-2 rounded-xl';
 
 export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) {
   const { user, updateEmail, updatePassword, signOut } = useAuth();
@@ -158,17 +158,17 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3] p-4 md:p-8">
+    <div className="app-shell min-h-screen p-4 text-[#F5F2F7] md:p-8">
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-2xl border border-[#1F2230] bg-[#161924] px-3 py-2 text-sm text-[#A9ACBA]">
-              <CircleUserRound className="h-4 w-4 text-[#ECECF3]" />
+            <div className="app-panel-soft inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm app-muted">
+              <CircleUserRound className="h-4 w-4 text-[#F5F2F7]" />
               Réglages du profil et du compte
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-[#ECECF3]">Paramètres</h1>
-              <p className="text-sm text-[#A9ACBA]">
+              <h1 className="text-2xl font-semibold text-[#F5F2F7]">Paramètres</h1>
+              <p className="text-sm app-muted">
                 Tout est regroupé ici pour éviter d’avoir deux onglets séparés.
               </p>
             </div>
@@ -178,14 +178,14 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             <Button
               onClick={onBack}
               variant="ghost"
-              className="h-11 rounded-xl border border-[#1F2230] bg-[#161924] px-4 text-sm text-[#ECECF3] hover:bg-[#1B2030]"
+              className="h-11 rounded-xl border border-white/10 bg-[rgba(21,18,31,0.82)] px-4 text-sm text-[#F5F2F7] hover:bg-[rgba(37,29,54,0.92)]"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Retour
             </Button>
             <Button
               onClick={handleSaveProfile}
-              className="h-11 rounded-xl bg-[#4169E1] px-4 text-sm text-white hover:bg-[#3557C1]"
+              className="h-11 rounded-xl px-4 text-sm"
             >
               <Save className="w-4 h-4 mr-2" />
               {saved ? 'Sauvegardé' : 'Sauvegarder'}
@@ -197,11 +197,11 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
           <Card className={`${cardClassName} space-y-4`}>
             <div className="flex items-start gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#1F2230] bg-[#10131B]">
-                <CircleUserRound className="h-5 w-5 text-[#ECECF3]" />
+                <CircleUserRound className="h-5 w-5 text-[#F5F2F7]" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-[#ECECF3]">Profil</h2>
-                <p className="text-sm leading-5 text-[#A9ACBA]">
+                <h2 className="text-xl font-semibold text-[#F5F2F7]">Profil</h2>
+                <p className="text-sm leading-5 app-muted">
                   Les infos visibles dans ton espace de travail.
                 </p>
               </div>
@@ -209,7 +209,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
             <div className="grid gap-3 md:grid-cols-2">
               <div>
-                <Label htmlFor="name" className="text-[#ECECF3]">
+                <Label htmlFor="name" className="text-[#F5F2F7]">
                   Prénom
                 </Label>
                 <Input
@@ -222,42 +222,42 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               </div>
 
               <div>
-                <Label className="text-[#ECECF3]">
+                <Label className="text-[#F5F2F7]">
                   Compte
                 </Label>
-                <div className={`${inputClassName} min-h-[44px] px-4 py-3 text-sm text-[#A9ACBA]`}>
+                <div className={`${inputClassName} min-h-[44px] px-4 py-3 text-sm app-muted`}>
                   {user?.email ?? 'Mode invité'}
                 </div>
               </div>
             </div>
 
             {profileMessage ? (
-              <div className="rounded-2xl border border-[#29425B] bg-[#182332] px-4 py-3 text-sm text-[#9DD0FF]">
+              <div className="rounded-2xl border border-[#6d42ff]/30 bg-[#182332] px-4 py-3 text-sm text-[#d6c9ff]">
                 {profileMessage}
               </div>
             ) : null}
           </Card>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-3 h-full flex flex-col">
+            <Card className={`${cardClassName} space-y-3 h-full flex flex-col`}>
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#1F2230] bg-[#10131B]">
-                  <Mail className="h-4 w-4 text-[#ECECF3]" />
+                <div className="app-panel-soft flex h-10 w-10 items-center justify-center rounded-2xl">
+                  <Mail className="h-4 w-4 text-[#F5F2F7]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#ECECF3]">Email</h2>
-                  <p className="text-xs leading-5 text-[#A9ACBA]">
+                  <h2 className="text-lg font-semibold text-[#F5F2F7]">Email</h2>
+                  <p className="text-xs leading-5 app-muted">
                     Une confirmation sera envoyée avant le changement définitif.
                   </p>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="account-email" className="text-[#ECECF3] text-sm">
+                <Label htmlFor="account-email" className="text-[#F5F2F7] text-sm">
                   Adresse email
                 </Label>
                 <div className="relative mt-2">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A9ACBA]" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/52" />
                   <Input
                     id="account-email"
                     type="email"
@@ -274,28 +274,28 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 <Button
                   onClick={handleEmailUpdate}
                   disabled={!user || isUpdatingEmail}
-                  className="w-full h-10 rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white"
+                  className="w-full h-10 rounded-xl"
                 >
                   {isUpdatingEmail ? 'Mise à jour...' : 'Mettre à jour l’email'}
                 </Button>
               </div>
             </Card>
 
-            <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-3 h-full flex flex-col">
+            <Card className={`${cardClassName} space-y-3 h-full flex flex-col`}>
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#1F2230] bg-[#10131B]">
-                  <KeyRound className="h-4 w-4 text-[#ECECF3]" />
+                <div className="app-panel-soft flex h-10 w-10 items-center justify-center rounded-2xl">
+                  <KeyRound className="h-4 w-4 text-[#F5F2F7]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#ECECF3]">Mot de passe</h2>
-                  <p className="text-xs leading-5 text-[#A9ACBA]">
+                  <h2 className="text-lg font-semibold text-[#F5F2F7]">Mot de passe</h2>
+                  <p className="text-xs leading-5 app-muted">
                     Utilise un mot de passe d’au moins 6 caractères.
                   </p>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="new-password" className="text-[#ECECF3] text-sm">
+                <Label htmlFor="new-password" className="text-[#F5F2F7] text-sm">
                   Nouveau mot de passe
                 </Label>
                 <Input
@@ -310,7 +310,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               </div>
 
               <div>
-                <Label htmlFor="confirm-password" className="text-[#ECECF3] text-sm">
+                <Label htmlFor="confirm-password" className="text-[#F5F2F7] text-sm">
                   Confirme le mot de passe
                 </Label>
                 <Input
@@ -328,7 +328,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 <Button
                   onClick={handlePasswordUpdate}
                   disabled={!user || isUpdatingPassword}
-                  className="w-full h-10 rounded-xl bg-[#6B9AC4] hover:bg-[#5A89B3] text-white"
+                  className="w-full h-10 rounded-xl app-secondary-btn"
                 >
                   {isUpdatingPassword ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
                 </Button>
@@ -336,31 +336,31 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             </Card>
 
             {accountError ? (
-              <div className="md:col-span-2 rounded-2xl bg-[#11141D] px-4 py-3 text-sm text-[#E16941]">
+              <div className="md:col-span-2 rounded-2xl bg-[#11141D] px-4 py-3 text-sm text-[#ef8b82]">
                 {accountError}
               </div>
             ) : null}
 
             {accountMessage ? (
-              <div className="md:col-span-2 rounded-2xl border border-[#29425B] bg-[#182332] px-4 py-3 text-sm text-[#9DD0FF]">
+              <div className="md:col-span-2 rounded-2xl border border-[#6d42ff]/30 bg-[#182332] px-4 py-3 text-sm text-[#d6c9ff]">
                 {accountMessage}
               </div>
             ) : null}
 
             {!user ? (
-              <div className="md:col-span-2 rounded-2xl border border-[#1F2230] bg-[#11141D] px-4 py-4 text-sm text-[#A9ACBA]">
+              <div className="md:col-span-2 rounded-2xl border border-white/10 bg-[rgba(17,20,29,0.84)] px-4 py-4 text-sm app-muted">
                 Les réglages de sécurité du compte sont disponibles seulement après connexion à Supabase.
               </div>
             ) : null}
 
-            <Card className="bg-[#161924] border border-[#1F2230] rounded-3xl p-4 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-3 md:col-span-2">
+            <Card className={`${cardClassName} space-y-3 md:col-span-2`}>
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#10131B] border border-[#1F2230] flex items-center justify-center shrink-0">
-                  <OctagonAlert className="w-4 h-4 text-[#E16941]" />
+                <div className="w-10 h-10 rounded-2xl bg-[rgba(239,107,99,0.12)] border border-[#ef6b63]/30 flex items-center justify-center shrink-0">
+                  <OctagonAlert className="w-4 h-4 text-[#ef6b63]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#ECECF3]">Supprimer le compte</h2>
-                  <p className="text-xs leading-5 text-[#A9ACBA]">
+                  <h2 className="text-lg font-semibold text-[#F5F2F7]">Supprimer le compte</h2>
+                  <p className="text-xs leading-5 app-muted">
                     Cette action est définitive et tu perdras l’accès à ton compte.
                   </p>
                 </div>
@@ -368,7 +368,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
               <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
                 <div>
-                  <Label htmlFor="delete-confirmation" className="text-[#ECECF3] text-sm">
+                  <Label htmlFor="delete-confirmation" className="text-[#F5F2F7] text-sm">
                     Tape SUPPRIMER pour confirmer
                   </Label>
                   <Input
@@ -384,7 +384,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
                 <Button
                   onClick={handleDeleteAccount}
                   disabled={!user || isDeletingAccount || deleteConfirmation.trim() !== 'SUPPRIMER'}
-                  className="h-11 rounded-xl bg-[#E16941] px-4 hover:bg-[#c95735] text-white md:min-w-[260px]"
+                  className="h-11 rounded-xl bg-[#ef6b63] px-4 hover:bg-[#e15d55] text-white md:min-w-[260px]"
                 >
                   {isDeletingAccount ? 'Suppression...' : 'Supprimer définitivement le compte'}
                 </Button>

@@ -30,7 +30,7 @@ type WakeLockNavigator = Navigator & {
 
 function AppFrame() {
   return (
-    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3]">
+    <div className="app-shell min-h-screen text-[#F5F2F7]">
       <Outlet />
     </div>
   );

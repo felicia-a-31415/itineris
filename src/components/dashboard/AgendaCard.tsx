@@ -75,15 +75,15 @@ export function AgendaCard({
   renderTaskInfoPopoverContent,
 }: AgendaCardProps) {
   return (
-    <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
+    <Card className="app-panel rounded-3xl p-6 space-y-2">
       <div className={`flex flex-col ${calendarMode === 'tasks' ? 'gap-2' : 'gap-4'}`}>
-        <p className="text-sm text-[#A9ACBA]">Agenda en ligne</p>
+        <p className="app-muted text-sm">Agenda en ligne</p>
         <div className="flex flex-wrap items-start justify-between gap-3">
           {calendarMode === 'calendar' ? (
             <div className="flex flex-wrap items-center gap-3">
               <Button
                 variant="outline"
-                className="h-11 rounded-full border-[#2B3550] bg-[#0F1117] text-[#ECECF3] hover:bg-[#1A1D26] px-5"
+                className="h-11 rounded-full px-5"
                 onClick={onToday}
               >
                 Aujourd&apos;hui
@@ -93,7 +93,7 @@ export function AgendaCard({
                   type="button"
                   onClick={onPrevRange}
                   variant="ghost"
-                  className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#ECECF3] p-0"
+                  className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#F5F2F7] p-0 hover:bg-white/6"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </Button>
@@ -101,7 +101,7 @@ export function AgendaCard({
                   type="button"
                   onClick={onNextRange}
                   variant="ghost"
-                  className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#ECECF3] p-0"
+                  className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#F5F2F7] p-0 hover:bg-white/6"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </Button>
@@ -114,10 +114,10 @@ export function AgendaCard({
           <div className="flex flex-wrap items-center gap-2">
             {calendarMode === 'calendar' ? (
               <Select value={timeView} onValueChange={onTimeViewChange}>
-                <SelectTrigger className="h-11 min-h-11 w-[128px] rounded-full border-[#2B3550] bg-[#0F1117] px-4 text-sm font-semibold text-[#ECECF3] hover:bg-[#1A1D26] focus-visible:border-[#2B3550] focus-visible:ring-0 data-[size=default]:h-11">
+                <SelectTrigger className="h-11 min-h-11 w-[128px] rounded-full border-white/10 bg-[rgba(21,18,31,0.82)] px-4 text-sm font-semibold text-[#F5F2F7] hover:bg-[rgba(37,29,54,0.92)] focus-visible:border-white/12 focus-visible:ring-0 data-[size=default]:h-11">
                   <SelectValue>{timeView === 'week' ? 'Semaine' : 'Mois'}</SelectValue>
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border border-[#1F2230] bg-[#161924] text-[#ECECF3] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
+                <SelectContent className="rounded-xl border border-white/10 bg-[rgba(20,17,30,0.96)] text-[#F5F2F7] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
                   <SelectItem value="week" className="rounded-lg py-2 text-sm">
                     Semaine
                   </SelectItem>
@@ -127,9 +127,9 @@ export function AgendaCard({
                 </SelectContent>
               </Select>
             ) : null}
-            <div className="relative inline-flex items-center h-11 w-[102px] rounded-full border border-[#2B3550] bg-[#0F1117] overflow-hidden">
+            <div className="relative inline-flex items-center h-11 w-[102px] rounded-full border border-white/10 bg-[rgba(21,18,31,0.82)] overflow-hidden">
               <div
-                className={`absolute top-0 bottom-0 w-1/2 bg-[#9FD0FF] ${
+                className={`absolute top-0 bottom-0 w-1/2 bg-[linear-gradient(90deg,#6d42ff_0%,#8b61ff_100%)] ${
                   calendarMode === 'calendar'
                     ? 'left-0 rounded-l-full rounded-r-none'
                     : 'left-1/2 rounded-r-full rounded-l-none'
@@ -141,8 +141,8 @@ export function AgendaCard({
                 variant="ghost"
                 className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
                   calendarMode === 'calendar'
-                    ? 'text-[#0B0D10]'
-                    : 'text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-white/5'
+                    ? 'text-white'
+                    : 'text-white/64 hover:text-white hover:bg-white/5'
                 }`}
                 aria-label="Vue calendrier"
               >
@@ -154,8 +154,8 @@ export function AgendaCard({
                 variant="ghost"
                 className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
                   calendarMode === 'tasks'
-                    ? 'text-[#0B0D10]'
-                    : 'text-[#A9ACBA] hover:text-[#ECECF3] hover:bg-white/5'
+                    ? 'text-white'
+                    : 'text-white/64 hover:text-white hover:bg-white/5'
                 }`}
                 aria-label="Vue liste"
               >
@@ -165,7 +165,7 @@ export function AgendaCard({
             <Button
               asChild
               variant="ghost"
-              className="h-11 px-4 rounded-full border border-[#2B3550] bg-[#0F1117] text-sm font-semibold text-[#ECECF3] hover:bg-[#1A1D26]"
+              className="h-11 px-4 rounded-full border border-white/10 bg-[rgba(21,18,31,0.82)] text-sm font-semibold text-[#F5F2F7] hover:bg-[rgba(37,29,54,0.92)]"
             >
               <label htmlFor="agendaUpload" className="flex items-center gap-2 cursor-pointer">
                 <Upload className="w-4 h-4" />
@@ -184,8 +184,8 @@ export function AgendaCard({
       </div>
 
       {uploadNotice ? (
-        <div className="mt-3 text-xs text-[#A9ACBA] bg-[#0F1117] rounded-2xl px-3 py-2 inline-flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-[#4169E1]" />
+        <div className="mt-3 text-xs app-muted bg-[rgba(18,15,28,0.88)] rounded-2xl px-3 py-2 inline-flex items-center gap-2 border border-white/8">
+          <Sparkles className="w-4 h-4 text-[#8b61ff]" />
           {uploadNotice}
         </div>
       ) : null}
