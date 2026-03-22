@@ -68,8 +68,7 @@ export function TimerCard({
       <div className="mb-2">
         <p className="text-sm text-[#A9ACBA]">Minuteur</p>
       </div>
-      <div className="grid gap-6 sm:grid-cols-[1.1fr,1fr] items-start">
-        <div className="flex flex-col items-center justify-start gap-7 pt-2">
+      <div className="flex flex-col items-center justify-start gap-7 pt-2">
           <div className="flex flex-wrap justify-center gap-3.5">
             {MODE_OPTIONS.map(({ key, label, color }) => {
               const isActive = timerMode === key;
@@ -111,36 +110,6 @@ export function TimerCard({
               <span className="text-3xl font-semibold text-[#ECECF3]">{formatTime(timeLeft)}</span>
               <span className="mt-1 text-xs text-[#A9ACBA]">{timerMinutes} min</span>
             </div>
-          </div>
-        </div>
-
-        <div className="flex h-full flex-col justify-end gap-6 pt-6">
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={onToggleRunning}
-              className="h-11 min-w-[124px] bg-[#4169E1] px-4 hover:bg-[#3557C1] text-white rounded-2xl"
-            >
-              {isRunning ? (
-                <>
-                  <Pause className="w-4 h-4 mr-2" />
-                  Pause
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4 mr-2" />
-                  {isInitialTime ? 'Lancer' : 'Relancer'}
-                </>
-              )}
-            </Button>
-            <Button
-              onClick={onReset}
-              variant="outline"
-              className="h-11 w-11 rounded-2xl border-[#1F2230] bg-[#10131B] p-0 text-[#ECECF3] hover:bg-[#161924]"
-              aria-label="Réinitialiser le minuteur"
-              title="Réinitialiser le minuteur"
-            >
-              <RotateCcw className="h-5 w-5" />
-            </Button>
           </div>
 
           <div className="rounded-2xl border border-[#1F2230] bg-[#10131B] px-4 py-4 text-sm text-[#A9ACBA]">
@@ -215,7 +184,35 @@ export function TimerCard({
               </div>
             ) : null}
           </div>
-        </div>
+
+          <div className="flex items-center justify-center gap-3">
+            <Button
+              onClick={onToggleRunning}
+              className="h-10 min-w-[124px] rounded-xl bg-[#4169E1] px-4 text-white hover:bg-[#3557C1]"
+            >
+              {isRunning ? (
+                <>
+                  <Pause className="w-4 h-4 mr-2" />
+                  Pause
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 mr-2" />
+                  {isInitialTime ? 'Lancer' : 'Relancer'}
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={onReset}
+              type="button"
+              variant="ghost"
+              className="h-10 w-10 rounded-xl p-0 text-white hover:bg-transparent hover:text-white"
+              aria-label="Réinitialiser le minuteur"
+              title="Réinitialiser le minuteur"
+            >
+              <RotateCcw className="h-6 w-6 stroke-[2.75]" />
+            </Button>
+          </div>
       </div>
     </Card>
   );

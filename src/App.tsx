@@ -1,9 +1,8 @@
 import './styles/globals.css';
 
 import { useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 
-import { Bienvenue } from './pages/Bienvenue';
 import { Login } from './pages/Login';
 import { Parametres } from './pages/Parametres';
 import { TableauDeBord } from './pages/TableauDeBord';
@@ -28,6 +27,14 @@ type WakeLockNavigator = Navigator & {
     request: (type: 'screen') => Promise<WakeLockSentinelLike>;
   };
 };
+
+function AppFrame() {
+  return (
+    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3]">
+      <Outlet />
+    </div>
+  );
+}
 
 export default function App() {
   const [userData, setUserData] = useState<UserData | null>(() => loadUserData() ?? null);
@@ -123,43 +130,25 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0D10] text-[#ECECF3]">
-      <Routes>
+    <Routes>
+      <Route path="/" element={<AppFrame />}>
+        <Route index element={isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />} />
         <Route
-          path="/"
-          element={
-            isInitialAppLoading ? null : user ? (
-              <Navigate to="/tableaudebord" replace />
-            ) : (
-              <Bienvenue
-                onGetStarted={() => navigate('/tableaudebord', { state: { authMode: 'signup' } })}
-                onLogin={() => navigate('/tableaudebord', { state: { authMode: 'login' } })}
-                onContinueWithoutAccount={() => navigate('/tableaudebord')}
-              />
-            )
-          }
-        />
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/tableaudebord"
-          element={
-            isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />
-          }
-        />
-        <Route
-          path="/parametres"
+          path="parametres"
           element={
             isInitialAppLoading ? null : (
               <Parametres
-                onBack={() => navigate('/tableaudebord')}
+                onBack={() => navigate('/')}
                 userData={userData ?? defaultUserData}
                 onSave={handleSettingsSave}
               />
             )
           }
         />
-        <Route path="/*" element={<Erreur />} />
-      </Routes>
-    </div>
+      </Route>
+      <Route path="/login" element={<Login />} />
+      <Route path="/tableaudebord" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Erreur />} />
+    </Routes>
   );
 }

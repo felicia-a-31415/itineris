@@ -20,7 +20,7 @@ export default function Erreur() {
               asChild
               className="rounded-2xl bg-[#4169E1] hover:bg-[#3557C1] text-white px-6 py-3"
             >
-              <Link to="/tableaudebord">Retour au tableau de bord</Link>
+              <Link to="/">Retour au tableau de bord</Link>
             </Button>
           </div>
         </div>

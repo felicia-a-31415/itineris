@@ -91,11 +91,11 @@ export function Login() {
 
     if (isSigningUp) {
       setIsSubmitting(false);
-      navigate('/tableaudebord', { replace: true });
+      navigate('/', { replace: true });
       return;
     }
 
-    const redirectPath = requestedPath ?? '/tableaudebord';
+    const redirectPath = requestedPath ?? '/';
     navigate(redirectPath, { replace: true });
   };
 
