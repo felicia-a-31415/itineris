@@ -22,6 +22,8 @@ import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '../ui/po
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Switch } from '../ui/switch';
 import { DashboardAuthGate } from '../components/DashboardAuthGate';
+import { ChatCard } from '../components/dashboard/ChatCard';
+import { StudyStatsCard } from '../components/dashboard/StudyStatsCard';
 import { TaskCreationDialog } from '../components/dashboard/TaskCreationDialog';
 import { TimerCard } from '../components/dashboard/TimerCard';
 import alarmSound from '../assets/Gentle-little-bell-ringing-sound-effect.mp3';
@@ -1821,56 +1823,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             onEditingCommit={commitTimerEdit}
           />
 
-          {/* Chat IA */}
-          <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] h-full min-h-0 flex flex-col">
-            <div className="mb-2 flex items-center justify-between">
-              <p className="text-sm text-[#A9ACBA]">Chat IA</p>
-              <span className="text-xs text-[#7F869A]">Bêta</span>
-            </div>
-            <div
-              ref={chatScrollRef}
-              className="h-[340px] overflow-y-auto rounded-2xl border border-[#1F2230] bg-[#0F1117] p-4 text-sm text-[#A9ACBA] space-y-3"
-            >
-              {messages.map((message, index) => (
-                <div
-                  key={`${message.role}-${index}`}
-                  className={message.role === 'user' ? 'text-right text-[#ECECF3]' : 'text-left text-[#A9ACBA]'}
-                >
-                  <div
-                    className={
-                      message.role === 'user'
-                        ? 'inline-block max-w-[90%] rounded-2xl bg-[#1C2233] px-3 py-2 text-left'
-                        : 'max-w-[90%] rounded-2xl bg-[#131722] px-3 py-2'
-                    }
-                  >
-                    {renderFormattedMessage(message.content)}
-                  </div>
-                </div>
-              ))}
-              {isSendingChat ? <div className="text-left text-[#7F869A]">L&apos;IA ecrit...</div> : null}
-            </div>
-            <div className="mt-6 flex items-center gap-2">
-              <Input
-                value={chatInput}
-                onChange={(event) => setChatInput(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault();
-                    void handleSendChat();
-                  }
-                }}
-                placeholder="Écris ta question..."
-                className="h-10 rounded-xl border-[#1F2230] bg-[#0F1117] text-[#ECECF3]"
-              />
-              <Button
-                onClick={() => void handleSendChat()}
-                disabled={isSendingChat || !chatInput.trim()}
-                className="h-10 rounded-xl bg-[#4169E1] hover:bg-[#3557C1] text-white px-4"
-              >
-                Envoyer
-              </Button>
-            </div>
-          </Card>
+          <ChatCard
+            chatScrollRef={chatScrollRef}
+            messages={messages}
+            isSendingChat={isSendingChat}
+            chatInput={chatInput}
+            setChatInput={setChatInput}
+            onSend={() => void handleSendChat()}
+            renderFormattedMessage={renderFormattedMessage}
+          />
         </div>
 
         {/* Agenda en ligne */}
@@ -2177,57 +2138,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           )}
         </Card>
 
-        {/* Temps étudié */}
-        <Card className="bg-[#161924] border-[#1F2230] rounded-3xl p-6 shadow-[0_18px_50px_rgba(0,0,0,0.55),0_8px_24px_rgba(0,0,0,0.35),0_1px_0_rgba(255,255,255,0.06)] space-y-2">
-          <div className="flex flex-col gap-0">
-            <p className="text-sm text-[#A9ACBA]">Temps étudié</p>
-            <div className="flex flex-wrap items-center justify-between gap-3"></div>
-          </div>
-
-          <div className="mt-2 overflow-x-auto">
-            <div className="w-[1104px] min-w-[1104px] grid grid-cols-7 gap-3 items-end">
-              {weekDates.map((date, index) => {
-                const minutes = Math.round(activeWeekMinutes[index] ?? 0);
-                const showBar = minutes > 0;
-                const barHeight = Math.max(8, Math.min(220, (minutes / (maxWeekMinutes || 1)) * 220));
-                return (
-                  <div key={index} className="flex flex-col items-center gap-2">
-                    <div className="w-full bg-[#1B2030] rounded-2xl h-56 flex items-end">
-                      {showBar && (
-                        <div
-                          className="w-full bg-[#4169E1] rounded-2xl transition-all"
-                          style={{ height: `${barHeight}px` }}
-                        />
-                      )}
-                    </div>
-                    <div className="text-xs text-[#ECECF3] font-medium">{minutes} min</div>
-                    <div className="text-xs text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="mt-6 overflow-x-auto">
-            <div className="w-[1104px] min-w-[1104px] grid gap-4 md:grid-cols-3">
-              <div className="space-y-1">
-                <p className="text-sm text-[#A9ACBA]">Total de cette semaine</p>
-                <p className="text-2xl text-[#ECECF3]">{activeWeekTotalMinutes} min</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-[#A9ACBA]">Moyenne quotidienne</p>
-                <p className="text-2xl text-[#ECECF3]">{averageDailyMinutes} min</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-[#A9ACBA]">Écart depuis la semaine passée</p>
-                <p className="text-2xl text-[#ECECF3]">
-                  {weekDeltaMinutes >= 0 ? '+' : '-'}
-                  {Math.abs(weekDeltaMinutes)} min
-                </p>
-              </div>
-            </div>
-          </div>
-        </Card>
+        <StudyStatsCard
+          weekDates={weekDates}
+          activeWeekMinutes={activeWeekMinutes}
+          maxWeekMinutes={maxWeekMinutes}
+          activeWeekTotalMinutes={activeWeekTotalMinutes}
+          averageDailyMinutes={averageDailyMinutes}
+          weekDeltaMinutes={weekDeltaMinutes}
+          getDayName={getDayName}
+        />
 
         <TaskCreationDialog
           open={showAddDialog && !!modalTask}
