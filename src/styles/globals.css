@@ -191,4 +191,15 @@
 
 html {
   font-size: var(--font-size);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+[role="button"],
+[data-slot="button"],
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
 }

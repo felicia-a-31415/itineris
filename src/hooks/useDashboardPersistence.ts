@@ -57,10 +57,18 @@ export function useDashboardPersistence({
   const [isDashboardHydrated, setIsDashboardHydrated] = useState(false);
   const pendingRemoteSaveRef = useRef<DashboardData | null>(null);
   const pendingRemoteSaveUserIdRef = useRef<string | null>(null);
+  const buildTimerStateRef = useRef(buildTimerState);
+  const hydrateTimerStateRef = useRef(hydrateTimerState);
+  const resetHydrationGuardRef = useRef(resetHydrationGuard);
+
+  buildTimerStateRef.current = buildTimerState;
+  hydrateTimerStateRef.current = hydrateTimerState;
+  resetHydrationGuardRef.current = resetHydrationGuard;
 
   useEffect(() => {
     let isMounted = true;
-    resetHydrationGuard();
+    setIsDashboardHydrated(false);
+    resetHydrationGuardRef.current();
 
     const hydrateDashboardData = async () => {
       if (loading) return;
@@ -71,7 +79,7 @@ export function useDashboardPersistence({
         if (cached.studyData && typeof cached.studyData === 'object') setStudyData(cached.studyData);
         if (cached.sessionsByDay && typeof cached.sessionsByDay === 'object') setSessionsByDay(cached.sessionsByDay);
         if (Array.isArray(cached.chatMessages) && cached.chatMessages.length > 0) setMessages(cached.chatMessages);
-        hydrateTimerState(cached.timerState);
+        hydrateTimerStateRef.current(cached.timerState);
         setIsDashboardHydrated(true);
         return;
       }
@@ -105,7 +113,7 @@ export function useDashboardPersistence({
             ? remoteData.chatMessages
             : defaultMessages
         );
-        hydrateTimerState(remoteData.timerState);
+        hydrateTimerStateRef.current(remoteData.timerState);
         saveDashboardDataToLocal(userId, remoteData);
       }
 
@@ -121,8 +129,6 @@ export function useDashboardPersistence({
     userId,
     currentWeekStart,
     loading,
-    resetHydrationGuard,
-    hydrateTimerState,
     setTasks,
     setStudyData,
     setSessionsByDay,
@@ -135,13 +141,13 @@ export function useDashboardPersistence({
 
   useEffect(() => {
     if (loading || !isDashboardHydrated) return;
-    const payload = { tasks, studyData, sessionsByDay, chatMessages: messages, timerState: buildTimerState() };
+    const payload = { tasks, studyData, sessionsByDay, chatMessages: messages, timerState: buildTimerStateRef.current() };
     saveDashboardDataToLocal(userId, payload);
     if (userId) {
       pendingRemoteSaveRef.current = payload;
       pendingRemoteSaveUserIdRef.current = userId;
     }
-  }, [userId, tasks, studyData, sessionsByDay, messages, buildTimerState, isDashboardHydrated, loading]);
+  }, [userId, tasks, studyData, sessionsByDay, messages, isDashboardHydrated, loading]);
 
   useEffect(() => {
     if (loading || !isDashboardHydrated || !userId) return;
