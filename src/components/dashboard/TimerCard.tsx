@@ -63,14 +63,17 @@ export function TimerCard({
 }: TimerCardProps) {
   const customIsActive = isEditingTimer || !presetMinutes.includes(safeMinutes);
   const progressDegrees = progress * 3.6;
-  const timerRingGradient = `conic-gradient(
-    from 180deg,
-    #9f7bff 0deg,
-    #6f46ff ${Math.max(18, progressDegrees * 0.2)}deg,
-    #ff4f9b ${Math.max(42, progressDegrees * 0.68)}deg,
-    #ffc083 ${progressDegrees}deg,
-    rgba(28,22,42,0.92) ${progressDegrees}deg 360deg
-  )`;
+  const timerRingGradient =
+    progressDegrees <= 0
+      ? 'conic-gradient(from 180deg, rgba(28,22,42,0.92) 0deg 360deg)'
+      : `conic-gradient(
+          from 180deg,
+          #9f7bff 0deg,
+          #6f46ff ${progressDegrees * 0.2}deg,
+          #ff4f9b ${progressDegrees * 0.68}deg,
+          #ffc083 ${progressDegrees}deg,
+          rgba(28,22,42,0.92) ${progressDegrees}deg 360deg
+        )`;
 
   return (
     <Card className="app-panel rounded-3xl p-6 h-full">
