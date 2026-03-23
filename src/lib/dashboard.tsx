@@ -251,9 +251,15 @@ export const parseTimerActionFromMessage = (message: string): ChatTimerAction | 
 
   if (!hasTimerContext) return null;
 
+  const secondsMatch = normalized.match(/\b(\d{1,5})\s*(s|sec|secs|seconde|secondes)\b/);
   const minutesMatch = normalized.match(/\b(\d{1,3})\s*(min|mins|minute|minutes)\b/);
+  const parsedSeconds = secondsMatch ? Number(secondsMatch[1]) : undefined;
   const parsedMinutes = minutesMatch ? Number(minutesMatch[1]) : undefined;
-  const minutes = Number.isFinite(parsedMinutes) ? Math.min(120, Math.max(5, Math.round(parsedMinutes!))) : undefined;
+  const minutes = Number.isFinite(parsedSeconds)
+    ? Math.max(1 / 60, (parsedSeconds as number) / 60)
+    : Number.isFinite(parsedMinutes)
+      ? Math.max(1 / 60, parsedMinutes as number)
+      : undefined;
 
   const mode = /\b(courte pause|pause courte|short)\b/.test(normalized)
     ? 'short'

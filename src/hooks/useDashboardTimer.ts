@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { DashboardTimerState } from '../lib/storage';
 
+const MIN_TIMER_MINUTES = 1 / 60;
+
 type TimerModeKey = 'focus' | 'short' | 'long';
 
 type TimerModeMap = Record<
@@ -53,7 +55,7 @@ export function useDashboardTimer({
   const alarmRef = useRef<HTMLAudioElement | null>(null);
   const timerStateHydratedRef = useRef(false);
 
-  const safeMinutes = Math.max(5, timerMinutes || 5);
+  const safeMinutes = Math.max(MIN_TIMER_MINUTES, timerMinutes || MIN_TIMER_MINUTES);
   const ringColor = timerModes[timerMode].color;
   const progress = Math.min(100, Math.max(0, ((safeMinutes * 60 - timeLeft) / (safeMinutes * 60)) * 100));
   const isInitialTime = Math.abs(timeLeft - safeMinutes * 60) < 0.5;
@@ -69,20 +71,21 @@ export function useDashboardTimer({
   };
 
   const setCustomTimerMinutes = (nextMinutes: number) => {
-    const clamped = Math.min(120, Math.max(5, Math.round(nextMinutes)));
+    const clamped = Math.max(MIN_TIMER_MINUTES, nextMinutes);
+    const durationSeconds = Math.max(1, Math.round(clamped * 60));
     setIsRunning(false);
     lastTickRef.current = null;
     setIsEditingTimer(false);
     setTimerMinutes(clamped);
-    setTimeLeft(clamped * 60);
-    setEditingTimerValue(clamped.toString());
+    setTimeLeft(durationSeconds);
+    setEditingTimerValue(durationSeconds.toString());
   };
 
   const commitTimerEdit = () => {
     const parsed = Number(editingTimerValue);
     if (Number.isFinite(parsed)) {
-      const clamped = Math.min(120, Math.max(5, parsed));
-      setCustomTimerMinutes(clamped);
+      const clampedSeconds = Math.max(1, Math.round(parsed));
+      setCustomTimerMinutes(clampedSeconds / 60);
     }
     setIsEditingTimer(false);
   };
@@ -107,8 +110,9 @@ export function useDashboardTimer({
     timerStateHydratedRef.current = true;
 
     const persistedMode = persistedTimerState.mode as TimerModeKey;
-    const nextMinutes = Math.min(120, Math.max(5, persistedTimerState.minutes || timerModes[persistedMode].minutes));
-    const cappedRemainingSeconds = Math.min(nextMinutes * 60, Math.max(0, persistedTimerState.remainingSeconds || 0));
+    const nextMinutes = Math.max(MIN_TIMER_MINUTES, persistedTimerState.minutes || timerModes[persistedMode].minutes);
+    const durationSeconds = Math.max(1, Math.round(nextMinutes * 60));
+    const cappedRemainingSeconds = Math.min(durationSeconds, Math.max(0, persistedTimerState.remainingSeconds || 0));
 
     setTimerMode(persistedMode);
     setTimerMinutes(nextMinutes);
@@ -153,7 +157,7 @@ export function useDashboardTimer({
     const requestedMode =
       timerAction.mode && timerAction.mode in timerModes ? (timerAction.mode as TimerModeKey) : timerMode;
     const requestedMinutes = Number.isFinite(timerAction.minutes)
-      ? Math.min(120, Math.max(5, Math.round(timerAction.minutes as number)))
+      ? Math.max(MIN_TIMER_MINUTES, timerAction.minutes as number)
       : timerAction.mode && timerAction.mode in timerModes
         ? timerModes[timerAction.mode as TimerModeKey].minutes
         : safeMinutes;

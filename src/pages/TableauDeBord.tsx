@@ -461,19 +461,19 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             onPresetSelect={setCustomTimerMinutes}
             onCustomClick={() => {
               setIsEditingTimer(true);
-              setEditingTimerValue(timerMinutes.toString());
+              setEditingTimerValue(Math.max(1, Math.round(safeMinutes * 60)).toString());
             }}
             onEditingValueChange={setEditingTimerValue}
             onEditingFocus={() => {
               setIsEditingTimer(true);
               if (!editingTimerValue) {
-                setEditingTimerValue(timerMinutes.toString());
+                setEditingTimerValue(Math.max(1, Math.round(safeMinutes * 60)).toString());
               }
             }}
             onEditingBlur={() => setIsEditingTimer(false)}
             onEditingCancel={() => {
               setIsEditingTimer(false);
-              setEditingTimerValue(timerMinutes.toString());
+              setEditingTimerValue(Math.max(1, Math.round(safeMinutes * 60)).toString());
             }}
             onEditingCommit={commitTimerEdit}
           />

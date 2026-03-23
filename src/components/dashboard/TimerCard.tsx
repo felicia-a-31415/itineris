@@ -62,6 +62,11 @@ export function TimerCard({
   onEditingCommit,
 }: TimerCardProps) {
   const customIsActive = isEditingTimer || !presetMinutes.includes(safeMinutes);
+  const durationSeconds = Math.max(1, Math.round(safeMinutes * 60));
+  const timerDurationLabel =
+    durationSeconds < 60 || durationSeconds % 60 !== 0
+      ? `${durationSeconds} sec`
+      : `${durationSeconds / 60} min`;
   const progressDegrees = progress * 3.6;
   const timerRingGradient =
     progressDegrees <= 0
@@ -122,14 +127,13 @@ export function TimerCard({
             <div className="absolute inset-3 rounded-full shadow-inner flex flex-col items-center justify-center bg-[linear-gradient(180deg,rgba(11,12,20,0.95),rgba(21,17,32,0.92))]">
               <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_52%)]" />
               <span className="text-3xl font-semibold text-[#F5F2F7]">{formatTime(timeLeft)}</span>
-              <span className="mt-1 text-xs app-muted">{timerMinutes} min</span>
+              <span className="mt-1 text-xs app-muted">{timerDurationLabel}</span>
             </div>
           </div>
 
           <div className="app-panel-soft rounded-2xl px-4 py-4 text-sm app-muted">
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-3">
               <span className="text-sm app-muted">Durée du minuteur</span>
-              <span className="text-xs text-white/40">Entre 5 et 120 min</span>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -167,9 +171,8 @@ export function TimerCard({
               <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                 <Input
                   type="number"
-                  min={5}
-                  max={120}
-                  step={5}
+                  min={1}
+                  step={1}
                   value={editingTimerValue}
                   onFocus={onEditingFocus}
                   onChange={(e) => onEditingValueChange(e.target.value)}
@@ -184,8 +187,9 @@ export function TimerCard({
                     }
                   }}
                   className="h-10 rounded-xl sm:max-w-[150px]"
-                  placeholder={`${timerMinutes}`}
+                  placeholder={`${durationSeconds}`}
                   autoFocus
+                  aria-label="Durée personnalisée en secondes"
                 />
                 <Button
                   type="button"
