@@ -15,6 +15,7 @@ type UseDashboardPersistenceParams = {
   userId?: string;
   loading: boolean;
   currentWeekStart: string;
+  timerPersistenceKey: string;
   tasks: DashboardTask[];
   setTasks: Dispatch<SetStateAction<DashboardTask[]>>;
   studyData: Record<string, number[]>;
@@ -37,6 +38,7 @@ export function useDashboardPersistence({
   userId,
   loading,
   currentWeekStart,
+  timerPersistenceKey,
   tasks,
   setTasks,
   studyData,
@@ -168,7 +170,7 @@ export function useDashboardPersistence({
 
   useEffect(() => {
     persistDashboardSnapshot();
-  }, [userId, tasks, studyData, sessionsByDay, messages, isDashboardHydrated, loading]);
+  }, [userId, tasks, studyData, sessionsByDay, messages, timerPersistenceKey, isDashboardHydrated, loading]);
 
   useEffect(() => {
     if (loading || !isDashboardHydrated || !userId) return;

@@ -189,10 +189,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     loading,
     location,
   });
+  const timerPersistenceKey = `${timerMode}:${safeMinutes}:${Math.round(timeLeft)}:${isRunning ? 1 : 0}`;
   const { isDashboardHydrated, persistDashboardSnapshot } = useDashboardPersistence({
     userId: user?.id,
     loading,
     currentWeekStart,
+    timerPersistenceKey,
     tasks,
     setTasks,
     studyData,
