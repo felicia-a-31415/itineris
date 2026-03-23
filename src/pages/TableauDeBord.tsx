@@ -189,7 +189,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     loading,
     location,
   });
-  const { isDashboardHydrated } = useDashboardPersistence({
+  const { isDashboardHydrated, persistDashboardSnapshot } = useDashboardPersistence({
     userId: user?.id,
     loading,
     currentWeekStart,
@@ -457,7 +457,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
               }
               startTimer();
             }}
-            onReset={resetTimerToCurrentDuration}
+            onReset={() => {
+              resetTimerToCurrentDuration();
+              persistDashboardSnapshot({
+                mode: timerMode,
+                minutes: safeMinutes,
+                remainingSeconds: Math.max(1, Math.round(safeMinutes * 60)),
+                isRunning: false,
+                updatedAt: Date.now(),
+              });
+            }}
             onPresetSelect={setCustomTimerMinutes}
             onCustomClick={() => {
               setIsEditingTimer(true);

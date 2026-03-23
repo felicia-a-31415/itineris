@@ -60,10 +60,37 @@ export function useDashboardPersistence({
   const buildTimerStateRef = useRef(buildTimerState);
   const hydrateTimerStateRef = useRef(hydrateTimerState);
   const resetHydrationGuardRef = useRef(resetHydrationGuard);
+  const tasksRef = useRef(tasks);
+  const studyDataRef = useRef(studyData);
+  const sessionsByDayRef = useRef(sessionsByDay);
+  const messagesRef = useRef(messages);
 
   buildTimerStateRef.current = buildTimerState;
   hydrateTimerStateRef.current = hydrateTimerState;
   resetHydrationGuardRef.current = resetHydrationGuard;
+  tasksRef.current = tasks;
+  studyDataRef.current = studyData;
+  sessionsByDayRef.current = sessionsByDay;
+  messagesRef.current = messages;
+
+  const persistDashboardSnapshot = (timerState?: DashboardTimerState) => {
+    if (loading || !isDashboardHydrated) return;
+
+    const payload = {
+      tasks: tasksRef.current,
+      studyData: studyDataRef.current,
+      sessionsByDay: sessionsByDayRef.current,
+      chatMessages: messagesRef.current,
+      timerState: timerState ?? buildTimerStateRef.current(),
+    };
+
+    saveDashboardDataToLocal(userId, payload);
+
+    if (userId) {
+      pendingRemoteSaveRef.current = payload;
+      pendingRemoteSaveUserIdRef.current = userId;
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -140,13 +167,7 @@ export function useDashboardPersistence({
   ]);
 
   useEffect(() => {
-    if (loading || !isDashboardHydrated) return;
-    const payload = { tasks, studyData, sessionsByDay, chatMessages: messages, timerState: buildTimerStateRef.current() };
-    saveDashboardDataToLocal(userId, payload);
-    if (userId) {
-      pendingRemoteSaveRef.current = payload;
-      pendingRemoteSaveUserIdRef.current = userId;
-    }
+    persistDashboardSnapshot();
   }, [userId, tasks, studyData, sessionsByDay, messages, isDashboardHydrated, loading]);
 
   useEffect(() => {
@@ -177,5 +198,5 @@ export function useDashboardPersistence({
     };
   }, [userId, isDashboardHydrated, loading, remoteSaveIntervalMs]);
 
-  return { isDashboardHydrated };
+  return { isDashboardHydrated, persistDashboardSnapshot };
 }
