@@ -529,6 +529,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           averageDailyMinutes={averageDailyMinutes}
           weekDeltaMinutes={weekDeltaMinutes}
           getDayName={getDayName}
+          onToday={handleToday}
+          onPrevRange={handlePrevRange}
+          onNextRange={handleNextRange}
         />
 
         <TaskCreationDialog

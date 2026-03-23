@@ -1,3 +1,6 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
 
 type StudyStatsCardProps = {
@@ -8,6 +11,9 @@ type StudyStatsCardProps = {
   averageDailyMinutes: number;
   weekDeltaMinutes: number;
   getDayName: (date: Date) => string;
+  onToday: () => void;
+  onPrevRange: () => void;
+  onNextRange: () => void;
 };
 
 export function StudyStatsCard({
@@ -18,12 +24,43 @@ export function StudyStatsCard({
   averageDailyMinutes,
   weekDeltaMinutes,
   getDayName,
+  onToday,
+  onPrevRange,
+  onNextRange,
 }: StudyStatsCardProps) {
   return (
     <Card className="app-panel rounded-3xl p-6 space-y-2">
-      <div className="flex flex-col gap-0">
+      <div className="flex flex-col gap-4">
         <p className="app-muted text-sm">Temps étudié</p>
-        <div className="flex flex-wrap items-center justify-between gap-3"></div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              className="h-11 rounded-full border-white/10 bg-[rgba(21,18,31,0.82)] px-6 text-base font-semibold text-[#F5F2F7] hover:bg-[rgba(37,29,54,0.92)]"
+              onClick={onToday}
+            >
+              Cette semaine
+            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                onClick={onPrevRange}
+                variant="ghost"
+                className="h-11 w-11 rounded-full border border-transparent bg-transparent p-0 text-[#F5F2F7] hover:bg-white/6"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <Button
+                type="button"
+                onClick={onNextRange}
+                variant="ghost"
+                className="h-11 w-11 rounded-full border border-transparent bg-transparent p-0 text-[#F5F2F7] hover:bg-white/6"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="mt-2 overflow-x-auto">

@@ -65,10 +65,11 @@ export function TimerCard({
   const progressDegrees = progress * 3.6;
   const timerRingGradient = `conic-gradient(
     from 180deg,
-    #8f6bff 0deg,
-    #ff5f8f ${Math.max(32, progressDegrees * 0.68)}deg,
-    #ffb07c ${progressDegrees}deg,
-    rgba(34,28,48,0.88) ${progressDegrees}deg 360deg
+    #9f7bff 0deg,
+    #6f46ff ${Math.max(18, progressDegrees * 0.2)}deg,
+    #ff4f9b ${Math.max(42, progressDegrees * 0.68)}deg,
+    #ffc083 ${progressDegrees}deg,
+    rgba(28,22,42,0.92) ${progressDegrees}deg 360deg
   )`;
 
   return (
@@ -112,10 +113,11 @@ export function TimerCard({
             style={{
               background: timerRingGradient,
               boxShadow:
-                '0 0 18px rgba(143,107,255,0.52), 0 0 42px rgba(255,95,143,0.34), 0 0 92px rgba(255,176,124,0.18)',
+                '0 0 22px rgba(159,123,255,0.72), 0 0 54px rgba(255,79,155,0.48), 0 0 118px rgba(255,192,131,0.3)',
             }}
           >
-            <div className="absolute inset-3 rounded-full shadow-inner flex flex-col items-center justify-center bg-[linear-gradient(180deg,rgba(11,12,20,0.96),rgba(21,17,32,0.94))]">
+            <div className="absolute inset-3 rounded-full shadow-inner flex flex-col items-center justify-center bg-[linear-gradient(180deg,rgba(11,12,20,0.95),rgba(21,17,32,0.92))]">
+              <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_52%)]" />
               <span className="text-3xl font-semibold text-[#F5F2F7]">{formatTime(timeLeft)}</span>
               <span className="mt-1 text-xs app-muted">{timerMinutes} min</span>
             </div>
