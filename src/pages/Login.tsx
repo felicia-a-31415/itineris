@@ -118,7 +118,7 @@ export function Login() {
       return;
     }
 
-    setMessage('Email envoyé. Vérifie ta boite de réception puis ouvre le lien Supabase pour choisir un nouveau mot de passe.');
+    setMessage('Courriel envoyé. Vérifie ta boite de réception pour choisir un nouveau mot de passe.');
   };
 
   return (

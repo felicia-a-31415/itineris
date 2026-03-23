@@ -36,17 +36,17 @@ export function StudyStatsCard({
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
-              className="h-11 rounded-full border-white/10 bg-[rgba(21,18,31,0.82)] px-6 text-base font-semibold text-[#F5F2F7] hover:bg-[rgba(37,29,54,0.92)]"
+              className="h-11 rounded-full px-5"
               onClick={onToday}
             >
-              Cette semaine
+              Aujourd&apos;hui
             </Button>
             <div className="flex items-center gap-2">
               <Button
                 type="button"
                 onClick={onPrevRange}
                 variant="ghost"
-                className="h-11 w-11 rounded-full border border-transparent bg-transparent p-0 text-[#F5F2F7] hover:bg-white/6"
+                className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#F5F2F7] p-0 hover:bg-white/6"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
@@ -54,7 +54,7 @@ export function StudyStatsCard({
                 type="button"
                 onClick={onNextRange}
                 variant="ghost"
-                className="h-11 w-11 rounded-full border border-transparent bg-transparent p-0 text-[#F5F2F7] hover:bg-white/6"
+                className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#F5F2F7] p-0 hover:bg-white/6"
               >
                 <ChevronRight className="h-5 w-5" />
               </Button>
