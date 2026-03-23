@@ -140,7 +140,8 @@ export function useDashboardTimer({
     }
 
     setTimeLeft(remainingAfterResume);
-    setIsRunning(true);
+    setIsRunning(false);
+    lastTickRef.current = null;
     return true;
   };
 
