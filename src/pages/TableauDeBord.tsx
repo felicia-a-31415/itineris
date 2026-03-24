@@ -46,6 +46,8 @@ interface TableauDeBordScreenProps {
   userName?: string;
 }
 
+type ExpandedPanel = 'timer' | 'chat' | 'agenda' | null;
+
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -122,6 +124,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [studyData, setStudyData] = useState<Record<string, number[]>>(() =>
     createDefaultStudyData(currentWeekStart)
   );
+  const [expandedPanel, setExpandedPanel] = useState<ExpandedPanel>(null);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
   const {
     timerMinutes,
@@ -219,6 +222,25 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   }, [messages, isSendingChat, isDashboardHydrated]);
 
   useEffect(() => {
+    if (!expandedPanel) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setExpandedPanel(null);
+      }
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [expandedPanel]);
+
+  useEffect(() => {
     setStudyData((prev) => {
       if (prev[currentWeekStart]) return prev;
       return { ...prev, [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] };
@@ -246,6 +268,116 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     monthOffset,
     monthAnchor,
   });
+
+  const renderTimerCard = (isExpanded = false) => (
+    <TimerCard
+      timerMode={timerMode}
+      timerMinutes={timerMinutes}
+      timeLeft={timeLeft}
+      progress={progress}
+      ringColor={ringColor}
+      isRunning={isRunning}
+      isInitialTime={isInitialTime}
+      safeMinutes={safeMinutes}
+      isEditingTimer={isEditingTimer}
+      editingTimerValue={editingTimerValue}
+      presetMinutes={TIMER_PRESET_MINUTES}
+      formatTime={formatTime}
+      isExpanded={isExpanded}
+      onExpandToggle={() => setExpandedPanel(isExpanded ? null : 'timer')}
+      onModeSelect={(mode) => {
+        const next = TIMER_MODES[mode];
+        setTimerMode(mode);
+        setIsEditingTimer(false);
+        setCustomTimerMinutes(next.minutes);
+      }}
+      onToggleRunning={() => {
+        if (isRunning) {
+          setIsRunning(false);
+          return;
+        }
+        startTimer();
+      }}
+      onReset={() => {
+        resetTimerToCurrentDuration();
+        persistDashboardSnapshot({
+          mode: timerMode,
+          minutes: safeMinutes,
+          remainingSeconds: Math.max(1, Math.round(safeMinutes * 60)),
+          isRunning: false,
+          updatedAt: Date.now(),
+        });
+      }}
+      onPresetSelect={setCustomTimerMinutes}
+      onCustomClick={() => {
+        setIsEditingTimer(true);
+        setEditingTimerValue(Math.max(1, Math.round(safeMinutes * 60)).toString());
+      }}
+      onEditingValueChange={setEditingTimerValue}
+      onEditingFocus={() => {
+        setIsEditingTimer(true);
+        if (!editingTimerValue) {
+          setEditingTimerValue(Math.max(1, Math.round(safeMinutes * 60)).toString());
+        }
+      }}
+      onEditingBlur={() => setIsEditingTimer(false)}
+      onEditingCancel={() => {
+        setIsEditingTimer(false);
+        setEditingTimerValue(Math.max(1, Math.round(safeMinutes * 60)).toString());
+      }}
+      onEditingCommit={commitTimerEdit}
+    />
+  );
+
+  const renderChatCard = (isExpanded = false) => (
+    <ChatCard
+      chatScrollRef={chatScrollRef}
+      messages={messages}
+      isSendingChat={isSendingChat}
+      chatInput={chatInput}
+      setChatInput={setChatInput}
+      onSend={() => void handleSendChat()}
+      renderFormattedMessage={renderFormattedMessage}
+      isExpanded={isExpanded}
+      onExpandToggle={() => setExpandedPanel(isExpanded ? null : 'chat')}
+    />
+  );
+
+  const renderAgendaCard = (isExpanded = false) => (
+    <AgendaCard
+      timeView={timeView}
+      calendarMode={calendarMode}
+      uploadNotice={uploadNotice}
+      tasksListContent={tasksListContent}
+      headerDates={headerDates}
+      calendarDates={calendarDates}
+      monthRangeStart={monthRangeStart}
+      showAddDialog={showAddDialog}
+      modalTaskId={modalTaskId}
+      taskDetailsId={taskDetailsId}
+      editingNameId={editingNameId}
+      editingNameValue={editingNameValue}
+      onTimeViewChange={setTimeView}
+      onCalendarModeChange={setCalendarMode}
+      onToday={handleToday}
+      onPrevRange={handlePrevRange}
+      onNextRange={handleNextRange}
+      onAgendaImageUpload={handleAgendaImageUpload}
+      isCurrentRangeToday={isCurrentRangeToday}
+      getDayName={getDayName}
+      formatDate={formatDate}
+      getTasksForDate={getTasksForDate}
+      onCreateTask={createTaskForDate}
+      onToggleTask={toggleTask}
+      onEditingNameValueChange={setEditingNameValue}
+      onCommitEditingName={commitEditingName}
+      onCancelEditingName={cancelEditingName}
+      onTaskDetailsChange={setTaskDetailsId}
+      renderTaskInfoPopoverContent={renderTaskInfoPopoverContent}
+      isExpanded={isExpanded}
+      onExpandToggle={() => setExpandedPanel(isExpanded ? null : 'agenda')}
+    />
+  );
 
   useEffect(() => {
     const nextPositions: Record<string, number> = {};
@@ -433,104 +565,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         ) : null}
 
         <div className="grid gap-6 items-stretch md:grid-cols-2">
-          <TimerCard
-            timerMode={timerMode}
-            timerMinutes={timerMinutes}
-            timeLeft={timeLeft}
-            progress={progress}
-            ringColor={ringColor}
-            isRunning={isRunning}
-            isInitialTime={isInitialTime}
-            safeMinutes={safeMinutes}
-            isEditingTimer={isEditingTimer}
-            editingTimerValue={editingTimerValue}
-            presetMinutes={TIMER_PRESET_MINUTES}
-            formatTime={formatTime}
-            onModeSelect={(mode) => {
-              const next = TIMER_MODES[mode];
-              setTimerMode(mode);
-              setIsEditingTimer(false);
-              setCustomTimerMinutes(next.minutes);
-            }}
-            onToggleRunning={() => {
-              if (isRunning) {
-                setIsRunning(false);
-                return;
-              }
-              startTimer();
-            }}
-            onReset={() => {
-              resetTimerToCurrentDuration();
-              persistDashboardSnapshot({
-                mode: timerMode,
-                minutes: safeMinutes,
-                remainingSeconds: Math.max(1, Math.round(safeMinutes * 60)),
-                isRunning: false,
-                updatedAt: Date.now(),
-              });
-            }}
-            onPresetSelect={setCustomTimerMinutes}
-            onCustomClick={() => {
-              setIsEditingTimer(true);
-              setEditingTimerValue(Math.max(1, Math.round(safeMinutes * 60)).toString());
-            }}
-            onEditingValueChange={setEditingTimerValue}
-            onEditingFocus={() => {
-              setIsEditingTimer(true);
-              if (!editingTimerValue) {
-                setEditingTimerValue(Math.max(1, Math.round(safeMinutes * 60)).toString());
-              }
-            }}
-            onEditingBlur={() => setIsEditingTimer(false)}
-            onEditingCancel={() => {
-              setIsEditingTimer(false);
-              setEditingTimerValue(Math.max(1, Math.round(safeMinutes * 60)).toString());
-            }}
-            onEditingCommit={commitTimerEdit}
-          />
-
-          <ChatCard
-            chatScrollRef={chatScrollRef}
-            messages={messages}
-            isSendingChat={isSendingChat}
-            chatInput={chatInput}
-            setChatInput={setChatInput}
-            onSend={() => void handleSendChat()}
-            renderFormattedMessage={renderFormattedMessage}
-          />
+          {renderTimerCard()}
+          {renderChatCard()}
         </div>
 
-        <AgendaCard
-          timeView={timeView}
-          calendarMode={calendarMode}
-          uploadNotice={uploadNotice}
-          tasksListContent={tasksListContent}
-          headerDates={headerDates}
-          calendarDates={calendarDates}
-          monthRangeStart={monthRangeStart}
-          showAddDialog={showAddDialog}
-          modalTaskId={modalTaskId}
-          taskDetailsId={taskDetailsId}
-          editingNameId={editingNameId}
-          editingNameValue={editingNameValue}
-          onTimeViewChange={setTimeView}
-          onCalendarModeChange={setCalendarMode}
-          onToday={handleToday}
-          onPrevRange={handlePrevRange}
-          onNextRange={handleNextRange}
-          onAgendaImageUpload={handleAgendaImageUpload}
-          isCurrentRangeToday={isCurrentRangeToday}
-          getDayName={getDayName}
-          formatDate={formatDate}
-          getTasksForDate={getTasksForDate}
-          onCreateTask={createTaskForDate}
-          onToggleTask={toggleTask}
-          onEditingNameValueChange={setEditingNameValue}
-          onCommitEditingName={commitEditingName}
-          onCancelEditingName={cancelEditingName}
-          onTaskDetailsChange={setTaskDetailsId}
-          renderTaskInfoPopoverContent={renderTaskInfoPopoverContent}
-        />
+        {renderAgendaCard()}
 
         <StudyStatsCard
           weekDates={weekDates}
@@ -593,6 +632,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           onContinueWithoutAccount={enableGuestAccess}
         />
       </div>
+
+      {expandedPanel ? (
+        <div className="fixed inset-0 z-50 bg-[rgba(8,10,18,0.82)] p-3 backdrop-blur-xl md:p-5">
+          <div className="mx-auto h-full max-w-[1440px]">
+            {expandedPanel === 'timer' ? renderTimerCard(true) : null}
+            {expandedPanel === 'chat' ? renderChatCard(true) : null}
+            {expandedPanel === 'agenda' ? renderAgendaCard(true) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

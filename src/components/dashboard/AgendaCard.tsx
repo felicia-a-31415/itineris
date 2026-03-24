@@ -1,5 +1,5 @@
 import type React from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Info, List, Sparkles, Upload } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Info, List, Maximize2, Minimize2, Sparkles, Upload } from 'lucide-react';
 
 import { type DashboardTask } from '../../lib/storage';
 import { Button } from '../../ui/button';
@@ -41,6 +41,8 @@ type AgendaCardProps = {
   onCancelEditingName: () => void;
   onTaskDetailsChange: (taskId: string | null) => void;
   renderTaskInfoPopoverContent: (task: AgendaTask, close: () => void) => React.ReactNode;
+  isExpanded?: boolean;
+  onExpandToggle?: () => void;
 };
 
 export function AgendaCard({
@@ -73,11 +75,27 @@ export function AgendaCard({
   onCancelEditingName,
   onTaskDetailsChange,
   renderTaskInfoPopoverContent,
+  isExpanded = false,
+  onExpandToggle,
 }: AgendaCardProps) {
   return (
-    <Card className="app-panel rounded-3xl p-6 space-y-2">
+    <Card className={`app-panel rounded-3xl p-6 space-y-2 ${isExpanded ? 'min-h-full overflow-auto' : ''}`}>
       <div className={`flex flex-col ${calendarMode === 'tasks' ? 'gap-2' : 'gap-4'}`}>
-        <p className="app-muted text-sm">Agenda en ligne</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="app-muted text-sm">Agenda en ligne</p>
+          {onExpandToggle ? (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onExpandToggle}
+              className="h-9 w-9 rounded-full p-0 text-white/72 hover:bg-white/6 hover:text-white"
+              aria-label={isExpanded ? "Réduire l'agenda" : "Agrandir l'agenda"}
+              title={isExpanded ? "Réduire l'agenda" : "Agrandir l'agenda"}
+            >
+              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </Button>
+          ) : null}
+        </div>
         <div className="flex flex-wrap items-start justify-between gap-3">
           {calendarMode === 'calendar' ? (
             <div className="flex flex-wrap items-center gap-3">
