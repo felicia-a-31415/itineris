@@ -29,6 +29,112 @@ type UseDashboardTasksParams = {
   isValidTaskTime: (value?: string) => boolean;
 };
 
+const MAX_ANTHROPIC_IMAGE_BYTES = 5 * 1024 * 1024;
+
+async function readFileAsDataUrl(file: Blob): Promise<string> {
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        reject(new Error("Impossible de lire l'image."));
+        return;
+      }
+      resolve(reader.result);
+    };
+
+    reader.onerror = () => reject(new Error("Impossible de lire l'image."));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+  const dataUrl = await readFileAsDataUrl(file);
+
+  return await new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Impossible de charger l'image."));
+    image.src = dataUrl;
+  });
+}
+
+async function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
+  return await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("Impossible de compresser l'image."));
+          return;
+        }
+        resolve(blob);
+      },
+      'image/jpeg',
+      quality
+    );
+  });
+}
+
+async function prepareImageForAnthropic(file: File): Promise<{ mediaType: string; data: string }> {
+  if (file.size <= MAX_ANTHROPIC_IMAGE_BYTES) {
+    const dataUrl = await readFileAsDataUrl(file);
+    const [, base64 = ''] = dataUrl.split(',');
+    if (!base64) throw new Error("Impossible de convertir l'image.");
+    return {
+      mediaType: file.type || 'image/jpeg',
+      data: base64,
+    };
+  }
+
+  const image = await loadImageFromFile(file);
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  if (!context) {
+    throw new Error("Impossible de préparer l'image.");
+  }
+
+  let width = image.naturalWidth;
+  let height = image.naturalHeight;
+  const maxDimension = 1800;
+
+  if (Math.max(width, height) > maxDimension) {
+    const scale = maxDimension / Math.max(width, height);
+    width = Math.max(1, Math.round(width * scale));
+    height = Math.max(1, Math.round(height * scale));
+  }
+
+  const attempts = [
+    { scale: 1, quality: 0.82 },
+    { scale: 0.9, quality: 0.72 },
+    { scale: 0.8, quality: 0.62 },
+    { scale: 0.7, quality: 0.52 },
+  ];
+
+  for (const attempt of attempts) {
+    const attemptWidth = Math.max(1, Math.round(width * attempt.scale));
+    const attemptHeight = Math.max(1, Math.round(height * attempt.scale));
+    canvas.width = attemptWidth;
+    canvas.height = attemptHeight;
+    context.clearRect(0, 0, attemptWidth, attemptHeight);
+    context.drawImage(image, 0, 0, attemptWidth, attemptHeight);
+
+    const blob = await canvasToBlob(canvas, attempt.quality);
+    if (blob.size > MAX_ANTHROPIC_IMAGE_BYTES) continue;
+
+    const dataUrl = await readFileAsDataUrl(blob);
+    const [, base64 = ''] = dataUrl.split(',');
+    if (!base64) throw new Error("Impossible de convertir l'image.");
+
+    return {
+      mediaType: 'image/jpeg',
+      data: base64,
+    };
+  }
+
+  throw new Error("L'image est trop lourde. Réduis-la ou prends une capture plus légère.");
+}
+
 export function useDashboardTasks({
   taskColors,
   formatDate,
@@ -187,28 +293,7 @@ export function useDashboardTasks({
     setUploadNotice(`Analyse de la photo en cours : ${file.name}`);
 
     try {
-      const imageBase64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = () => {
-          const result = reader.result;
-          if (typeof result !== 'string') {
-            reject(new Error("Impossible de lire l'image."));
-            return;
-          }
-
-          const [, base64 = ''] = result.split(',');
-          if (!base64) {
-            reject(new Error("Impossible de convertir l'image."));
-            return;
-          }
-
-          resolve(base64);
-        };
-
-        reader.onerror = () => reject(new Error("Impossible de lire l'image."));
-        reader.readAsDataURL(file);
-      });
+      const preparedImage = await prepareImageForAnthropic(file);
 
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-chat`, {
         method: 'POST',
@@ -226,8 +311,8 @@ export function useDashboardTasks({
             timer: {},
             currentDate: currentDateContext,
             image: {
-              mediaType: file.type || 'image/jpeg',
-              data: imageBase64,
+              mediaType: preparedImage.mediaType,
+              data: preparedImage.data,
               fileName: file.name,
             },
           },
