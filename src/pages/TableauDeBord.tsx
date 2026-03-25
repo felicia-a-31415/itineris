@@ -567,9 +567,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
         ) : null}
 
-        <div className="grid items-stretch gap-6 md:grid-cols-2">
-          <div className="md:aspect-square">{renderTimerCard()}</div>
-          <div className="md:aspect-square">{renderChatCard()}</div>
+        <div className="grid items-stretch gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="w-full min-w-0 md:aspect-square">{renderTimerCard()}</div>
+          <div className="w-full min-w-0 md:aspect-square">{renderChatCard()}</div>
         </div>
 
         {renderAgendaCard()}
