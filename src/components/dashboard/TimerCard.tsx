@@ -83,13 +83,13 @@ export function TimerCard({
           #ffc083 ${progressDegrees}deg,
           rgba(28,22,42,0.92) ${progressDegrees}deg 360deg
         )`;
-  const timerSizeClass = isExpanded ? 'h-72 w-72 md:h-[24rem] md:w-[24rem]' : 'h-48 w-48';
-  const innerRingInsetClass = isExpanded ? 'inset-4 md:inset-5' : 'inset-3';
-  const timeLabelClass = isExpanded ? 'text-5xl md:text-6xl' : 'text-3xl';
+  const timerSizeClass = isExpanded ? 'h-72 w-72 md:h-[22rem] md:w-[22rem]' : 'h-48 w-48';
+  const innerRingInsetClass = isExpanded ? 'inset-4' : 'inset-3';
+  const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-3xl';
 
   return (
     <Card
-      className={`app-panel rounded-3xl p-6 ${isExpanded ? 'flex h-full flex-col overflow-auto md:p-10' : 'h-full'}`}
+      className={`app-panel w-full rounded-3xl p-6 ${isExpanded ? 'flex h-full flex-col overflow-auto' : 'h-full'}`}
     >
       <div className="mb-2 flex items-center justify-between gap-3">
         <p className="app-muted text-sm">Minuteur</p>
@@ -106,8 +106,8 @@ export function TimerCard({
           </Button>
         ) : null}
       </div>
-      <div className={`flex flex-col items-center gap-7 pt-2 ${isExpanded ? 'flex-1 justify-center' : 'justify-start'}`}>
-          <div className={`flex flex-wrap justify-center ${isExpanded ? 'gap-4' : 'gap-3.5'}`}>
+      <div className={`flex flex-1 flex-col items-center justify-center gap-7 ${isExpanded ? 'py-6' : 'py-2'}`}>
+          <div className="flex flex-wrap justify-center gap-3.5">
             {MODE_OPTIONS.map(({ key, label }) => {
               const isActive = timerMode === key;
               return (
@@ -115,9 +115,7 @@ export function TimerCard({
                   key={key}
                   type="button"
                   onClick={() => onModeSelect(key)}
-                  className={`rounded-xl border font-semibold transition shadow-sm ${
-                    isExpanded ? 'px-4 py-2.5 text-base' : 'px-3 py-2 text-sm'
-                  }`}
+                  className="rounded-xl border px-3 py-2 text-sm font-semibold transition shadow-sm"
                   style={
                     isActive
                       ? {
@@ -156,9 +154,9 @@ export function TimerCard({
             </div>
           </div>
 
-          <div className={`app-panel-soft rounded-2xl text-sm app-muted ${isExpanded ? 'w-full max-w-2xl px-6 py-5' : 'px-4 py-4'}`}>
+          <div className={`app-panel-soft rounded-2xl px-4 py-4 text-sm app-muted ${isExpanded ? 'w-full max-w-xl' : ''}`}>
             <div className="mb-3">
-              <span className={`${isExpanded ? 'text-base' : 'text-sm'} app-muted`}>Durée du minuteur</span>
+              <span className="text-sm app-muted">Durée du minuteur</span>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -169,9 +167,7 @@ export function TimerCard({
                     key={minutes}
                     type="button"
                     onClick={() => onPresetSelect(minutes)}
-                    className={`rounded-xl border font-medium transition ${
-                      isExpanded ? 'h-10 px-4 text-sm' : 'h-9 px-3 text-xs'
-                    } ${
+                    className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
                       isActive
                         ? 'border-[#6d42ff] bg-[#6d42ff] text-white'
                         : 'border-white/10 bg-[rgba(20,17,30,0.82)] text-[#F5F2F7] hover:bg-[rgba(40,28,60,0.92)]'
@@ -184,9 +180,7 @@ export function TimerCard({
               <button
                 type="button"
                 onClick={onCustomClick}
-                className={`rounded-xl border font-medium transition ${
-                  isExpanded ? 'h-10 px-4 text-sm' : 'h-9 px-3 text-xs'
-                } ${
+                className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
                   customIsActive
                     ? 'border-[#6d42ff] bg-[#6d42ff] text-white'
                     : 'border-white/10 bg-[rgba(20,17,30,0.82)] text-[#F5F2F7] hover:bg-[rgba(40,28,60,0.92)]'
@@ -232,10 +226,10 @@ export function TimerCard({
             ) : null}
           </div>
 
-          <div className={`flex items-center justify-center ${isExpanded ? 'gap-4 pt-2' : 'gap-3'}`}>
+          <div className="flex items-center justify-center gap-3">
             <Button
               onClick={onToggleRunning}
-              className={`${isExpanded ? 'h-12 min-w-[156px] px-6 text-base' : 'h-10 min-w-[124px] px-4'} rounded-xl`}
+              className="h-10 min-w-[124px] rounded-xl px-4"
             >
               {isRunning ? (
                 <>
@@ -253,11 +247,11 @@ export function TimerCard({
               onClick={onReset}
               type="button"
               variant="ghost"
-              className={`${isExpanded ? 'h-12 w-12' : 'h-10 w-10'} rounded-xl p-0 text-white/92 hover:bg-transparent hover:text-white`}
+              className="h-10 w-10 rounded-xl p-0 text-white/92 hover:bg-transparent hover:text-white"
               aria-label="Réinitialiser le minuteur"
               title="Réinitialiser le minuteur"
             >
-              <RotateCcw className={`${isExpanded ? 'h-7 w-7' : 'h-6 w-6'} stroke-[2.75]`} />
+              <RotateCcw className="h-6 w-6 stroke-[2.75]" />
             </Button>
           </div>
       </div>
