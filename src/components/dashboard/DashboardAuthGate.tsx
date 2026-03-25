@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Mail } from 'lucide-react';
 
 import { useAuth } from '../../lib/auth';
 import { Button } from '../../ui/button';
@@ -35,10 +35,6 @@ export function DashboardAuthGate({
   }, [open, initialMode]);
 
   if (!open) return null;
-
-  const isSignup = mode === 'signup';
-  const isLogin = mode === 'login';
-  const isReset = mode === 'reset';
 
   const getRecoveryRedirectUrl = () => {
     const basePath = import.meta.env.BASE_URL ?? '/';
@@ -102,15 +98,15 @@ export function DashboardAuthGate({
       </div>
 
       <div className="relative z-10 flex min-h-screen items-center justify-center p-4 md:p-8">
-        <div className="w-full max-w-[38rem] rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,rgba(16,13,26,0.97),rgba(58,18,47,0.82),rgba(158,56,90,0.7))] px-6 py-7 text-white shadow-[0_32px_90px_rgba(0,0,0,0.55)] md:min-h-[40rem] md:px-10 md:py-9">
-          <div className="mx-auto flex h-full max-w-[30rem] flex-col justify-center">
+        <div className="w-full max-w-[34rem] rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,rgba(16,13,26,0.96),rgba(76,16,58,0.72),rgba(221,73,102,0.64))] px-6 py-7 text-white shadow-[0_32px_90px_rgba(0,0,0,0.55)] md:min-h-[34rem] md:px-9 md:py-8">
+          <div className="mx-auto flex h-full max-w-[28rem] flex-col justify-center">
             {mode === 'choice' ? (
-              <div className="space-y-8 text-left">
-                <div className="space-y-4">
+              <div className="space-y-6 text-center">
+                <div className="space-y-3">
                   <h1 className="text-5xl font-semibold tracking-tight text-white md:text-6xl">Itineris</h1>
                   <p className="text-lg text-white/84 md:text-xl">Votre chemin vers la réussite</p>
                 </div>
-                <div className="grid gap-4 pt-1">
+                <div className="grid gap-3 pt-2">
                   <Button
                     onClick={() => setMode('signup')}
                     className="h-14 rounded-[22px] bg-[#6A39FF] text-lg text-white hover:bg-[#5D31E4]"
@@ -121,47 +117,28 @@ export function DashboardAuthGate({
                     onClick={onContinueWithoutAccount}
                     className="h-14 rounded-[22px] bg-[#2b2d56] text-lg text-white hover:bg-[#333663]"
                   >
-                    Rester déconnecté
+                    Continuer sans compte
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 </div>
                 <div className="text-base text-white/80">
-                  Tu as déjà un compte ?{' '}
+                  Tu as deja un compte ?{' '}
                   <button type="button" onClick={() => setMode('login')} className="underline underline-offset-4">
                     Se connecter
                   </button>
                 </div>
-                <p className="max-w-[28rem] text-sm leading-6 text-white/58">
-                  En continuant, tu acceptes les conditions d’utilisation et la politique de confidentialité.
-                </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-7 text-left">
-                <button
-                  type="button"
-                  onClick={() => setMode(isReset ? 'login' : 'choice')}
-                  className="inline-flex items-center gap-2 text-sm text-white/72 transition hover:text-white"
-                  disabled={isSubmitting}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Retour
-                </button>
-
+              <form onSubmit={handleSubmit} className="space-y-6 text-center">
                 <div className="space-y-3">
-                  <h1 className="text-5xl font-semibold tracking-tight text-white md:text-6xl">
-                    {isSignup ? 'Itineris' : isLogin ? 'Bon retour' : 'Mot de passe oublié ?'}
-                  </h1>
-                  <p className="text-lg leading-8 text-white/82 md:text-xl">
-                    {isSignup
-                      ? 'Votre chemin vers la réussite'
-                      : isLogin
-                        ? 'Connecte-toi pour accéder à ton tableau de bord.'
-                        : 'On t’enverra un lien pour réinitialiser ton mot de passe.'}
+                  <h1 className="text-5xl font-semibold tracking-tight text-white md:text-6xl">Itineris</h1>
+                  <p className="text-lg text-white/84 md:text-xl">
+                    {mode === 'reset' ? 'Récupère l’accès à ton compte' : 'Votre chemin vers la réussite'}
                   </p>
                 </div>
 
-                <div className="space-y-5 pt-2">
-                  {isSignup ? (
+                <div className="space-y-5 pt-2 text-left">
+                  {mode === 'signup' ? (
                     <div className="relative">
                       <Input
                         value=""
@@ -173,7 +150,7 @@ export function DashboardAuthGate({
                     </div>
                   ) : null}
 
-                  <div className="relative space-y-2">
+                  <div className="relative">
                     <Input
                       type="email"
                       value={email}
@@ -183,43 +160,28 @@ export function DashboardAuthGate({
                       disabled={isSubmitting}
                       required
                     />
-                    {isSignup ? (
-                      <p className="text-sm leading-6 text-white/58">
-                        Tu as déjà un compte ?{' '}
-                        <button
-                          type="button"
-                          onClick={() => setMode('login')}
-                          className="underline underline-offset-4"
-                        >
-                          Connecte-toi ici
-                        </button>
-                        .
-                      </p>
-                    ) : null}
+                    <Mail className="pointer-events-none absolute right-0 top-1/2 h-5 w-5 -translate-y-1/2 text-white/0" />
                   </div>
 
-                  {!isReset ? (
-                    <div className="relative space-y-2">
+                  {mode !== 'reset' ? (
+                    <div className="relative">
                       <Input
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={(event) => setPassword(event.target.value)}
-                        placeholder="Mot de passe"
-                        className="h-12 rounded-none border-0 border-b border-white/42 bg-transparent px-0 pr-12 text-[1.8rem] leading-none text-white placeholder:text-white/46 focus-visible:ring-0"
-                        disabled={isSubmitting}
-                        required
-                      />
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(event) => setPassword(event.target.value)}
+                          placeholder="Mot de passe"
+                          className="h-12 rounded-none border-0 border-b border-white/42 bg-transparent px-0 pr-12 text-[1.8rem] leading-none text-white placeholder:text-white/46 focus-visible:ring-0"
+                          disabled={isSubmitting}
+                          required
+                        />
                       <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute right-0 top-6 -translate-y-1/2 text-white/88 hover:text-white"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 text-white/88 hover:text-white"
                         disabled={isSubmitting}
                       >
                         {showPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
                       </button>
-                      {isSignup ? (
-                        <p className="text-sm leading-6 text-white/58">6+ caractères minimum.</p>
-                      ) : null}
                     </div>
                   ) : null}
                 </div>
@@ -231,19 +193,20 @@ export function DashboardAuthGate({
                   </div>
                 ) : null}
 
-                {isLogin ? (
-                  <div className="pt-1 text-base text-white/78">
-                    <button
-                      type="button"
-                      onClick={() => setMode('reset')}
-                      className="underline underline-offset-4"
-                    >
-                      Mot de passe oublié
-                    </button>
-                  </div>
-                ) : null}
+                <div className="flex items-center justify-center gap-3 pt-1 text-base text-white/78">
+                  <button
+                    type="button"
+                    onClick={() => (mode === 'reset' ? setMode('login') : setMode('reset'))}
+                    className="inline-flex items-center gap-2 underline underline-offset-4"
+                  >
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#6A39FF] text-base font-semibold text-white">
+                      ✓
+                    </span>
+                    {mode === 'reset' ? 'Retour à la connexion' : 'Mot de passe oublié'}
+                  </button>
+                </div>
 
-                <div className="grid gap-3 pt-1">
+                <div className="grid gap-3 pt-1 sm:grid-cols-2">
                   <Button
                     type="submit"
                     disabled={isSubmitting}
@@ -251,9 +214,9 @@ export function DashboardAuthGate({
                   >
                     {isSubmitting
                       ? 'Chargement...'
-                      : isSignup
+                      : mode === 'signup'
                         ? 'Continuer'
-                        : isReset
+                        : mode === 'reset'
                           ? 'Envoyer le lien'
                           : 'Se connecter'}
                   </Button>
@@ -262,19 +225,19 @@ export function DashboardAuthGate({
                     onClick={onContinueWithoutAccount}
                     className="h-14 rounded-[22px] bg-[#2b2d56] text-lg text-white hover:bg-[#333663]"
                   >
-                    Rester déconnecté
+                    Continuer sans compte
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 </div>
 
                 <div className="text-base text-white/80">
-                  {isSignup ? 'Tu as déjà un compte ? ' : 'Pas encore de compte ? '}
+                  {mode === 'signup' ? 'Tu as déjà un compte ? ' : 'Pas encore de compte ? '}
                   <button
                     type="button"
-                    onClick={() => setMode(isSignup ? 'login' : 'signup')}
+                    onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')}
                     className="underline underline-offset-4"
                   >
-                    {isSignup ? 'Se connecter' : 'Créer un compte'}
+                    {mode === 'signup' ? 'Se connecter' : 'Créer un compte'}
                   </button>
                 </div>
               </form>
