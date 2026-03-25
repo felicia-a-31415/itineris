@@ -104,6 +104,17 @@ export function useDashboardChat({
   const [chatInput, setChatInput] = useState('');
   const [isSendingChat, setIsSendingChat] = useState(false);
 
+  const getFriendlyChatError = (status: number, payloadError?: string, rawText?: string) => {
+    if (status === 429 || status === 503 || status === 529) {
+      return "Le coach IA est temporairement surcharge. Reessaie dans quelques secondes.";
+    }
+
+    if (payloadError?.trim()) return payloadError;
+    if (rawText?.trim()) return rawText;
+
+    return `La fonction de chat a renvoye le statut ${status}.`;
+  };
+
   const handleSendChat = async () => {
     const message = chatInput.trim();
     if (!message || isSendingChat) return;
@@ -145,7 +156,7 @@ export function useDashboardChat({
       }
 
       if (!response.ok) {
-        const errorMessage = payload?.error ?? responseText ?? `Edge Function returned status ${response.status}.`;
+        const errorMessage = getFriendlyChatError(response.status, payload?.error, responseText);
         setMessages((prev) => [...prev, { role: 'assistant', content: errorMessage }]);
         return;
       }

@@ -3,6 +3,35 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function callAnthropicWithRetry(apiKey: string, payload: unknown) {
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) return response;
+
+    if ((response.status === 429 || response.status === 529) && attempt < maxAttempts) {
+      await sleep(400 * attempt);
+      continue;
+    }
+
+    return response;
+  }
+
+  throw new Error('Anthropic request failed after retries.');
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -89,14 +118,7 @@ ${item.content}`,
       };
     });
 
-    const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
+    const anthropicPayload = {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 700,
         system:
@@ -228,17 +250,20 @@ ${item.content}`,
             },
           },
         ],
-      }),
-    });
+      };
+    const anthropicResponse = await callAnthropicWithRetry(anthropicKey, anthropicPayload);
 
     if (!anthropicResponse.ok) {
       const errorText = await anthropicResponse.text();
+      const isTemporaryCapacityError = anthropicResponse.status === 429 || anthropicResponse.status === 529;
       return new Response(
         JSON.stringify({
-          error: `Anthropic API error (${anthropicResponse.status}): ${errorText}`,
+          error: isTemporaryCapacityError
+            ? "Le coach IA est temporairement surcharge. Reessaie dans quelques secondes."
+            : `Anthropic API error (${anthropicResponse.status}): ${errorText}`,
         }),
         {
-          status: anthropicResponse.status,
+          status: isTemporaryCapacityError ? 503 : anthropicResponse.status,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
