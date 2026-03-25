@@ -54,9 +54,7 @@ export function ChatCard({
       </div>
 
       <div
-        className={`app-panel-soft flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl ${
-          isExpanded ? 'h-full' : 'h-[300px]'
-        }`}
+        className="app-panel-soft flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl"
       >
         <div
           ref={chatScrollRef}
@@ -84,11 +82,11 @@ export function ChatCard({
         </div>
 
         <div className="min-w-0 border-t border-white/8 p-2.5">
-          <div className="min-w-0 rounded-[28px] border border-white/10 bg-[rgba(248,248,252,0.96)] p-2 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+          <div className="min-w-0 rounded-[28px] border border-white/10 bg-[rgba(18,16,28,0.92)] p-2 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
             <div className="flex items-end gap-2">
               <textarea
                 value={chatInput}
-                onChange={(event) => setChatInput(event.target.value)}
+              onChange={(event) => setChatInput(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key !== 'Enter') return;
 
@@ -112,7 +110,7 @@ export function ChatCard({
               }}
               placeholder="Écris ta question..."
               rows={isExpanded ? 5 : 2}
-              className="max-h-52 min-h-[44px] flex-1 resize-none overflow-x-hidden bg-transparent px-1 py-2 text-sm text-[#1B1D26] outline-none placeholder:text-[#8B8D98]"
+              className="max-h-52 min-h-[44px] flex-1 resize-none overflow-x-hidden bg-transparent px-1 py-2 text-sm text-[#F5F2F7] outline-none placeholder:text-white/38"
             />
               <Button
                 onClick={onSend}

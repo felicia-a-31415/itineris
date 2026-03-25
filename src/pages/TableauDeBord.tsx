@@ -222,7 +222,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   useEffect(() => {
     if (!chatScrollRef.current) return;
     chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-  }, [messages, isSendingChat, isDashboardHydrated]);
+  }, [messages, isSendingChat, isDashboardHydrated, expandedPanel]);
 
   useEffect(() => {
     if (!expandedPanel) return;
@@ -567,9 +567,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
         ) : null}
 
-        <div className="grid items-stretch gap-6 md:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
-          {renderTimerCard()}
-          {renderChatCard()}
+        <div className="grid items-stretch gap-6 md:grid-cols-2">
+          <div className="md:aspect-square">{renderTimerCard()}</div>
+          <div className="md:aspect-square">{renderChatCard()}</div>
         </div>
 
         {renderAgendaCard()}
