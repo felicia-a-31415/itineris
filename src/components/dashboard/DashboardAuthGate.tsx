@@ -36,8 +36,8 @@ export function DashboardAuthGate({
       </div>
 
       <div className="relative z-10 flex min-h-screen items-center justify-center p-4 md:p-6">
-        <div className="w-full max-w-[36rem] rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(16,13,26,0.96),rgba(76,16,58,0.72),rgba(221,73,102,0.64))] px-4 py-5 text-white shadow-[0_24px_70px_rgba(0,0,0,0.5)] md:px-6 md:py-7">
-          <div className="relative z-10 flex items-center justify-center min-h-[21rem] px-3">
+        <div className="w-full max-w-[36rem] rounded-[24px] border border-white/10 bg-[linear-gradient(135deg,rgba(16,13,26,0.96),rgba(76,16,58,0.72),rgba(221,73,102,0.64))] px-4 py-6 text-white shadow-[0_24px_70px_rgba(0,0,0,0.5)] md:px-6 md:py-8">
+          <div className="relative z-10 flex items-center justify-center min-h-[24rem] px-3">
             <div className="w-full max-w-xl">
               {currentView === 'signup' ? (
                 <SignupView
@@ -159,7 +159,7 @@ function SignupView({
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          <p className="px-1 text-xs text-white/60">8+ characters, 1 uppercase letter, 1 number</p>
+          <p className="px-1 text-xs text-white/60">8+ caractères, 1 majuscule, 1 chiffre</p>
         </div>
       </div>
 
@@ -178,7 +178,7 @@ function SignupView({
           className="flex-1 rounded-full bg-[#6366f1] px-4 py-3 text-lg text-white transition-colors hover:bg-[#5558e3] disabled:opacity-50 md:text-xl"
           style={{ fontWeight: 600 }}
         >
-          {isSubmitting ? 'Chargement...' : 'Continue'}
+          {isSubmitting ? 'Chargement...' : 'Continuer'}
         </button>
         <button
           type="button"
@@ -186,19 +186,19 @@ function SignupView({
           className="flex-1 rounded-full bg-[#2d2d44] px-4 py-3 text-lg text-white transition-colors hover:bg-[#3a3a52] md:text-xl"
           style={{ fontWeight: 600 }}
         >
-          Stay logged out ↗
+          Continuer sans compte ↗
         </button>
       </div>
 
       <div className="text-center text-sm md:text-base">
-        <span className="text-white/90">Have an account? </span>
+        <span className="text-white/90">Tu as déjà un compte ? </span>
         <button
           type="button"
           onClick={onSwitchToLogin}
           className="underline text-white hover:text-white/80 transition-colors"
           style={{ fontWeight: 500 }}
         >
-          Log in
+          Se connecter
         </button>
       </div>
     </div>
@@ -280,7 +280,7 @@ function LoginView({ onSwitchToSignup, onBack, showPassword, onTogglePassword }:
         className="flex items-center gap-1.5 text-sm text-white transition-colors hover:text-white/80 md:text-base"
       >
         <ChevronLeft size={18} />
-        <span>Back</span>
+        <span>Retour</span>
       </button>
 
       <div className="space-y-2 text-center">
