@@ -78,18 +78,19 @@ Deno.serve(async (request) => {
       `Resume temporel fiable: ${currentDateSummary}`,
       `Date et heure actuelles: ${JSON.stringify(context?.currentDate ?? {})}`,
     ].join('\n');
-    const history = Array.isArray(context?.history)
-      ? context.history
-          .filter(
-            (item: { role?: string; content?: string }) =>
-              (item?.role === 'user' || item?.role === 'assistant') && typeof item?.content === 'string'
-          )
-          .slice(-12)
-          .map((item: { role: 'user' | 'assistant'; content: string }) => ({
-            role: item.role,
-            content: item.content,
-          }))
-      : [{ role: 'user', content: message }];
+    const history =
+      Array.isArray(context?.history) && context.history.length > 0
+        ? context.history
+            .filter(
+              (item: { role?: string; content?: string }) =>
+                (item?.role === 'user' || item?.role === 'assistant') && typeof item?.content === 'string'
+            )
+            .slice(-12)
+            .map((item: { role: 'user' | 'assistant'; content: string }) => ({
+              role: item.role,
+              content: item.content,
+            }))
+        : [{ role: 'user', content: message }];
     let injectedContext = false;
     const anthropicMessages = history.map((item) => {
       if (!injectedContext && item.role === 'user') {

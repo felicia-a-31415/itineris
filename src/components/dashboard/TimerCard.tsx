@@ -108,7 +108,7 @@ export function TimerCard({
       </div>
       <div className={`flex flex-col items-center gap-7 pt-2 ${isExpanded ? 'flex-1 justify-center' : 'justify-start'}`}>
           <div className={`flex flex-wrap justify-center ${isExpanded ? 'gap-4' : 'gap-3.5'}`}>
-            {MODE_OPTIONS.map(({ key, label, color }) => {
+            {MODE_OPTIONS.map(({ key, label }) => {
               const isActive = timerMode === key;
               return (
                 <button
@@ -123,7 +123,7 @@ export function TimerCard({
                       ? {
                           background: 'linear-gradient(90deg,#6d42ff 0%,#8c4fff 100%)',
                           color: '#ffffff',
-                          borderColor: color,
+                          borderColor: 'rgba(255,255,255,0.08)',
                           boxShadow: '0 0 18px rgba(109,66,255,0.34)',
                         }
                       : {

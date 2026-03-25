@@ -30,7 +30,7 @@ export function ChatCard({
 }: ChatCardProps) {
   return (
     <Card
-      className={`app-panel flex min-h-0 flex-col rounded-3xl p-6 ${
+      className={`app-panel flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl p-6 ${
         isExpanded ? 'h-full overflow-hidden' : 'h-full'
       }`}
     >
@@ -54,21 +54,24 @@ export function ChatCard({
       </div>
 
       <div
-        className={`app-panel-soft flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl ${
+        className={`app-panel-soft flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl ${
           isExpanded ? 'h-full' : 'h-[340px]'
         }`}
       >
-        <div ref={chatScrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 text-sm app-muted">
+        <div
+          ref={chatScrollRef}
+          className="min-h-0 min-w-0 flex-1 space-y-3 overflow-y-auto overflow-x-hidden p-4 text-sm app-muted"
+        >
           {messages.map((message, index) => (
             <div
               key={`${message.role}-${index}`}
-              className={message.role === 'user' ? 'text-right text-[#F5F2F7]' : 'text-left app-muted'}
+              className={`min-w-0 ${message.role === 'user' ? 'text-right text-[#F5F2F7]' : 'text-left app-muted'}`}
             >
               <div
                 className={
                   message.role === 'user'
-                    ? 'inline-block max-w-[90%] rounded-2xl bg-[linear-gradient(90deg,rgba(109,66,255,0.22),rgba(95,44,142,0.24))] px-3 py-2 text-left text-[#F5F2F7]'
-                    : 'max-w-[90%] rounded-2xl bg-[rgba(18,16,28,0.88)] px-3 py-2'
+                    ? 'inline-block max-w-[90%] break-words whitespace-pre-wrap rounded-2xl bg-[linear-gradient(90deg,rgba(109,66,255,0.22),rgba(95,44,142,0.24))] px-3 py-2 text-left text-[#F5F2F7]'
+                    : 'max-w-[90%] break-words whitespace-pre-wrap rounded-2xl bg-[rgba(18,16,28,0.88)] px-3 py-2'
                 }
               >
                 {renderFormattedMessage(message.content)}
@@ -78,8 +81,8 @@ export function ChatCard({
           {isSendingChat ? <div className="text-left text-white/46">L&apos;IA ecrit...</div> : null}
         </div>
 
-        <div className="border-t border-white/8 p-3">
-          <div className="rounded-2xl border border-white/10 bg-[rgba(17,15,27,0.92)] p-3">
+        <div className="min-w-0 border-t border-white/8 p-3">
+          <div className="min-w-0 rounded-2xl border border-white/10 bg-[rgba(17,15,27,0.92)] p-3">
             <textarea
               value={chatInput}
               onChange={(event) => setChatInput(event.target.value)}
@@ -106,10 +109,10 @@ export function ChatCard({
               }}
               placeholder="Écris ta question..."
               rows={isExpanded ? 5 : 3}
-              className="max-h-52 min-h-[72px] w-full resize-none bg-transparent text-sm text-[#F5F2F7] outline-none placeholder:text-white/38"
+              className="max-h-52 min-h-[72px] w-full resize-none overflow-x-hidden bg-transparent text-sm text-[#F5F2F7] outline-none placeholder:text-white/38"
             />
             <div className="mt-3 flex items-center justify-between gap-3">
-              <p className="text-xs text-white/40">Entrée pour envoyer, Cmd/Ctrl + Entrée pour un retour à la ligne</p>
+              <p className="min-w-0 flex-1 text-xs text-white/40">Entrée pour envoyer, Cmd/Ctrl + Entrée pour un retour à la ligne</p>
               <Button
                 onClick={onSend}
                 disabled={isSendingChat || !chatInput.trim()}
