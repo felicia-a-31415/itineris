@@ -1,15 +1,9 @@
 import { useState } from 'react';
 
+import { buildTasksFromAiActions, extractAddTaskActions } from '../lib/dashboardAi';
 import type { DashboardChatMessage, DashboardTask } from '../lib/storage';
 
-type ChatTaskAction = {
-  tool?: 'add_task';
-  name?: string;
-  date?: string;
-  time?: string;
-  urgent?: boolean;
-  color?: string;
-};
+type ChatTaskAction = Parameters<typeof buildTasksFromAiActions>[0]['actions'][number];
 
 type ChatDeleteTaskAction = {
   tool?: 'delete_task';
@@ -171,14 +165,7 @@ export function useDashboardChat({
         }
       }
 
-      const taskActions = Array.isArray(payload?.actions)
-        ? payload.actions.filter(
-            (action): action is ChatTaskAction =>
-              (action.tool === 'add_task' || action.tool === undefined) &&
-              typeof action?.name === 'string' &&
-              action.name.trim().length > 0
-          )
-        : [];
+      const taskActions = extractAddTaskActions(payload?.actions) as ChatTaskAction[];
 
       const deleteTaskActions = Array.isArray(payload?.actions)
         ? payload.actions.filter(
@@ -209,18 +196,13 @@ export function useDashboardChat({
       const effectiveTimerActions = fallbackTimerAction ? [fallbackTimerAction] : timerActions;
 
       if (taskActions.length > 0) {
-        const newTasks: DashboardTask[] = taskActions.map((action, index) => ({
-          id: `ai-${Date.now()}-${index}`,
-          name: action.name!.trim(),
-          completed: false,
-          color:
-            typeof action.color === 'string' && taskColors.includes(action.color)
-              ? action.color
-              : taskColors[index % taskColors.length],
-          urgent: !!action.urgent,
-          date: isValidTaskDate(action.date) ? action.date : formatDate(new Date()),
-          time: isValidTaskTime(action.time) ? action.time : undefined,
-        }));
+        const newTasks: DashboardTask[] = buildTasksFromAiActions({
+          actions: taskActions,
+          taskColors,
+          formatDate,
+          isValidTaskDate,
+          isValidTaskTime,
+        });
 
         setTasks((prev) => [...prev, ...newTasks]);
       }

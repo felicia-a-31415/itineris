@@ -69,6 +69,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     handleNextRange,
     handleToday,
   } = useDashboardView();
+  const currentDateContext = buildCurrentDateContext();
   const {
     tasks,
     setTasks,
@@ -116,8 +117,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   } = useDashboardTasks({
     taskColors: TASK_COLORS,
     formatDate,
-    weekDates,
     createDefaultTasks,
+    currentDateContext,
+    isValidTaskDate,
+    isValidTaskTime,
   });
 
   const [sessionsByDay, setSessionsByDay] = useState<Record<string, number>>(() => createDefaultSessionsByDay());
@@ -177,7 +180,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       timeLeft,
       isRunning,
     },
-    currentDateContext: buildCurrentDateContext(),
+    currentDateContext,
     taskColors: TASK_COLORS,
     formatDate,
     isValidTaskDate,

@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 
+import { buildTasksFromAiActions, extractAddTaskActions } from '../lib/dashboardAi';
 import type { DashboardTask } from '../lib/storage';
 
 type Task = DashboardTask;
@@ -7,15 +8,34 @@ type Task = DashboardTask;
 type UseDashboardTasksParams = {
   taskColors: string[];
   formatDate: (date: Date) => string;
-  weekDates: Date[];
   createDefaultTasks: () => Task[];
+  currentDateContext: {
+    localDate: string;
+    localTime24: string;
+    localDateTime: string;
+    weekdayFr: string;
+    timezone: string;
+    timezoneOffsetMinutes: number;
+    today: string;
+    tomorrow: string;
+    yesterday: string;
+    thisWeekMonday: string;
+    nextWeekMonday: string;
+    isoUtc: string;
+    localeFr: string;
+    unixMs: number;
+  };
+  isValidTaskDate: (value?: string) => boolean;
+  isValidTaskTime: (value?: string) => boolean;
 };
 
 export function useDashboardTasks({
   taskColors,
   formatDate,
-  weekDates,
   createDefaultTasks,
+  currentDateContext,
+  isValidTaskDate,
+  isValidTaskTime,
 }: UseDashboardTasksParams) {
   const [tasks, setTasks] = useState<Task[]>(() => createDefaultTasks());
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
@@ -161,21 +181,97 @@ export function useDashboardTasks({
     setDeleteCompletedMenuOpen(false);
   };
 
-  const handleAgendaImageUpload = (file?: File) => {
+  const handleAgendaImageUpload = async (file?: File) => {
     if (!file) return;
-    const extracted: Task[] = [
-      {
-        id: `photo-${Date.now()}-1`,
-        name: 'Importer le planning photo',
-        completed: false,
-        color: '#F39C12',
-        urgent: false,
-        date: formatDate(weekDates[2]),
-        time: '12:00',
-      },
-    ];
-    setTasks((prev) => [...prev, ...extracted]);
-    setUploadNotice(`Photo importée et analysée (mock) : ${file.name}`);
+
+    setUploadNotice(`Analyse de la photo en cours : ${file.name}`);
+
+    try {
+      const imageBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const result = reader.result;
+          if (typeof result !== 'string') {
+            reject(new Error("Impossible de lire l'image."));
+            return;
+          }
+
+          const [, base64 = ''] = result.split(',');
+          if (!base64) {
+            reject(new Error("Impossible de convertir l'image."));
+            return;
+          }
+
+          resolve(base64);
+        };
+
+        reader.onerror = () => reject(new Error("Impossible de lire l'image."));
+        reader.readAsDataURL(file);
+      });
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
+          message:
+            "Analyse cette photo, lis le texte visible et ajoute les devoirs, examens, remises et evenements scolaires detectes comme taches dans l'agenda. Si une date ou une heure est visible, utilise-la.",
+          context: {
+            tasks,
+            history: [],
+            timerSessions: {},
+            timer: {},
+            currentDate: currentDateContext,
+            image: {
+              mediaType: file.type || 'image/jpeg',
+              data: imageBase64,
+              fileName: file.name,
+            },
+          },
+        }),
+      });
+
+      const responseText = await response.text();
+      const payload = responseText ? JSON.parse(responseText) : null;
+
+      if (!response.ok) {
+        const errorMessage =
+          typeof payload?.error === 'string' && payload.error.trim()
+            ? payload.error
+            : "L'analyse de la photo a échoué.";
+        setUploadNotice(errorMessage);
+        return;
+      }
+
+      const taskActions = extractAddTaskActions(payload?.actions);
+
+      if (taskActions.length === 0) {
+        setUploadNotice(
+          typeof payload?.reply === 'string' && payload.reply.trim()
+            ? payload.reply
+            : "Aucune tâche n'a été détectée dans la photo."
+        );
+        return;
+      }
+
+      const extracted = buildTasksFromAiActions({
+        actions: taskActions,
+        taskColors,
+        formatDate,
+        isValidTaskDate,
+        isValidTaskTime,
+      });
+
+      setTasks((prev) => [...prev, ...extracted]);
+      setUploadNotice(
+        `${extracted.length} tâche${extracted.length > 1 ? 's ont été ajoutées' : ' a été ajoutée'} depuis la photo.`
+      );
+    } catch (error) {
+      setUploadNotice(error instanceof Error ? error.message : "L'analyse de la photo a échoué.");
+    }
   };
 
   const getTasksForDate = (date: string) => {

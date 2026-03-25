@@ -195,7 +195,10 @@ export function AgendaCard({
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={(e) => onAgendaImageUpload(e.target.files?.[0])}
+              onChange={(e) => {
+                void onAgendaImageUpload(e.target.files?.[0]);
+                e.currentTarget.value = '';
+              }}
             />
           </div>
         </div>
