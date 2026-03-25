@@ -638,10 +638,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
       {expandedPanel ? (
         <div className="fixed inset-0 z-50 bg-[rgba(8,10,18,0.82)] p-3 backdrop-blur-xl md:p-5">
-          <div className="mx-auto h-full max-w-[1440px]">
-            {expandedPanel === 'timer' ? renderTimerCard(true) : null}
-            {expandedPanel === 'chat' ? renderChatCard(true) : null}
-            {expandedPanel === 'agenda' ? renderAgendaCard(true) : null}
+          <div
+            className={`mx-auto flex h-full min-h-0 ${
+              expandedPanel === 'timer' ? 'max-w-[1100px] items-center justify-center' : 'max-w-[1440px]'
+            }`}
+          >
+            <div className="flex h-full min-h-0 w-full">
+              {expandedPanel === 'timer' ? renderTimerCard(true) : null}
+              {expandedPanel === 'chat' ? renderChatCard(true) : null}
+              {expandedPanel === 'agenda' ? renderAgendaCard(true) : null}
+            </div>
           </div>
         </div>
       ) : null}
