@@ -30,6 +30,7 @@ type UseDashboardTasksParams = {
 };
 
 const MAX_ANTHROPIC_IMAGE_BYTES = 5 * 1024 * 1024;
+const TARGET_ANTHROPIC_IMAGE_BYTES = 4.5 * 1024 * 1024;
 
 async function readFileAsDataUrl(file: Blob): Promise<string> {
   return await new Promise<string>((resolve, reject) => {
@@ -75,17 +76,12 @@ async function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise
   });
 }
 
-async function prepareImageForAnthropic(file: File): Promise<{ mediaType: string; data: string }> {
-  if (file.size <= MAX_ANTHROPIC_IMAGE_BYTES) {
-    const dataUrl = await readFileAsDataUrl(file);
-    const [, base64 = ''] = dataUrl.split(',');
-    if (!base64) throw new Error("Impossible de convertir l'image.");
-    return {
-      mediaType: file.type || 'image/jpeg',
-      data: base64,
-    };
-  }
+function getDecodedByteLengthFromBase64(base64: string) {
+  const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0;
+  return Math.floor((base64.length * 3) / 4) - padding;
+}
 
+async function prepareImageForAnthropic(file: File): Promise<{ mediaType: string; data: string }> {
   const image = await loadImageFromFile(file);
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
@@ -105,10 +101,11 @@ async function prepareImageForAnthropic(file: File): Promise<{ mediaType: string
   }
 
   const attempts = [
-    { scale: 1, quality: 0.82 },
+    { scale: 1, quality: 0.8 },
     { scale: 0.9, quality: 0.72 },
-    { scale: 0.8, quality: 0.62 },
-    { scale: 0.7, quality: 0.52 },
+    { scale: 0.8, quality: 0.64 },
+    { scale: 0.7, quality: 0.56 },
+    { scale: 0.6, quality: 0.5 },
   ];
 
   for (const attempt of attempts) {
@@ -120,11 +117,12 @@ async function prepareImageForAnthropic(file: File): Promise<{ mediaType: string
     context.drawImage(image, 0, 0, attemptWidth, attemptHeight);
 
     const blob = await canvasToBlob(canvas, attempt.quality);
-    if (blob.size > MAX_ANTHROPIC_IMAGE_BYTES) continue;
+    if (blob.size > TARGET_ANTHROPIC_IMAGE_BYTES) continue;
 
     const dataUrl = await readFileAsDataUrl(blob);
     const [, base64 = ''] = dataUrl.split(',');
     if (!base64) throw new Error("Impossible de convertir l'image.");
+    if (getDecodedByteLengthFromBase64(base64) > MAX_ANTHROPIC_IMAGE_BYTES) continue;
 
     return {
       mediaType: 'image/jpeg',
