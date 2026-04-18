@@ -210,9 +210,9 @@ export function TimerCard({
                     }
                   }}
                   className="h-10 rounded-xl sm:max-w-[150px]"
-                  placeholder={`${durationSeconds}`}
+                  placeholder={`${Math.max(1, Math.round(safeMinutes))}`}
                   autoFocus
-                  aria-label="Durée personnalisée en secondes"
+                  aria-label="Durée personnalisée en minutes"
                 />
                 <Button
                   type="button"

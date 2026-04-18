@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { DashboardTimerState } from '../lib/storage';
 
-const MIN_TIMER_MINUTES = 1 / 60;
+const MIN_TIMER_MINUTES = 1;
 
 type TimerModeKey = 'focus' | 'short' | 'long';
 
@@ -71,21 +71,20 @@ export function useDashboardTimer({
   };
 
   const setCustomTimerMinutes = (nextMinutes: number) => {
-    const clamped = Math.max(MIN_TIMER_MINUTES, nextMinutes);
+    const clamped = Math.max(MIN_TIMER_MINUTES, Math.round(nextMinutes));
     const durationSeconds = Math.max(1, Math.round(clamped * 60));
     setIsRunning(false);
     lastTickRef.current = null;
     setIsEditingTimer(false);
     setTimerMinutes(clamped);
     setTimeLeft(durationSeconds);
-    setEditingTimerValue(durationSeconds.toString());
+    setEditingTimerValue(clamped.toString());
   };
 
   const commitTimerEdit = () => {
     const parsed = Number(editingTimerValue);
     if (Number.isFinite(parsed)) {
-      const clampedSeconds = Math.max(1, Math.round(parsed));
-      setCustomTimerMinutes(clampedSeconds / 60);
+      setCustomTimerMinutes(parsed);
     }
     setIsEditingTimer(false);
   };
@@ -110,7 +109,10 @@ export function useDashboardTimer({
     timerStateHydratedRef.current = true;
 
     const persistedMode = persistedTimerState.mode as TimerModeKey;
-    const nextMinutes = Math.max(MIN_TIMER_MINUTES, persistedTimerState.minutes || timerModes[persistedMode].minutes);
+    const nextMinutes = Math.max(
+      MIN_TIMER_MINUTES,
+      Math.round(persistedTimerState.minutes || timerModes[persistedMode].minutes)
+    );
     const durationSeconds = Math.max(1, Math.round(nextMinutes * 60));
     const cappedRemainingSeconds = Math.min(durationSeconds, Math.max(0, persistedTimerState.remainingSeconds || 0));
 
@@ -157,7 +159,7 @@ export function useDashboardTimer({
     const requestedMode =
       timerAction.mode && timerAction.mode in timerModes ? (timerAction.mode as TimerModeKey) : timerMode;
     const requestedMinutes = Number.isFinite(timerAction.minutes)
-      ? Math.max(MIN_TIMER_MINUTES, timerAction.minutes as number)
+      ? Math.max(MIN_TIMER_MINUTES, Math.round(timerAction.minutes as number))
       : timerAction.mode && timerAction.mode in timerModes
         ? timerModes[timerAction.mode as TimerModeKey].minutes
         : safeMinutes;
