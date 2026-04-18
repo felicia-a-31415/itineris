@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
+import { Input } from '../../ui/input';
 
 type StudyStatsCardProps = {
   weekDates: Date[];
@@ -11,6 +13,8 @@ type StudyStatsCardProps = {
   averageDailyMinutes: number;
   weekDeltaMinutes: number;
   getDayName: (date: Date) => string;
+  formatDate: (date: Date) => string;
+  onManualStudyTimeChange: (dateKey: string, minutes: number, mode: 'add' | 'set') => void;
   onToday: () => void;
   onPrevRange: () => void;
   onNextRange: () => void;
@@ -24,10 +28,29 @@ export function StudyStatsCard({
   averageDailyMinutes,
   weekDeltaMinutes,
   getDayName,
+  formatDate,
+  onManualStudyTimeChange,
   onToday,
   onPrevRange,
   onNextRange,
 }: StudyStatsCardProps) {
+  const todayKey = formatDate(new Date());
+  const [manualDateKey, setManualDateKey] = useState(todayKey);
+  const [manualMinutes, setManualMinutes] = useState('');
+  const parsedManualMinutes = Number(manualMinutes);
+  const canSubmitManualMinutes = Number.isFinite(parsedManualMinutes) && parsedManualMinutes >= 0;
+
+  useEffect(() => {
+    setManualDateKey(todayKey);
+  }, [todayKey]);
+
+  const submitManualStudyTime = (mode: 'add' | 'set') => {
+    if (!canSubmitManualMinutes) return;
+    if (mode === 'add' && parsedManualMinutes <= 0) return;
+    onManualStudyTimeChange(manualDateKey, parsedManualMinutes, mode);
+    setManualMinutes('');
+  };
+
   return (
     <Card className="app-panel rounded-3xl p-6 space-y-2">
       <div className="flex flex-col gap-4">
@@ -59,6 +82,63 @@ export function StudyStatsCard({
                 <ChevronRight className="h-5 w-5" />
               </Button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-white/8 bg-[rgba(16,14,24,0.72)] p-4">
+        <div className="mb-3">
+          <p className="text-sm text-[#F5F2F7]">Modifier le temps d'étude</p>
+          <p className="text-xs app-muted">Ajoute des minutes ou remplace le total d'une journée.</p>
+        </div>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+          <label className="flex flex-1 flex-col gap-2 text-xs font-medium app-muted">
+            Date
+            <Input
+              type="date"
+              value={manualDateKey}
+              onChange={(event) => setManualDateKey(event.target.value)}
+              className="h-10 rounded-xl"
+              aria-label="Date du temps d'étude"
+            />
+          </label>
+          <label className="flex flex-1 flex-col gap-2 text-xs font-medium app-muted">
+            Minutes
+            <Input
+              type="number"
+              min={0}
+              step={1}
+              value={manualMinutes}
+              onChange={(event) => setManualMinutes(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  submitManualStudyTime('add');
+                }
+              }}
+              className="h-10 rounded-xl"
+              placeholder="30"
+              aria-label="Minutes d'étude"
+            />
+          </label>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              onClick={() => submitManualStudyTime('add')}
+              disabled={!canSubmitManualMinutes || parsedManualMinutes <= 0}
+              className="h-10 rounded-xl px-4"
+            >
+              Ajouter
+            </Button>
+            <Button
+              type="button"
+              onClick={() => submitManualStudyTime('set')}
+              disabled={!canSubmitManualMinutes}
+              variant="outline"
+              className="h-10 rounded-xl px-4"
+            >
+              Remplacer
+            </Button>
           </div>
         </div>
       </div>

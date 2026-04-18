@@ -26,6 +26,8 @@ import {
   findMatchingTaskIndex,
   formatDate,
   getCurrentWeekDates,
+  getWeekStartKeyForDate,
+  getWeekdayArrayIndex,
   getDayName,
   isValidTaskDate,
   isValidTaskTime,
@@ -276,6 +278,22 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     monthOffset,
     monthAnchor,
   });
+
+  const handleManualStudyTimeChange = (dateKey: string, minutes: number, mode: 'add' | 'set') => {
+    const targetDate = parseLocalDateString(dateKey);
+    if (!targetDate || !Number.isFinite(minutes)) return;
+
+    const normalizedMinutes = Math.max(0, Math.round(minutes));
+    const weekKey = getWeekStartKeyForDate(targetDate);
+    const dayIndex = getWeekdayArrayIndex(targetDate);
+
+    setStudyData((prev) => {
+      const weekArray = Array.from({ length: 7 }, (_, index) => prev[weekKey]?.[index] ?? 0);
+      weekArray[dayIndex] =
+        mode === 'add' ? Math.max(0, (weekArray[dayIndex] ?? 0) + normalizedMinutes) : normalizedMinutes;
+      return { ...prev, [weekKey]: weekArray };
+    });
+  };
 
   const renderTimerCard = (isExpanded = false) => (
     <TimerCard
@@ -595,6 +613,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           averageDailyMinutes={averageDailyMinutes}
           weekDeltaMinutes={weekDeltaMinutes}
           getDayName={getDayName}
+          formatDate={formatDate}
+          onManualStudyTimeChange={handleManualStudyTimeChange}
           onToday={handleToday}
           onPrevRange={handlePrevRange}
           onNextRange={handleNextRange}
