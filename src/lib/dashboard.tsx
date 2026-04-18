@@ -15,8 +15,7 @@ export const DASHBOARD_GUEST_ACCESS_KEY = 'itineris.dashboard.guest-access';
 export const MINIMUM_STREAK_MINUTES = 1;
 export const TIMER_MODES = {
   focus: { label: 'Focus', minutes: 25, color: '#3B82F6' },
-  short: { label: 'Courte pause', minutes: 5, color: '#22C55E' },
-  long: { label: 'Longue pause', minutes: 15, color: '#8B5CF6' },
+  pause: { label: 'Pause', minutes: 5, color: '#22C55E' },
 } as const;
 export const TIMER_PRESET_MINUTES = [25, 30, 45, 60] as const;
 export const DEFAULT_CHAT_MESSAGES: DashboardChatMessage[] = [
@@ -256,18 +255,16 @@ export const parseTimerActionFromMessage = (message: string): ChatTimerAction | 
   const parsedSeconds = secondsMatch ? Number(secondsMatch[1]) : undefined;
   const parsedMinutes = minutesMatch ? Number(minutesMatch[1]) : undefined;
   const minutes = Number.isFinite(parsedSeconds)
-    ? Math.max(1 / 60, (parsedSeconds as number) / 60)
+    ? Math.max(1, Math.round((parsedSeconds as number) / 60))
     : Number.isFinite(parsedMinutes)
-      ? Math.max(1 / 60, parsedMinutes as number)
+      ? Math.max(1, Math.round(parsedMinutes as number))
       : undefined;
 
-  const mode = /\b(courte pause|pause courte|short)\b/.test(normalized)
-    ? 'short'
-    : /\b(longue pause|pause longue|long)\b/.test(normalized)
-      ? 'long'
-      : /\b(focus)\b/.test(normalized)
-        ? 'focus'
-        : undefined;
+  const mode = /\b(pause|courte pause|pause courte|short|longue pause|pause longue|long)\b/.test(normalized)
+    ? 'pause'
+    : /\b(focus)\b/.test(normalized)
+      ? 'focus'
+      : undefined;
 
   if (/\b(pause|mets en pause|arrete|stop)\b/.test(normalized)) return { tool: 'set_timer', action: 'pause' };
   if (/\b(reinitialise|reinitialiser|remets? a zero|reset|remet le timer a zero)\b/.test(normalized)) {

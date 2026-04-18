@@ -28,7 +28,7 @@ type ChatUpdateTaskAction = {
 type ChatTimerAction = {
   tool?: 'set_timer';
   action?: 'start' | 'pause' | 'reset' | 'set';
-  mode?: 'focus' | 'short' | 'long';
+  mode?: 'focus' | 'pause' | 'short' | 'long';
   minutes?: number;
 };
 
@@ -57,7 +57,7 @@ type UseDashboardChatParams = {
   sessionsByDay: Record<string, number>;
   sessionsCompletedToday: number;
   timerContext: {
-    mode: 'focus' | 'short' | 'long';
+    mode: 'focus' | 'pause';
     minutes: number;
     timeLeft: number;
     isRunning: boolean;

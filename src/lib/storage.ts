@@ -30,9 +30,12 @@ export type DashboardChatMessage = {
 };
 
 export type DashboardTimerState = {
-  mode: 'focus' | 'short' | 'long';
+  tool?: 'timer' | 'stopwatch' | 'alarm';
+  mode: 'focus' | 'pause' | 'short' | 'long';
   minutes: number;
   remainingSeconds: number;
+  stopwatchSeconds?: number;
+  alarmTime?: string;
   isRunning: boolean;
   updatedAt: number;
 };

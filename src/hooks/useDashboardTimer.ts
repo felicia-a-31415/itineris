@@ -4,7 +4,8 @@ import type { DashboardTimerState } from '../lib/storage';
 
 const MIN_TIMER_MINUTES = 1;
 
-type TimerModeKey = 'focus' | 'short' | 'long';
+type TimerToolKey = 'timer' | 'stopwatch' | 'alarm';
+type TimerModeKey = 'focus' | 'pause';
 
 type TimerModeMap = Record<
   TimerModeKey,
@@ -17,7 +18,7 @@ type TimerModeMap = Record<
 
 type TimerAction = {
   action?: 'start' | 'pause' | 'reset' | 'set';
-  mode?: TimerModeKey;
+  mode?: TimerModeKey | 'short' | 'long';
   minutes?: number;
 };
 
@@ -35,6 +36,17 @@ type UseDashboardTimerParams = {
   setSessionsByDay: React.Dispatch<React.SetStateAction<Record<string, number>>>;
 };
 
+const getCurrentTimeInputValue = () => {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+};
+
+const normalizeTimerMode = (mode?: DashboardTimerState['mode'] | TimerAction['mode']): TimerModeKey | null => {
+  if (mode === 'focus') return 'focus';
+  if (mode === 'pause' || mode === 'short' || mode === 'long') return 'pause';
+  return null;
+};
+
 export function useDashboardTimer({
   timerModes,
   alarmSoundSrc,
@@ -47,12 +59,16 @@ export function useDashboardTimer({
   const [timerMinutes, setTimerMinutes] = useState(25);
   const [timeLeft, setTimeLeft] = useState(timerMinutes * 60);
   const [timerMode, setTimerMode] = useState<TimerModeKey>('focus');
+  const [timerTool, setTimerTool] = useState<TimerToolKey>('timer');
+  const [stopwatchSeconds, setStopwatchSeconds] = useState(0);
+  const [alarmTime, setAlarmTime] = useState(() => getCurrentTimeInputValue());
   const [isRunning, setIsRunning] = useState(false);
   const [isEditingTimer, setIsEditingTimer] = useState(false);
   const [editingTimerValue, setEditingTimerValue] = useState('');
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
+  const alarmTriggeredKeyRef = useRef<string | null>(null);
   const timerStateHydratedRef = useRef(false);
 
   const safeMinutes = Math.max(MIN_TIMER_MINUTES, timerMinutes || MIN_TIMER_MINUTES);
@@ -95,20 +111,27 @@ export function useDashboardTimer({
   };
 
   const buildTimerState = (): DashboardTimerState => ({
+    tool: timerTool,
     mode: timerMode,
     minutes: safeMinutes,
     remainingSeconds: Math.max(0, timeLeft),
+    stopwatchSeconds,
+    alarmTime,
     isRunning,
     updatedAt: Date.now(),
   });
 
   const hydrateTimerState = (persistedTimerState?: DashboardTimerState | null) => {
     if (timerStateHydratedRef.current || !persistedTimerState) return false;
-    if (!['focus', 'short', 'long'].includes(persistedTimerState.mode)) return false;
+    const persistedMode = normalizeTimerMode(persistedTimerState.mode);
+    if (!persistedMode) return false;
 
     timerStateHydratedRef.current = true;
 
-    const persistedMode = persistedTimerState.mode as TimerModeKey;
+    const persistedTool =
+      persistedTimerState.tool && ['timer', 'stopwatch', 'alarm'].includes(persistedTimerState.tool)
+        ? persistedTimerState.tool
+        : 'timer';
     const nextMinutes = Math.max(
       MIN_TIMER_MINUTES,
       Math.round(persistedTimerState.minutes || timerModes[persistedMode].minutes)
@@ -116,11 +139,16 @@ export function useDashboardTimer({
     const durationSeconds = Math.max(1, Math.round(nextMinutes * 60));
     const cappedRemainingSeconds = Math.min(durationSeconds, Math.max(0, persistedTimerState.remainingSeconds || 0));
 
+    setTimerTool(persistedTool);
     setTimerMode(persistedMode);
     setTimerMinutes(nextMinutes);
     setEditingTimerValue(nextMinutes.toString());
+    setStopwatchSeconds(Math.max(0, persistedTimerState.stopwatchSeconds ?? 0));
+    if (persistedTimerState.alarmTime && /^\d{2}:\d{2}$/.test(persistedTimerState.alarmTime)) {
+      setAlarmTime(persistedTimerState.alarmTime);
+    }
 
-    if (!persistedTimerState.isRunning) {
+    if (!persistedTimerState.isRunning || persistedTool !== 'timer') {
       setIsRunning(false);
       setTimeLeft(cappedRemainingSeconds);
       return true;
@@ -156,8 +184,8 @@ export function useDashboardTimer({
   };
 
   const applyChatTimerAction = (timerAction: TimerAction) => {
-    const requestedMode =
-      timerAction.mode && timerAction.mode in timerModes ? (timerAction.mode as TimerModeKey) : timerMode;
+    const normalizedMode = normalizeTimerMode(timerAction.mode);
+    const requestedMode = normalizedMode && normalizedMode in timerModes ? normalizedMode : timerMode;
     const requestedMinutes = Number.isFinite(timerAction.minutes)
       ? Math.max(MIN_TIMER_MINUTES, Math.round(timerAction.minutes as number))
       : timerAction.mode && timerAction.mode in timerModes
@@ -173,10 +201,12 @@ export function useDashboardTimer({
       case 'set':
         setIsRunning(false);
         lastTickRef.current = null;
+        setTimerTool('timer');
         applyTimerSettings(requestedMode, requestedMinutes);
         return;
       case 'start':
         if (timerAction.mode || Number.isFinite(timerAction.minutes)) {
+          setTimerTool('timer');
           applyTimerSettings(requestedMode, requestedMinutes);
         }
         lastTickRef.current = performance.now();
@@ -188,7 +218,7 @@ export function useDashboardTimer({
   };
 
   useEffect(() => {
-    if (!isRunning) return;
+    if (!isRunning || timerTool !== 'timer') return;
     lastTickRef.current = lastTickRef.current ?? performance.now();
 
     const applyDelta = (deltaSec: number) => {
@@ -261,11 +291,61 @@ export function useDashboardTimer({
       }
       clearInterval(hiddenInterval);
     };
-  }, [isRunning, safeMinutes, timerMode, setSessionsByDay, setStudyData, addElapsedStudySeconds, formatDate, getCurrentWeekDates]);
+  }, [isRunning, safeMinutes, timerMode, timerTool, setSessionsByDay, setStudyData, addElapsedStudySeconds, formatDate, getCurrentWeekDates]);
+
+  useEffect(() => {
+    if (!isRunning || timerTool !== 'stopwatch') return;
+    lastTickRef.current = lastTickRef.current ?? performance.now();
+
+    const tick = () => {
+      const now = performance.now();
+      const lastTick = lastTickRef.current ?? now;
+      const deltaSec = (now - lastTick) / 1000;
+      lastTickRef.current = now;
+      setStopwatchSeconds((prev) => prev + deltaSec);
+      animationFrameRef.current = requestAnimationFrame(tick);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [isRunning, timerTool]);
+
+  useEffect(() => {
+    if (!isRunning || timerTool !== 'alarm') return;
+
+    const checkAlarm = () => {
+      const now = new Date();
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const alarmKey = `${formatDate(now)}:${alarmTime}`;
+      if (currentTime !== alarmTime || alarmTriggeredKeyRef.current === alarmKey) return;
+
+      alarmTriggeredKeyRef.current = alarmKey;
+      setIsRunning(false);
+      if (alarmRef.current) {
+        try {
+          alarmRef.current.currentTime = 0;
+          void alarmRef.current.play();
+        } catch (err) {
+          console.error('Lecture du son impossible', err);
+        }
+      }
+    };
+
+    checkAlarm();
+    const alarmInterval = window.setInterval(checkAlarm, 1000);
+    return () => window.clearInterval(alarmInterval);
+  }, [alarmTime, formatDate, isRunning, timerTool]);
 
   useEffect(() => {
     if (isRunning) {
-      document.title = `itineris | ${formatTime(timeLeft)}`;
+      const titleTime =
+        timerTool === 'stopwatch' ? formatTime(stopwatchSeconds) : timerTool === 'alarm' ? alarmTime : formatTime(timeLeft);
+      document.title = `itineris | ${titleTime}`;
       if (lastTickRef.current === null) {
         lastTickRef.current = performance.now();
       }
@@ -273,7 +353,7 @@ export function useDashboardTimer({
       document.title = 'itineris';
       lastTickRef.current = null;
     }
-  }, [isRunning, timeLeft]);
+  }, [alarmTime, isRunning, stopwatchSeconds, timeLeft, timerTool]);
 
   useEffect(() => {
     return () => {
@@ -297,6 +377,9 @@ export function useDashboardTimer({
     timerMinutes,
     timeLeft,
     timerMode,
+    timerTool,
+    stopwatchSeconds,
+    alarmTime,
     isRunning,
     isEditingTimer,
     editingTimerValue,
@@ -306,6 +389,16 @@ export function useDashboardTimer({
     isInitialTime,
     formatTime,
     setTimerMode,
+    setTimerTool: (nextTool: TimerToolKey) => {
+      setIsRunning(false);
+      lastTickRef.current = null;
+      setIsEditingTimer(false);
+      setTimerTool(nextTool);
+    },
+    setAlarmTime: (nextAlarmTime: string) => {
+      alarmTriggeredKeyRef.current = null;
+      setAlarmTime(nextAlarmTime);
+    },
     setIsRunning,
     setIsEditingTimer,
     setEditingTimerValue,
@@ -328,6 +421,14 @@ export function useDashboardTimer({
     resetTimerToCurrentDuration: () => {
       setIsRunning(false);
       lastTickRef.current = null;
+      if (timerTool === 'stopwatch') {
+        setStopwatchSeconds(0);
+        return;
+      }
+      if (timerTool === 'alarm') {
+        alarmTriggeredKeyRef.current = null;
+        return;
+      }
       setTimeLeft(safeMinutes * 60);
     },
   };
