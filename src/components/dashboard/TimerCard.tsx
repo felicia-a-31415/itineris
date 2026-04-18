@@ -115,7 +115,7 @@ export function TimerCard({
 
   return (
     <Card
-      className={`app-panel flex h-full w-full flex-col rounded-3xl p-6 ${isExpanded ? 'overflow-auto' : ''}`}
+      className={`app-panel flex w-full flex-col rounded-3xl p-6 ${isExpanded ? 'h-full overflow-auto' : ''}`}
     >
       <div className="mb-2 flex items-center justify-between gap-3">
         <p className="app-muted text-sm">
@@ -134,26 +134,28 @@ export function TimerCard({
           </Button>
         ) : null}
       </div>
-      <div className={`flex flex-1 flex-col items-center justify-center gap-7 ${isExpanded ? 'py-6' : 'py-2'}`}>
-          <div className="flex flex-wrap justify-center gap-2">
-            {TOOL_OPTIONS.map(({ key, label }) => {
-              const isActive = timerTool === key;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => onToolSelect(key)}
-                  className={`h-9 rounded-xl border px-3 text-xs font-semibold transition ${
-                    isActive
-                      ? 'border-[#6d42ff] bg-[#6d42ff] text-white'
-                      : 'border-white/10 bg-[rgba(20,17,30,0.82)] text-[#F5F2F7] hover:bg-[rgba(40,28,60,0.92)]'
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
+
+      <div className="mb-5 flex flex-wrap justify-center gap-2">
+        {TOOL_OPTIONS.map(({ key, label }) => {
+          const isActive = timerTool === key;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onToolSelect(key)}
+              className={`h-9 rounded-xl border px-3 text-xs font-semibold transition ${
+                isActive
+                  ? 'border-[#6d42ff] bg-[#6d42ff] text-white'
+                  : 'border-white/10 bg-[rgba(20,17,30,0.82)] text-[#F5F2F7] hover:bg-[rgba(40,28,60,0.92)]'
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className={`flex flex-col items-center gap-6 ${isExpanded ? 'flex-1 justify-center py-6' : ''}`}>
 
         {timerTool === 'timer' ? (
           <div className="flex flex-wrap justify-center gap-3.5">
