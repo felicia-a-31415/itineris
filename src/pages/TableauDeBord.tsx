@@ -137,7 +137,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     timerMode,
     timerTool,
     stopwatchSeconds,
-    alarmTime,
     isRunning,
     isEditingTimer,
     editingTimerValue,
@@ -148,7 +147,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     formatTime,
     setTimerMode,
     setTimerTool,
-    setAlarmTime,
     setIsRunning,
     setIsEditingTimer,
     setEditingTimerValue,
@@ -202,7 +200,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     loading,
     location,
   });
-  const timerPersistenceKey = `${timerTool}:${timerMode}:${safeMinutes}:${Math.round(timeLeft)}:${Math.round(stopwatchSeconds)}:${alarmTime}:${isRunning ? 1 : 0}`;
+  const timerPersistenceKey = `${timerTool}:${timerMode}:${safeMinutes}:${Math.round(timeLeft)}:${Math.round(stopwatchSeconds)}:${isRunning ? 1 : 0}`;
   const { isDashboardHydrated, persistDashboardSnapshot } = useDashboardPersistence({
     userId: user?.id,
     loading,
@@ -302,7 +300,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       timerMinutes={timerMinutes}
       timeLeft={timeLeft}
       stopwatchSeconds={stopwatchSeconds}
-      alarmTime={alarmTime}
       progress={progress}
       ringColor={ringColor}
       isRunning={isRunning}
@@ -328,7 +325,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         }
         startTimer();
       }}
-      onAlarmTimeChange={setAlarmTime}
       onReset={() => {
         resetTimerToCurrentDuration();
         persistDashboardSnapshot({
@@ -337,7 +333,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           minutes: safeMinutes,
           remainingSeconds: Math.max(1, Math.round(safeMinutes * 60)),
           stopwatchSeconds: timerTool === 'stopwatch' ? 0 : stopwatchSeconds,
-          alarmTime,
           isRunning: false,
           updatedAt: Date.now(),
         });

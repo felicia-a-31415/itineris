@@ -1,11 +1,11 @@
-import { Maximize2, Minimize2, Pause, Play, RotateCcw } from 'lucide-react';
+import { Clock3, Maximize2, Minimize2, Pause, Play, RotateCcw, Timer } from 'lucide-react';
 
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
 import { Input } from '../../ui/input';
 
 type TimerModeKey = 'focus' | 'pause';
-type TimerToolKey = 'timer' | 'stopwatch' | 'alarm';
+type TimerToolKey = 'timer' | 'stopwatch';
 
 type TimerCardProps = {
   timerTool: TimerToolKey;
@@ -13,7 +13,6 @@ type TimerCardProps = {
   timerMinutes: number;
   timeLeft: number;
   stopwatchSeconds: number;
-  alarmTime: string;
   progress: number;
   ringColor: string;
   isRunning: boolean;
@@ -27,7 +26,6 @@ type TimerCardProps = {
   onModeSelect: (mode: TimerModeKey) => void;
   onToggleRunning: () => void;
   onReset: () => void;
-  onAlarmTimeChange: (value: string) => void;
   onPresetSelect: (minutes: number) => void;
   onCustomClick: () => void;
   onEditingValueChange: (value: string) => void;
@@ -44,11 +42,10 @@ const MODE_OPTIONS: Array<{ key: TimerModeKey; label: string; color: string }> =
   { key: 'pause', label: 'Pause', color: '#22C55E' },
 ];
 
-const TOOL_OPTIONS: Array<{ key: TimerToolKey; label: string }> = [
-  { key: 'timer', label: 'Minuteur' },
-  { key: 'stopwatch', label: 'Chronomètre' },
-  { key: 'alarm', label: 'Alarme' },
-];
+const TOOL_OPTIONS = [
+  { key: 'timer', label: 'Minuteur', Icon: Clock3 },
+  { key: 'stopwatch', label: 'Chronomètre', Icon: Timer },
+] satisfies Array<{ key: TimerToolKey; label: string; Icon: typeof Clock3 }>;
 
 export function TimerCard({
   timerTool,
@@ -56,7 +53,6 @@ export function TimerCard({
   timerMinutes,
   timeLeft,
   stopwatchSeconds,
-  alarmTime,
   progress,
   ringColor,
   isRunning,
@@ -70,7 +66,6 @@ export function TimerCard({
   onModeSelect,
   onToggleRunning,
   onReset,
-  onAlarmTimeChange,
   onPresetSelect,
   onCustomClick,
   onEditingValueChange,
@@ -87,16 +82,8 @@ export function TimerCard({
     durationSeconds < 60 || durationSeconds % 60 !== 0
       ? `${durationSeconds} sec`
       : `${durationSeconds / 60} min`;
-  const displayTime =
-    timerTool === 'alarm' ? alarmTime : timerTool === 'stopwatch' ? formatTime(stopwatchSeconds) : formatTime(timeLeft);
-  const statusLabel =
-    timerTool === 'alarm'
-      ? isRunning
-        ? 'Alarme activée'
-        : 'Alarme inactive'
-      : timerTool === 'stopwatch'
-        ? 'Chronomètre'
-        : timerDurationLabel;
+  const displayTime = timerTool === 'stopwatch' ? formatTime(stopwatchSeconds) : formatTime(timeLeft);
+  const statusLabel = timerTool === 'stopwatch' ? 'Chronomètre' : timerDurationLabel;
   const progressDegrees = timerTool === 'timer' ? progress * 3.6 : timerTool === 'stopwatch' ? 360 : 0;
   const timerRingGradient =
     progressDegrees <= 0
@@ -119,7 +106,7 @@ export function TimerCard({
     >
       <div className="mb-2 flex items-center justify-between gap-3">
         <p className="app-muted text-sm">
-          {timerTool === 'stopwatch' ? 'Chronomètre' : timerTool === 'alarm' ? 'Alarme' : 'Minuteur'}
+          {timerTool === 'stopwatch' ? 'Chronomètre' : 'Minuteur'}
         </p>
         {onExpandToggle ? (
           <Button
@@ -135,20 +122,21 @@ export function TimerCard({
         ) : null}
       </div>
 
-      <div className="mb-5 flex flex-wrap justify-center gap-2">
-        {TOOL_OPTIONS.map(({ key, label }) => {
+      <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl border border-white/8 bg-[rgba(16,14,24,0.58)] p-2">
+        {TOOL_OPTIONS.map(({ key, label, Icon }) => {
           const isActive = timerTool === key;
           return (
             <button
               key={key}
               type="button"
               onClick={() => onToolSelect(key)}
-              className={`h-9 rounded-xl border px-3 text-xs font-semibold transition ${
+              className={`flex min-h-[68px] flex-col items-center justify-center gap-1 rounded-xl border px-3 text-xs font-semibold transition ${
                 isActive
-                  ? 'border-[#6d42ff] bg-[#6d42ff] text-white'
-                  : 'border-white/10 bg-[rgba(20,17,30,0.82)] text-[#F5F2F7] hover:bg-[rgba(40,28,60,0.92)]'
+                  ? 'border-white/14 bg-white/8 text-white'
+                  : 'border-transparent bg-transparent text-[#C9C3D4] hover:border-white/10 hover:bg-white/6 hover:text-[#F5F2F7]'
               }`}
             >
+              <Icon className="h-5 w-5" />
               {label}
             </button>
           );
@@ -280,22 +268,6 @@ export function TimerCard({
           </div>
         ) : null}
 
-        {timerTool === 'alarm' ? (
-          <div className={`app-panel-soft rounded-2xl px-4 py-4 text-sm app-muted ${isExpanded ? 'w-full max-w-xl' : ''}`}>
-            <label className="mb-3 block text-sm app-muted" htmlFor="dashboard-alarm-time">
-              Heure de l'alarme
-            </label>
-            <Input
-              id="dashboard-alarm-time"
-              type="time"
-              value={alarmTime}
-              onChange={(e) => onAlarmTimeChange(e.target.value)}
-              className="h-10 rounded-xl sm:max-w-[170px]"
-              aria-label="Heure de l'alarme"
-            />
-          </div>
-        ) : null}
-
           <div className="flex items-center justify-center gap-3">
             <Button
               onClick={onToggleRunning}
@@ -304,12 +276,12 @@ export function TimerCard({
               {isRunning ? (
                 <>
                   <Pause className="w-4 h-4 mr-2" />
-                  {timerTool === 'alarm' ? 'Désactiver' : 'Pause'}
+                  Pause
                 </>
               ) : (
                 <>
                   <Play className="w-4 h-4 mr-2" />
-                  {timerTool === 'alarm' ? 'Activer' : timerTool === 'stopwatch' ? 'Lancer' : isInitialTime ? 'Lancer' : 'Relancer'}
+                  {timerTool === 'stopwatch' ? 'Lancer' : isInitialTime ? 'Lancer' : 'Relancer'}
                 </>
               )}
             </Button>

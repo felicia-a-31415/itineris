@@ -4,7 +4,7 @@ import type { DashboardTimerState } from '../lib/storage';
 
 const MIN_TIMER_MINUTES = 1;
 
-type TimerToolKey = 'timer' | 'stopwatch' | 'alarm';
+type TimerToolKey = 'timer' | 'stopwatch';
 type TimerModeKey = 'focus' | 'pause';
 
 type TimerModeMap = Record<
@@ -36,11 +36,6 @@ type UseDashboardTimerParams = {
   setSessionsByDay: React.Dispatch<React.SetStateAction<Record<string, number>>>;
 };
 
-const getCurrentTimeInputValue = () => {
-  const now = new Date();
-  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-};
-
 const normalizeTimerMode = (mode?: DashboardTimerState['mode'] | TimerAction['mode']): TimerModeKey | null => {
   if (mode === 'focus') return 'focus';
   if (mode === 'pause' || mode === 'short' || mode === 'long') return 'pause';
@@ -61,14 +56,12 @@ export function useDashboardTimer({
   const [timerMode, setTimerMode] = useState<TimerModeKey>('focus');
   const [timerTool, setTimerTool] = useState<TimerToolKey>('timer');
   const [stopwatchSeconds, setStopwatchSeconds] = useState(0);
-  const [alarmTime, setAlarmTime] = useState(() => getCurrentTimeInputValue());
   const [isRunning, setIsRunning] = useState(false);
   const [isEditingTimer, setIsEditingTimer] = useState(false);
   const [editingTimerValue, setEditingTimerValue] = useState('');
   const lastTickRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
-  const alarmTriggeredKeyRef = useRef<string | null>(null);
   const timerStateHydratedRef = useRef(false);
 
   const safeMinutes = Math.max(MIN_TIMER_MINUTES, timerMinutes || MIN_TIMER_MINUTES);
@@ -116,7 +109,6 @@ export function useDashboardTimer({
     minutes: safeMinutes,
     remainingSeconds: Math.max(0, timeLeft),
     stopwatchSeconds,
-    alarmTime,
     isRunning,
     updatedAt: Date.now(),
   });
@@ -128,10 +120,7 @@ export function useDashboardTimer({
 
     timerStateHydratedRef.current = true;
 
-    const persistedTool =
-      persistedTimerState.tool && ['timer', 'stopwatch', 'alarm'].includes(persistedTimerState.tool)
-        ? persistedTimerState.tool
-        : 'timer';
+    const persistedTool: TimerToolKey = persistedTimerState.tool === 'stopwatch' ? 'stopwatch' : 'timer';
     const nextMinutes = Math.max(
       MIN_TIMER_MINUTES,
       Math.round(persistedTimerState.minutes || timerModes[persistedMode].minutes)
@@ -144,9 +133,6 @@ export function useDashboardTimer({
     setTimerMinutes(nextMinutes);
     setEditingTimerValue(nextMinutes.toString());
     setStopwatchSeconds(Math.max(0, persistedTimerState.stopwatchSeconds ?? 0));
-    if (persistedTimerState.alarmTime && /^\d{2}:\d{2}$/.test(persistedTimerState.alarmTime)) {
-      setAlarmTime(persistedTimerState.alarmTime);
-    }
 
     if (!persistedTimerState.isRunning || persistedTool !== 'timer') {
       setIsRunning(false);
@@ -316,35 +302,8 @@ export function useDashboardTimer({
   }, [isRunning, timerTool]);
 
   useEffect(() => {
-    if (!isRunning || timerTool !== 'alarm') return;
-
-    const checkAlarm = () => {
-      const now = new Date();
-      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      const alarmKey = `${formatDate(now)}:${alarmTime}`;
-      if (currentTime !== alarmTime || alarmTriggeredKeyRef.current === alarmKey) return;
-
-      alarmTriggeredKeyRef.current = alarmKey;
-      setIsRunning(false);
-      if (alarmRef.current) {
-        try {
-          alarmRef.current.currentTime = 0;
-          void alarmRef.current.play();
-        } catch (err) {
-          console.error('Lecture du son impossible', err);
-        }
-      }
-    };
-
-    checkAlarm();
-    const alarmInterval = window.setInterval(checkAlarm, 1000);
-    return () => window.clearInterval(alarmInterval);
-  }, [alarmTime, formatDate, isRunning, timerTool]);
-
-  useEffect(() => {
     if (isRunning) {
-      const titleTime =
-        timerTool === 'stopwatch' ? formatTime(stopwatchSeconds) : timerTool === 'alarm' ? alarmTime : formatTime(timeLeft);
+      const titleTime = timerTool === 'stopwatch' ? formatTime(stopwatchSeconds) : formatTime(timeLeft);
       document.title = `itineris | ${titleTime}`;
       if (lastTickRef.current === null) {
         lastTickRef.current = performance.now();
@@ -353,7 +312,7 @@ export function useDashboardTimer({
       document.title = 'itineris';
       lastTickRef.current = null;
     }
-  }, [alarmTime, isRunning, stopwatchSeconds, timeLeft, timerTool]);
+  }, [isRunning, stopwatchSeconds, timeLeft, timerTool]);
 
   useEffect(() => {
     return () => {
@@ -379,7 +338,6 @@ export function useDashboardTimer({
     timerMode,
     timerTool,
     stopwatchSeconds,
-    alarmTime,
     isRunning,
     isEditingTimer,
     editingTimerValue,
@@ -394,10 +352,6 @@ export function useDashboardTimer({
       lastTickRef.current = null;
       setIsEditingTimer(false);
       setTimerTool(nextTool);
-    },
-    setAlarmTime: (nextAlarmTime: string) => {
-      alarmTriggeredKeyRef.current = null;
-      setAlarmTime(nextAlarmTime);
     },
     setIsRunning,
     setIsEditingTimer,
@@ -423,10 +377,6 @@ export function useDashboardTimer({
       lastTickRef.current = null;
       if (timerTool === 'stopwatch') {
         setStopwatchSeconds(0);
-        return;
-      }
-      if (timerTool === 'alarm') {
-        alarmTriggeredKeyRef.current = null;
         return;
       }
       setTimeLeft(safeMinutes * 60);
