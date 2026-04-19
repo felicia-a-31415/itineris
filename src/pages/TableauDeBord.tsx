@@ -173,6 +173,11 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     chatInput,
     setChatInput,
     isSendingChat,
+    chatAttachments,
+    isPreparingChatAttachments,
+    chatAttachmentError,
+    handleChatFileSelect,
+    removeChatAttachment,
     handleSendChat,
   } = useDashboardChat({
     defaultMessages: DEFAULT_CHAT_MESSAGES,
@@ -363,8 +368,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       chatScrollRef={chatScrollRef}
       messages={messages}
       isSendingChat={isSendingChat}
+      attachments={chatAttachments}
+      isPreparingAttachments={isPreparingChatAttachments}
+      attachmentError={chatAttachmentError}
       chatInput={chatInput}
       setChatInput={setChatInput}
+      onFilesSelected={(files) => void handleChatFileSelect(files)}
+      onRemoveAttachment={removeChatAttachment}
       onSend={() => void handleSendChat()}
       renderFormattedMessage={renderFormattedMessage}
       isExpanded={isExpanded}

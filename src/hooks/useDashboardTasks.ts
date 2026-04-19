@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 
 import { buildTasksFromAiActions, extractAddTaskActions } from '../lib/dashboardAi';
+import { prepareImageForAnthropic } from '../lib/chatAttachments';
 import type { DashboardTask } from '../lib/storage';
 
 type Task = DashboardTask;
@@ -28,110 +29,6 @@ type UseDashboardTasksParams = {
   isValidTaskDate: (value?: string) => boolean;
   isValidTaskTime: (value?: string) => boolean;
 };
-
-const MAX_ANTHROPIC_IMAGE_BYTES = 5 * 1024 * 1024;
-const TARGET_ANTHROPIC_IMAGE_BYTES = 4.5 * 1024 * 1024;
-
-async function readFileAsDataUrl(file: Blob): Promise<string> {
-  return await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (typeof reader.result !== 'string') {
-        reject(new Error("Impossible de lire l'image."));
-        return;
-      }
-      resolve(reader.result);
-    };
-
-    reader.onerror = () => reject(new Error("Impossible de lire l'image."));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function loadImageFromFile(file: File): Promise<HTMLImageElement> {
-  const dataUrl = await readFileAsDataUrl(file);
-
-  return await new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Impossible de charger l'image."));
-    image.src = dataUrl;
-  });
-}
-
-async function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
-  return await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) {
-          reject(new Error("Impossible de compresser l'image."));
-          return;
-        }
-        resolve(blob);
-      },
-      'image/jpeg',
-      quality
-    );
-  });
-}
-
-function getDecodedByteLengthFromBase64(base64: string) {
-  const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0;
-  return Math.floor((base64.length * 3) / 4) - padding;
-}
-
-async function prepareImageForAnthropic(file: File): Promise<{ mediaType: string; data: string }> {
-  const image = await loadImageFromFile(file);
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-
-  if (!context) {
-    throw new Error("Impossible de préparer l'image.");
-  }
-
-  let width = image.naturalWidth;
-  let height = image.naturalHeight;
-  const maxDimension = 1800;
-
-  if (Math.max(width, height) > maxDimension) {
-    const scale = maxDimension / Math.max(width, height);
-    width = Math.max(1, Math.round(width * scale));
-    height = Math.max(1, Math.round(height * scale));
-  }
-
-  const attempts = [
-    { scale: 1, quality: 0.8 },
-    { scale: 0.9, quality: 0.72 },
-    { scale: 0.8, quality: 0.64 },
-    { scale: 0.7, quality: 0.56 },
-    { scale: 0.6, quality: 0.5 },
-  ];
-
-  for (const attempt of attempts) {
-    const attemptWidth = Math.max(1, Math.round(width * attempt.scale));
-    const attemptHeight = Math.max(1, Math.round(height * attempt.scale));
-    canvas.width = attemptWidth;
-    canvas.height = attemptHeight;
-    context.clearRect(0, 0, attemptWidth, attemptHeight);
-    context.drawImage(image, 0, 0, attemptWidth, attemptHeight);
-
-    const blob = await canvasToBlob(canvas, attempt.quality);
-    if (blob.size > TARGET_ANTHROPIC_IMAGE_BYTES) continue;
-
-    const dataUrl = await readFileAsDataUrl(blob);
-    const [, base64 = ''] = dataUrl.split(',');
-    if (!base64) throw new Error("Impossible de convertir l'image.");
-    if (getDecodedByteLengthFromBase64(base64) > MAX_ANTHROPIC_IMAGE_BYTES) continue;
-
-    return {
-      mediaType: 'image/jpeg',
-      data: base64,
-    };
-  }
-
-  throw new Error("L'image est trop lourde. Réduis-la ou prends une capture plus légère.");
-}
 
 export function useDashboardTasks({
   taskColors,

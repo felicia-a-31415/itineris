@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { buildTasksFromAiActions, extractAddTaskActions } from '../lib/dashboardAi';
+import { prepareChatAttachment, type ChatAttachment } from '../lib/chatAttachments';
 import type { DashboardChatMessage, DashboardTask } from '../lib/storage';
 
 type ChatTaskAction = Parameters<typeof buildTasksFromAiActions>[0]['actions'][number];
@@ -97,6 +98,9 @@ export function useDashboardChat({
   const [messages, setMessages] = useState<DashboardChatMessage[]>(defaultMessages);
   const [chatInput, setChatInput] = useState('');
   const [isSendingChat, setIsSendingChat] = useState(false);
+  const [chatAttachments, setChatAttachments] = useState<ChatAttachment[]>([]);
+  const [isPreparingChatAttachments, setIsPreparingChatAttachments] = useState(false);
+  const [chatAttachmentError, setChatAttachmentError] = useState<string | null>(null);
 
   const getFriendlyChatError = (status: number, payloadError?: string, rawText?: string) => {
     if (status === 429 || status === 503 || status === 529) {
@@ -109,13 +113,54 @@ export function useDashboardChat({
     return `La fonction de chat a renvoye le statut ${status}.`;
   };
 
+  const handleChatFileSelect = async (files?: FileList | File[] | null) => {
+    const selectedFiles = Array.from(files ?? []);
+    if (selectedFiles.length === 0) return;
+
+    setIsPreparingChatAttachments(true);
+    setChatAttachmentError(null);
+
+    try {
+      const availableSlots = Math.max(0, 4 - chatAttachments.length);
+      if (availableSlots === 0) {
+        setChatAttachmentError('Maximum 4 fichiers par message.');
+        return;
+      }
+
+      const preparedAttachments = await Promise.all(selectedFiles.slice(0, availableSlots).map(prepareChatAttachment));
+      setChatAttachments((prev) => [...prev, ...preparedAttachments]);
+
+      if (selectedFiles.length > availableSlots) {
+        setChatAttachmentError('Maximum 4 fichiers par message. Les fichiers en trop ont ete ignores.');
+      }
+    } catch (error) {
+      setChatAttachmentError(error instanceof Error ? error.message : 'Impossible de joindre ce fichier.');
+    } finally {
+      setIsPreparingChatAttachments(false);
+    }
+  };
+
+  const removeChatAttachment = (id: string) => {
+    setChatAttachments((prev) => prev.filter((attachment) => attachment.id !== id));
+    setChatAttachmentError(null);
+  };
+
   const handleSendChat = async () => {
     const message = chatInput.trim();
-    if (!message || isSendingChat) return;
-    const nextMessages = [...messages, { role: 'user' as const, content: message }];
+    if ((!message && chatAttachments.length === 0) || isSendingChat || isPreparingChatAttachments) return;
+
+    const attachmentsForRequest = chatAttachments;
+    const attachmentNames = attachmentsForRequest.map((attachment) => attachment.name);
+    const effectiveMessage = message || 'Analyse les fichiers joints et aide-moi a les comprendre.';
+    const displayMessage =
+      attachmentNames.length > 0
+        ? `${message || 'Fichiers joints'}\n\nPieces jointes: ${attachmentNames.join(', ')}`
+        : effectiveMessage;
+    const nextMessages = [...messages, { role: 'user' as const, content: displayMessage }];
 
     setMessages(nextMessages);
     setChatInput('');
+    setChatAttachmentError(null);
     setIsSendingChat(true);
 
     try {
@@ -126,10 +171,11 @@ export function useDashboardChat({
           apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
         },
         body: JSON.stringify({
-          message,
+          message: effectiveMessage,
           context: {
             tasks,
             history: nextMessages.slice(-12),
+            attachments: attachmentsForRequest.map(({ id: _id, ...attachment }) => attachment),
             timerSessions: {
               completedToday: sessionsCompletedToday,
               byDay: sessionsByDay,
@@ -154,6 +200,8 @@ export function useDashboardChat({
         setMessages((prev) => [...prev, { role: 'assistant', content: errorMessage }]);
         return;
       }
+
+      setChatAttachments([]);
 
       if (!payload?.reply) {
         if (!Array.isArray(payload?.actions) || payload.actions.length === 0) {
@@ -192,7 +240,7 @@ export function useDashboardChat({
           )
         : [];
 
-      const fallbackTimerAction = timerActions.length === 0 ? parseTimerActionFromMessage(message) : null;
+      const fallbackTimerAction = timerActions.length === 0 ? parseTimerActionFromMessage(effectiveMessage) : null;
       const effectiveTimerActions = fallbackTimerAction ? [fallbackTimerAction] : timerActions;
 
       if (taskActions.length > 0) {
@@ -273,6 +321,11 @@ export function useDashboardChat({
     chatInput,
     setChatInput,
     isSendingChat,
+    chatAttachments,
+    isPreparingChatAttachments,
+    chatAttachmentError,
+    handleChatFileSelect,
+    removeChatAttachment,
     handleSendChat,
   };
 }
