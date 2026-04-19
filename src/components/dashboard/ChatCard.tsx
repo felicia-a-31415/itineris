@@ -160,8 +160,8 @@ export function ChatCard({
                   if (canSend) onSend();
                 }}
                 placeholder="Écris ta question..."
-                rows={isExpanded ? 5 : 2}
-                className="max-h-52 min-h-[44px] flex-1 resize-none overflow-x-hidden bg-transparent px-1 py-2 text-sm text-[#F5F2F7] outline-none placeholder:text-white/38"
+                rows={1}
+                className="max-h-52 min-h-[40px] flex-1 resize-none overflow-x-hidden bg-transparent px-1 py-2 text-sm leading-6 text-[#F5F2F7] outline-none placeholder:text-white/38"
               />
               <Button
                 onClick={onSend}
