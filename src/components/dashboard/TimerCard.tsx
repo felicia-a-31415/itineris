@@ -104,10 +104,7 @@ export function TimerCard({
     <Card
       className={`app-panel flex w-full flex-col rounded-3xl p-6 ${isExpanded ? 'h-full overflow-auto' : ''}`}
     >
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="app-muted text-sm">
-          {timerTool === 'stopwatch' ? 'Chronomètre' : 'Minuteur'}
-        </p>
+      <div className="mb-2 flex items-center justify-end gap-3">
         {onExpandToggle ? (
           <Button
             type="button"

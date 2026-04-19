@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
 
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
@@ -37,6 +37,7 @@ export function StudyStatsCard({
   const todayKey = formatDate(new Date());
   const [manualDateKey, setManualDateKey] = useState(todayKey);
   const [manualMinutes, setManualMinutes] = useState('');
+  const [isManualEditorOpen, setIsManualEditorOpen] = useState(false);
   const parsedManualMinutes = Number(manualMinutes);
   const canSubmitManualMinutes = Number.isFinite(parsedManualMinutes) && parsedManualMinutes >= 0;
 
@@ -54,7 +55,19 @@ export function StudyStatsCard({
   return (
     <Card className="app-panel rounded-3xl p-6 space-y-2">
       <div className="flex flex-col gap-4">
-        <p className="app-muted text-sm">Temps étudié</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="app-muted text-sm">Temps étudié</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsManualEditorOpen((open) => !open)}
+            className="h-10 rounded-xl px-3"
+            aria-expanded={isManualEditorOpen}
+          >
+            <Pencil className="mr-2 h-4 w-4" />
+            Modifier
+          </Button>
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Button
@@ -86,6 +99,7 @@ export function StudyStatsCard({
         </div>
       </div>
 
+      {isManualEditorOpen ? (
       <div className="mt-4 rounded-2xl border border-white/8 bg-[rgba(16,14,24,0.72)] p-4">
         <div className="mb-3">
           <p className="text-sm text-[#F5F2F7]">Modifier le temps d'étude</p>
@@ -142,6 +156,7 @@ export function StudyStatsCard({
           </div>
         </div>
       </div>
+      ) : null}
 
       <div className="mt-2 overflow-x-auto">
         <div className="w-[1104px] min-w-[1104px] grid grid-cols-7 gap-3 items-end">
