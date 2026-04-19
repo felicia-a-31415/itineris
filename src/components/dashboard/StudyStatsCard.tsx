@@ -105,7 +105,7 @@ export function StudyStatsCard({
         </div>
       </div>
 
-      <div className="mt-2 overflow-x-auto">
+      <div className="app-scrollbar-hidden mt-2 overflow-x-auto">
         <div className="w-[1104px] min-w-[1104px] grid grid-cols-7 gap-3 items-end">
           {weekDates.map((date, index) => {
             const minutes = Math.round(activeWeekMinutes[index] ?? 0);
@@ -145,7 +145,7 @@ export function StudyStatsCard({
         </div>
       </div>
 
-      <div className="mt-6 overflow-x-auto">
+      <div className="app-scrollbar-hidden mt-6 overflow-x-auto">
         <div className="w-[1104px] min-w-[1104px] grid gap-4 md:grid-cols-3">
           <div className="space-y-1">
             <p className="text-sm app-muted">Total de cette semaine</p>

@@ -199,6 +199,15 @@
   .app-muted {
     color: #b3a7be;
   }
+
+  .app-scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .app-scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /**
