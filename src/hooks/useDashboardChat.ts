@@ -165,6 +165,20 @@ export function useDashboardChat({
     setIsSendingChat(true);
 
     try {
+      if (attachmentsForRequest.length > 0) {
+        console.info(
+          'Sending chat attachments',
+          attachmentsForRequest.map((attachment) => ({
+            name: attachment.name,
+            kind: attachment.kind,
+            mediaType: attachment.mediaType,
+            size: attachment.size,
+            dataLength: attachment.data?.length ?? 0,
+            textLength: attachment.text?.length ?? 0,
+          }))
+        );
+      }
+
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-chat`, {
         method: 'POST',
         headers: {
