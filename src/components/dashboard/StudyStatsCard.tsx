@@ -34,7 +34,7 @@ export function StudyStatsCard({
   onNextRange,
 }: StudyStatsCardProps) {
   const [draggingDayIndex, setDraggingDayIndex] = useState<number | null>(null);
-  const chartMaxMinutes = Math.max(240, Math.ceil((maxWeekMinutes || 60) / 30) * 30);
+  const chartMaxMinutes = Math.max(15, Math.ceil(((maxWeekMinutes || 15) * 1.08) / 5) * 5);
 
   const startDraggingStudyTime = (
     event: React.PointerEvent<HTMLButtonElement>,
