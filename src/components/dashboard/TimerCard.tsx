@@ -1,4 +1,4 @@
-import { Clock3, Lock, Maximize2, Minimize2, Pause, Play, RotateCcw, Timer, Unlock } from 'lucide-react';
+import { Clock3, Lock, Maximize2, Minimize2, Pause, Play, RotateCcw, Timer } from 'lucide-react';
 
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
@@ -38,7 +38,6 @@ type TimerCardProps = {
   onEditingCancel: () => void;
   onEditingCommit: () => void;
   onSaveStopwatchSession: () => void;
-  onToggleTimerLock: () => void;
   onUnlockPasswordChange: (value: string) => void;
   onUnlockSubmit: () => void;
   onUnlockCancel: () => void;
@@ -87,7 +86,6 @@ export function TimerCard({
   onEditingCancel,
   onEditingCommit,
   onSaveStopwatchSession,
-  onToggleTimerLock,
   onUnlockPasswordChange,
   onUnlockSubmit,
   onUnlockCancel,
@@ -138,7 +136,6 @@ export function TimerCard({
   const innerRingInsetClass = isExpanded ? 'inset-4' : 'inset-3';
   const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-4xl';
   const lockedControlClass = isTimerLocked ? 'cursor-not-allowed opacity-45' : '';
-  const runningToggleDisabled = isTimerLocked && isRunning;
 
   return (
     <Card
@@ -171,20 +168,6 @@ export function TimerCard({
         </div>
         <div className="flex justify-end">
           <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onToggleTimerLock}
-              className={`h-9 w-9 shrink-0 rounded-full p-0 ${
-                isTimerLocked
-                  ? 'bg-[#6d42ff]/18 text-[#E6DCFF] hover:bg-[#6d42ff]/24 hover:text-white'
-                  : 'text-white/72 hover:bg-white/6 hover:text-white'
-              }`}
-              aria-label={isTimerLocked ? 'Déverrouiller le minuteur' : 'Verrouiller le minuteur'}
-              title={isTimerLocked ? 'Déverrouiller le minuteur' : 'Verrouiller le minuteur'}
-            >
-              {isTimerLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-            </Button>
             {onExpandToggle ? (
               <Button
                 type="button"
@@ -380,13 +363,12 @@ export function TimerCard({
           <div className="flex items-center justify-center gap-3">
             <Button
               onClick={onToggleRunning}
-              disabled={runningToggleDisabled}
               className="h-10 min-w-[124px] rounded-xl px-4"
-              title={runningToggleDisabled ? 'Déverrouille le minuteur pour le mettre en pause.' : undefined}
+              title={isTimerLocked && isRunning ? 'Mot de passe requis pour mettre en pause.' : undefined}
             >
               {isRunning ? (
                 <>
-                  <Pause className="w-4 h-4 mr-2" />
+                  {isTimerLocked ? <Lock className="w-4 h-4 mr-2" /> : <Pause className="w-4 h-4 mr-2" />}
                   Pause
                 </>
               ) : (

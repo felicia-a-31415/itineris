@@ -141,7 +141,7 @@ export function useDashboardTimer({
 
     setTimerMode(persistedMode);
     setTimerMinutes(nextMinutes);
-    setIsTimerLocked(Boolean(persistedTimerState.isLocked));
+    setIsTimerLocked(Boolean(persistedTimerState.isLocked && persistedTimerState.isRunning));
     setEditingTimerValue(nextMinutes.toString());
     setStopwatchSeconds(
       Math.max(0, (persistedTimerState.stopwatchSeconds ?? 0) + (persistedTool === 'stopwatch' && persistedTimerState.isRunning ? elapsedSeconds : 0))
@@ -192,6 +192,7 @@ export function useDashboardTimer({
 
     switch (timerAction.action) {
       case 'pause':
+        if (isTimerLocked) return;
         setIsRunning(false);
         lastTickRef.current = null;
         return;
@@ -242,6 +243,7 @@ export function useDashboardTimer({
 
         if (remaining <= 0) {
           setIsRunning(false);
+          setIsTimerLocked(false);
           if (timerMode === 'focus') {
             setSessionsByDay((prevSessions) => {
               const todayKey = formatDate(new Date());

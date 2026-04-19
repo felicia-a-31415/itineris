@@ -151,7 +151,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     formatTime,
     setTimerMode,
     setTimerTool,
-    toggleTimerLock,
+    setIsTimerLocked,
     setIsEditingTimer,
     setEditingTimerValue,
     setCustomTimerMinutes,
@@ -304,15 +304,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     });
   };
 
-  const handleTimerLockToggle = () => {
-    if (!isTimerLocked) {
-      toggleTimerLock();
-      setIsUnlockingTimer(false);
-      setTimerUnlockPassword('');
-      setTimerUnlockError(null);
-      return;
-    }
-
+  const openTimerUnlockPrompt = () => {
     setIsUnlockingTimer(true);
     setTimerUnlockPassword('');
     setTimerUnlockError(null);
@@ -320,7 +312,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
   const handleTimerUnlockSubmit = async () => {
     const email = user?.email?.trim();
-    const password = timerUnlockPassword.trim();
+    const password = timerUnlockPassword;
 
     if (!email) {
       setTimerUnlockError('Connecte-toi pour déverrouiller le minuteur.');
@@ -338,7 +330,8 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       return;
     }
 
-    toggleTimerLock();
+    setIsTimerLocked(false);
+    stopTimer();
     setIsUnlockingTimer(false);
     setTimerUnlockPassword('');
     setTimerUnlockError(null);
@@ -378,12 +371,18 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         setCustomTimerMinutes(next.minutes);
       }}
       onToggleRunning={() => {
-        if (isTimerLocked && isRunning) return;
+        if (isTimerLocked && isRunning) {
+          openTimerUnlockPrompt();
+          return;
+        }
         if (isRunning) {
           stopTimer();
           return;
         }
         startTimer();
+        if (user?.email) {
+          setIsTimerLocked(true);
+        }
       }}
       onReset={() => {
         if (isTimerLocked) return;
@@ -422,7 +421,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       }}
       onEditingCommit={commitTimerEdit}
       onSaveStopwatchSession={saveStopwatchSessionToStats}
-      onToggleTimerLock={handleTimerLockToggle}
       onUnlockPasswordChange={(value) => {
         setTimerUnlockPassword(value);
         setTimerUnlockError(null);
