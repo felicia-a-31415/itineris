@@ -96,9 +96,9 @@ export function TimerCard({
           #ffc083 ${progressDegrees}deg,
           rgba(28,22,42,0.92) ${progressDegrees}deg 360deg
         )`;
-  const timerSizeClass = isExpanded ? 'h-72 w-72 md:h-[22rem] md:w-[22rem]' : 'h-48 w-48';
+  const timerSizeClass = isExpanded ? 'h-72 w-72 md:h-[22rem] md:w-[22rem]' : 'h-60 w-60';
   const innerRingInsetClass = isExpanded ? 'inset-4' : 'inset-3';
-  const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-3xl';
+  const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-4xl';
 
   return (
     <Card
@@ -106,8 +106,9 @@ export function TimerCard({
         isExpanded ? 'h-full overflow-auto' : 'h-[720px] overflow-y-auto'
       }`}
     >
-      <div className="mb-5 flex items-start justify-between gap-3">
-        <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/8 bg-[rgba(16,14,24,0.58)] p-2">
+      <div className="mb-5 grid grid-cols-[1fr_auto_1fr] items-start gap-3">
+        <div />
+        <div className="grid w-full max-w-[360px] grid-cols-2 gap-2 rounded-2xl border border-white/8 bg-[rgba(16,14,24,0.58)] p-2">
           {TOOL_OPTIONS.map(({ key, label, Icon }) => {
             const isActive = timerTool === key;
             return (
@@ -115,7 +116,7 @@ export function TimerCard({
                 key={key}
                 type="button"
                 onClick={() => onToolSelect(key)}
-                className={`flex min-h-[68px] min-w-[104px] flex-col items-center justify-center gap-1 rounded-xl border px-3 text-xs font-semibold transition ${
+                className={`flex min-h-[68px] min-w-[152px] flex-col items-center justify-center gap-1 rounded-xl border px-4 text-xs font-semibold transition ${
                   isActive
                     ? 'border-white/14 bg-white/8 text-white'
                     : 'border-transparent bg-transparent text-[#C9C3D4] hover:border-white/10 hover:bg-white/6 hover:text-[#F5F2F7]'
@@ -127,18 +128,20 @@ export function TimerCard({
             );
           })}
         </div>
-        {onExpandToggle ? (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onExpandToggle}
-            className="h-9 w-9 shrink-0 rounded-full p-0 text-white/72 hover:bg-white/6 hover:text-white"
-            aria-label={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
-            title={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
-          >
-            {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-          </Button>
-        ) : null}
+        <div className="flex justify-end">
+          {onExpandToggle ? (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onExpandToggle}
+              className="h-9 w-9 shrink-0 rounded-full p-0 text-white/72 hover:bg-white/6 hover:text-white"
+              aria-label={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
+              title={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
+            >
+              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       <div className={`flex flex-col items-center gap-6 ${isExpanded ? 'flex-1 justify-center py-6' : ''}`}>
@@ -175,20 +178,22 @@ export function TimerCard({
           </div>
         ) : null}
 
-          <div
-            className={`relative flex items-center justify-center rounded-full ${timerSizeClass}`}
-            style={{
-              background: timerRingGradient,
-              boxShadow:
-                '0 0 22px rgba(159,123,255,0.72), 0 0 54px rgba(255,79,155,0.48), 0 0 118px rgba(255,192,131,0.3)',
-            }}
-          >
+          <div className={isExpanded ? 'flex items-center justify-center' : 'flex h-64 items-center justify-center'}>
             <div
-              className={`absolute ${innerRingInsetClass} rounded-full shadow-inner flex flex-col items-center justify-center bg-[linear-gradient(180deg,rgba(11,12,20,0.95),rgba(21,17,32,0.92))]`}
+              className={`relative flex items-center justify-center rounded-full ${timerSizeClass}`}
+              style={{
+                background: timerRingGradient,
+                boxShadow:
+                  '0 0 22px rgba(159,123,255,0.72), 0 0 54px rgba(255,79,155,0.48), 0 0 118px rgba(255,192,131,0.3)',
+              }}
             >
-              <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_52%)]" />
-              <span className={`font-semibold text-[#F5F2F7] ${timeLabelClass}`}>{displayTime}</span>
-              <span className={`mt-1 app-muted ${isExpanded ? 'text-sm' : 'text-xs'}`}>{statusLabel}</span>
+              <div
+                className={`absolute ${innerRingInsetClass} rounded-full shadow-inner flex flex-col items-center justify-center bg-[linear-gradient(180deg,rgba(11,12,20,0.95),rgba(21,17,32,0.92))]`}
+              >
+                <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_52%)]" />
+                <span className={`font-semibold text-[#F5F2F7] ${timeLabelClass}`}>{displayTime}</span>
+                <span className={`mt-1 app-muted ${isExpanded ? 'text-sm' : 'text-xs'}`}>{statusLabel}</span>
+              </div>
             </div>
           </div>
 
