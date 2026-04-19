@@ -70,7 +70,7 @@ export function StudyStatsCard({
   };
 
   return (
-    <Card className="app-panel rounded-3xl p-6 space-y-2">
+    <Card className="app-panel min-w-0 overflow-hidden rounded-3xl p-6 space-y-2">
       <div className="flex flex-col gap-4">
         <p className="app-muted text-sm">Temps étudié</p>
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -105,8 +105,8 @@ export function StudyStatsCard({
         </div>
       </div>
 
-      <div className="app-scrollbar-hidden mt-2 overflow-x-auto">
-        <div className="w-[1104px] min-w-[1104px] grid grid-cols-7 gap-3 items-end">
+      <div className="mt-2 min-w-0 overflow-x-hidden">
+        <div className="grid min-w-0 grid-cols-7 items-end gap-2 sm:gap-3">
           {weekDates.map((date, index) => {
             const minutes = Math.round(activeWeekMinutes[index] ?? 0);
             const showBar = minutes > 0;
@@ -145,8 +145,8 @@ export function StudyStatsCard({
         </div>
       </div>
 
-      <div className="app-scrollbar-hidden mt-6 overflow-x-auto">
-        <div className="w-[1104px] min-w-[1104px] grid gap-4 md:grid-cols-3">
+      <div className="mt-6 min-w-0 overflow-x-hidden">
+        <div className="grid min-w-0 gap-4 sm:grid-cols-3">
           <div className="space-y-1">
             <p className="text-sm app-muted">Total de cette semaine</p>
             <p className="text-2xl text-[#F5F2F7]">{activeWeekTotalMinutes} min</p>
