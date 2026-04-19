@@ -96,14 +96,14 @@ export function TimerCard({
           #ffc083 ${progressDegrees}deg,
           rgba(28,22,42,0.92) ${progressDegrees}deg 360deg
         )`;
-  const timerSizeClass = isExpanded ? 'h-72 w-72 md:h-[22rem] md:w-[22rem]' : 'h-60 w-60';
+  const timerSizeClass = isExpanded ? 'h-72 w-72 md:h-80 md:w-80' : 'h-60 w-60';
   const innerRingInsetClass = isExpanded ? 'inset-4' : 'inset-3';
   const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-4xl';
 
   return (
     <Card
       className={`app-panel flex w-full flex-col rounded-3xl p-6 ${
-        isExpanded ? 'h-full overflow-auto' : 'h-[720px] overflow-y-auto'
+        isExpanded ? 'app-scrollbar-hidden h-full overflow-auto' : 'app-scrollbar-hidden h-[720px] overflow-y-auto'
       }`}
     >
       <div className="mb-5 grid grid-cols-[1fr_auto_1fr] items-start gap-3">
@@ -146,8 +146,8 @@ export function TimerCard({
 
       <div className={`flex flex-col items-center gap-6 ${isExpanded ? 'flex-1 justify-center py-6' : ''}`}>
 
-        {timerTool === 'timer' ? (
-          <div className="flex flex-wrap justify-center gap-3.5">
+        <div className="flex h-10 items-center justify-center">
+          <div className={`flex flex-wrap justify-center gap-3.5 ${timerTool === 'timer' ? '' : 'invisible'}`}>
             {MODE_OPTIONS.map(({ key, label }) => {
               const isActive = timerMode === key;
               return (
@@ -176,7 +176,7 @@ export function TimerCard({
               );
             })}
           </div>
-        ) : null}
+        </div>
 
           <div className={isExpanded ? 'flex items-center justify-center' : 'flex h-64 items-center justify-center'}>
             <div
@@ -198,7 +198,7 @@ export function TimerCard({
           </div>
 
         {timerTool === 'timer' ? (
-          <div className={`app-panel-soft rounded-2xl px-4 py-4 text-sm app-muted ${isExpanded ? 'w-full max-w-xl' : ''}`}>
+          <div className={`app-panel-soft rounded-2xl px-4 py-4 text-sm app-muted ${isExpanded ? 'w-fit max-w-full' : ''}`}>
             <div className="mb-3">
               <span className="text-sm app-muted">Durée du minuteur</span>
             </div>

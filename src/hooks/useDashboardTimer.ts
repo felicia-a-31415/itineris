@@ -63,6 +63,7 @@ export function useDashboardTimer({
   const animationFrameRef = useRef<number | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
   const timerStateHydratedRef = useRef(false);
+  const stopwatchSessionRecordedRef = useRef(false);
 
   const safeMinutes = Math.max(MIN_TIMER_MINUTES, timerMinutes || MIN_TIMER_MINUTES);
   const ringColor = timerModes[timerMode].color;
@@ -129,10 +130,18 @@ export function useDashboardTimer({
     const cappedRemainingSeconds = Math.min(durationSeconds, Math.max(0, persistedTimerState.remainingSeconds || 0));
 
     setTimerTool(persistedTool);
+    const elapsedSeconds = Math.max(0, (Date.now() - persistedTimerState.updatedAt) / 1000);
+
     setTimerMode(persistedMode);
     setTimerMinutes(nextMinutes);
     setEditingTimerValue(nextMinutes.toString());
-    setStopwatchSeconds(Math.max(0, persistedTimerState.stopwatchSeconds ?? 0));
+    setStopwatchSeconds(
+      Math.max(0, (persistedTimerState.stopwatchSeconds ?? 0) + (persistedTool === 'stopwatch' && persistedTimerState.isRunning ? elapsedSeconds : 0))
+    );
+
+    if (persistedTool === 'stopwatch' && persistedTimerState.isRunning && elapsedSeconds > 0) {
+      setStudyData((prev) => addElapsedStudySeconds(prev, persistedTimerState.updatedAt, Date.now()));
+    }
 
     if (!persistedTimerState.isRunning || persistedTool !== 'timer') {
       setIsRunning(false);
@@ -140,7 +149,6 @@ export function useDashboardTimer({
       return true;
     }
 
-    const elapsedSeconds = Math.max(0, (Date.now() - persistedTimerState.updatedAt) / 1000);
     const effectiveElapsedSeconds = Math.min(cappedRemainingSeconds, elapsedSeconds);
     const remainingAfterResume = Math.max(0, cappedRemainingSeconds - elapsedSeconds);
 
@@ -167,6 +175,13 @@ export function useDashboardTimer({
 
   const resetHydrationGuard = () => {
     timerStateHydratedRef.current = false;
+  };
+
+  const recordStopwatchSession = () => {
+    if (timerTool !== 'stopwatch' || stopwatchSessionRecordedRef.current || stopwatchSeconds < 1) return;
+    const todayKey = formatDate(new Date());
+    setSessionsByDay((prev) => ({ ...prev, [todayKey]: (prev[todayKey] ?? 0) + 1 }));
+    stopwatchSessionRecordedRef.current = true;
   };
 
   const applyChatTimerAction = (timerAction: TimerAction) => {
@@ -283,14 +298,32 @@ export function useDashboardTimer({
     if (!isRunning || timerTool !== 'stopwatch') return;
     lastTickRef.current = lastTickRef.current ?? performance.now();
 
+    const applyStopwatchDelta = (deltaSec: number) => {
+      const effectiveDelta = Math.max(0, deltaSec);
+      if (effectiveDelta <= 0) return;
+      const endMs = Date.now();
+      const startMs = endMs - effectiveDelta * 1000;
+      setStopwatchSeconds((prev) => prev + effectiveDelta);
+      setStudyData((prev) => addElapsedStudySeconds(prev, startMs, endMs));
+    };
+
     const tick = () => {
       const now = performance.now();
       const lastTick = lastTickRef.current ?? now;
       const deltaSec = (now - lastTick) / 1000;
       lastTickRef.current = now;
-      setStopwatchSeconds((prev) => prev + deltaSec);
+      applyStopwatchDelta(deltaSec);
       animationFrameRef.current = requestAnimationFrame(tick);
     };
+
+    const hiddenInterval = setInterval(() => {
+      if (!document.hidden) return;
+      const now = performance.now();
+      const lastTick = lastTickRef.current ?? now;
+      const deltaSec = (now - lastTick) / 1000;
+      lastTickRef.current = now;
+      applyStopwatchDelta(deltaSec);
+    }, 1000);
 
     animationFrameRef.current = requestAnimationFrame(tick);
     return () => {
@@ -298,8 +331,9 @@ export function useDashboardTimer({
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
       }
+      clearInterval(hiddenInterval);
     };
-  }, [isRunning, timerTool]);
+  }, [isRunning, timerTool, setStudyData, addElapsedStudySeconds]);
 
   useEffect(() => {
     if (isRunning) {
@@ -348,6 +382,9 @@ export function useDashboardTimer({
     formatTime,
     setTimerMode,
     setTimerTool: (nextTool: TimerToolKey) => {
+      if (isRunning) {
+        recordStopwatchSession();
+      }
       setIsRunning(false);
       lastTickRef.current = null;
       setIsEditingTimer(false);
@@ -366,17 +403,25 @@ export function useDashboardTimer({
     applyChatTimerAction,
     startTimer: () => {
       lastTickRef.current = performance.now();
+      if (timerTool === 'stopwatch') {
+        stopwatchSessionRecordedRef.current = false;
+      }
       setIsRunning(true);
     },
     stopTimer: () => {
+      recordStopwatchSession();
       lastTickRef.current = null;
       setIsRunning(false);
     },
     resetTimerToCurrentDuration: () => {
+      if (isRunning) {
+        recordStopwatchSession();
+      }
       setIsRunning(false);
       lastTickRef.current = null;
       if (timerTool === 'stopwatch') {
         setStopwatchSeconds(0);
+        stopwatchSessionRecordedRef.current = false;
         return;
       }
       setTimeLeft(safeMinutes * 60);

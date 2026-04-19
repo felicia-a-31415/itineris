@@ -147,7 +147,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     formatTime,
     setTimerMode,
     setTimerTool,
-    setIsRunning,
     setIsEditingTimer,
     setEditingTimerValue,
     setCustomTimerMinutes,
@@ -157,6 +156,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     resetHydrationGuard,
     applyChatTimerAction,
     startTimer,
+    stopTimer,
     resetTimerToCurrentDuration,
   } = useDashboardTimer({
     timerModes: TIMER_MODES,
@@ -320,7 +320,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       }}
       onToggleRunning={() => {
         if (isRunning) {
-          setIsRunning(false);
+          stopTimer();
           return;
         }
         startTimer();

@@ -79,7 +79,7 @@ export function AgendaCard({
   onExpandToggle,
 }: AgendaCardProps) {
   return (
-    <Card className={`app-panel rounded-3xl p-6 space-y-2 ${isExpanded ? 'min-h-full overflow-auto' : ''}`}>
+    <Card className={`app-panel rounded-3xl p-6 space-y-2 ${isExpanded ? 'app-scrollbar-hidden min-h-full overflow-auto' : ''}`}>
       <div className={`flex flex-col ${calendarMode === 'tasks' ? 'gap-2' : 'gap-4'}`}>
         <div className="flex items-center justify-between gap-3">
           <p className="app-muted text-sm">Agenda en ligne</p>
@@ -214,7 +214,7 @@ export function AgendaCard({
       {calendarMode === 'tasks' ? (
         <div className="mt-0">{tasksListContent}</div>
       ) : (
-        <div className="mt-2 overflow-x-auto">
+        <div className="app-scrollbar-hidden mt-2 overflow-x-auto">
           <div className="w-[1104px] min-w-[1104px] shrink-0">
             <div className="grid grid-cols-7 border-b border-[#1F2230]">
               {headerDates.map((date, index) => (

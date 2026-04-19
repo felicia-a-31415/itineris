@@ -58,7 +58,7 @@ export function ChatCard({
       >
         <div
           ref={chatScrollRef}
-          className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-3 text-sm app-muted"
+          className="app-scrollbar-hidden min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-3 text-sm app-muted"
         >
           <div className="flex min-h-full flex-col justify-end space-y-3">
             {messages.map((message, index) => (
