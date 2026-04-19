@@ -112,6 +112,10 @@ export function TimerCard({
             ${activeRingColors.fourth} ${progressDegrees}deg,
             rgba(28,22,42,0.92) ${progressDegrees}deg 360deg
           )`;
+  const timerRingGlow =
+    timerTool === 'timer' && timerMode === 'pause'
+      ? '0 0 22px rgba(56,189,248,0.62), 0 0 56px rgba(34,211,238,0.42), 0 0 118px rgba(52,211,153,0.28)'
+      : '0 0 22px rgba(159,123,255,0.72), 0 0 54px rgba(255,79,155,0.48), 0 0 118px rgba(255,192,131,0.3)';
   const timerSizeClass = isExpanded ? 'h-72 w-72 md:h-80 md:w-80' : 'h-60 w-60';
   const innerRingInsetClass = isExpanded ? 'inset-4' : 'inset-3';
   const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-4xl';
@@ -124,7 +128,7 @@ export function TimerCard({
     >
       <div className="mb-5 grid grid-cols-[1fr_auto_1fr] items-start gap-3">
         <div />
-        <div className="grid w-full max-w-[360px] grid-cols-2 gap-2 rounded-2xl border border-white/8 bg-[rgba(16,14,24,0.58)] p-2">
+        <div className="grid w-full max-w-[300px] grid-cols-2 gap-1.5 rounded-2xl border border-[#8B61FF]/16 bg-[rgba(22,17,34,0.62)] p-1.5 shadow-[0_10px_28px_rgba(109,66,255,0.08)]">
           {TOOL_OPTIONS.map(({ key, label, Icon }) => {
             const isActive = timerTool === key;
             return (
@@ -132,13 +136,13 @@ export function TimerCard({
                 key={key}
                 type="button"
                 onClick={() => onToolSelect(key)}
-                className={`flex min-h-[68px] min-w-[152px] flex-col items-center justify-center gap-1 rounded-xl border px-4 text-xs font-semibold transition ${
+                className={`flex min-h-[54px] min-w-[124px] flex-col items-center justify-center gap-0.5 rounded-xl border px-3 text-[11px] font-semibold transition ${
                   isActive
-                    ? 'border-white/14 bg-white/8 text-white'
-                    : 'border-transparent bg-transparent text-[#C9C3D4] hover:border-white/10 hover:bg-white/6 hover:text-[#F5F2F7]'
+                    ? 'border-[#9F7BFF]/38 bg-[linear-gradient(180deg,rgba(109,66,255,0.24),rgba(68,43,112,0.18))] text-white shadow-[0_0_18px_rgba(109,66,255,0.2)]'
+                    : 'border-transparent bg-transparent text-[#C9C3D4] hover:border-[#9F7BFF]/22 hover:bg-[#8B61FF]/8 hover:text-[#F5F2F7]'
                 }`}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-4 w-4" />
                 {label}
               </button>
             );
@@ -199,8 +203,7 @@ export function TimerCard({
               className={`relative flex items-center justify-center rounded-full ${timerSizeClass}`}
               style={{
                 background: timerRingGradient,
-                boxShadow:
-                  '0 0 22px rgba(159,123,255,0.72), 0 0 54px rgba(255,79,155,0.48), 0 0 118px rgba(255,192,131,0.3)',
+                boxShadow: timerRingGlow,
               }}
             >
               <div
