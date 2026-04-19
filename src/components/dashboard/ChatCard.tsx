@@ -116,6 +116,17 @@ export function ChatCard({
                     </span>
                   );
                 })}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setChatInput(
+                      "Cree un quiz interactif de 7 questions base sur les fichiers joints. Pose une seule question a la fois. Apres chacune de mes reponses, dis si c'est juste ou faux et donne une explication detaillee avant de passer a la question suivante."
+                    )
+                  }
+                  className="inline-flex h-7 items-center rounded-lg border border-[#9F7BFF]/28 bg-[rgba(109,66,255,0.14)] px-3 text-xs font-semibold text-[#F5F2F7] hover:bg-[rgba(109,66,255,0.22)]"
+                >
+                  Créer un quiz
+                </button>
                 {isPreparingAttachments ? <span className="text-xs text-white/42">Preparation...</span> : null}
                 {attachmentError ? <span className="text-xs text-[#FFB4B4]">{attachmentError}</span> : null}
               </div>

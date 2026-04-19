@@ -33,6 +33,7 @@ type TimerCardProps = {
   onEditingBlur: () => void;
   onEditingCancel: () => void;
   onEditingCommit: () => void;
+  onSaveStopwatchSession: () => void;
   isExpanded?: boolean;
   onExpandToggle?: () => void;
 };
@@ -73,6 +74,7 @@ export function TimerCard({
   onEditingBlur,
   onEditingCancel,
   onEditingCommit,
+  onSaveStopwatchSession,
   isExpanded = false,
   onExpandToggle,
 }: TimerCardProps) {
@@ -288,6 +290,18 @@ export function TimerCard({
               </div>
             ) : null}
           </div>
+        ) : null}
+
+        {timerTool === 'stopwatch' ? (
+          <Button
+            type="button"
+            onClick={onSaveStopwatchSession}
+            disabled={stopwatchSeconds < 1}
+            variant="outline"
+            className="h-10 rounded-xl border-[#9F7BFF]/28 bg-[rgba(109,66,255,0.12)] px-4 text-sm text-[#F5F2F7] hover:bg-[rgba(109,66,255,0.2)] disabled:opacity-45"
+          >
+            Ajouter aux stats
+          </Button>
         ) : null}
 
           <div className="flex items-center justify-center gap-3">

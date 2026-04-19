@@ -63,7 +63,6 @@ export function useDashboardTimer({
   const animationFrameRef = useRef<number | null>(null);
   const alarmRef = useRef<HTMLAudioElement | null>(null);
   const timerStateHydratedRef = useRef(false);
-  const stopwatchSessionRecordedRef = useRef(false);
 
   const safeMinutes = Math.max(MIN_TIMER_MINUTES, timerMinutes || MIN_TIMER_MINUTES);
   const ringColor = timerModes[timerMode].color;
@@ -139,10 +138,6 @@ export function useDashboardTimer({
       Math.max(0, (persistedTimerState.stopwatchSeconds ?? 0) + (persistedTool === 'stopwatch' && persistedTimerState.isRunning ? elapsedSeconds : 0))
     );
 
-    if (persistedTool === 'stopwatch' && persistedTimerState.isRunning && elapsedSeconds > 0) {
-      setStudyData((prev) => addElapsedStudySeconds(prev, persistedTimerState.updatedAt, Date.now()));
-    }
-
     if (!persistedTimerState.isRunning || persistedTool !== 'timer') {
       setIsRunning(false);
       setTimeLeft(cappedRemainingSeconds);
@@ -175,13 +170,6 @@ export function useDashboardTimer({
 
   const resetHydrationGuard = () => {
     timerStateHydratedRef.current = false;
-  };
-
-  const recordStopwatchSession = () => {
-    if (timerTool !== 'stopwatch' || stopwatchSessionRecordedRef.current || stopwatchSeconds < 1) return;
-    const todayKey = formatDate(new Date());
-    setSessionsByDay((prev) => ({ ...prev, [todayKey]: (prev[todayKey] ?? 0) + 1 }));
-    stopwatchSessionRecordedRef.current = true;
   };
 
   const applyChatTimerAction = (timerAction: TimerAction) => {
@@ -301,10 +289,7 @@ export function useDashboardTimer({
     const applyStopwatchDelta = (deltaSec: number) => {
       const effectiveDelta = Math.max(0, deltaSec);
       if (effectiveDelta <= 0) return;
-      const endMs = Date.now();
-      const startMs = endMs - effectiveDelta * 1000;
       setStopwatchSeconds((prev) => prev + effectiveDelta);
-      setStudyData((prev) => addElapsedStudySeconds(prev, startMs, endMs));
     };
 
     const tick = () => {
@@ -333,7 +318,7 @@ export function useDashboardTimer({
       }
       clearInterval(hiddenInterval);
     };
-  }, [isRunning, timerTool, setStudyData, addElapsedStudySeconds]);
+  }, [isRunning, timerTool]);
 
   useEffect(() => {
     if (isRunning) {
@@ -382,9 +367,6 @@ export function useDashboardTimer({
     formatTime,
     setTimerMode,
     setTimerTool: (nextTool: TimerToolKey) => {
-      if (isRunning) {
-        recordStopwatchSession();
-      }
       setIsRunning(false);
       lastTickRef.current = null;
       setIsEditingTimer(false);
@@ -403,28 +385,37 @@ export function useDashboardTimer({
     applyChatTimerAction,
     startTimer: () => {
       lastTickRef.current = performance.now();
-      if (timerTool === 'stopwatch') {
-        stopwatchSessionRecordedRef.current = false;
-      }
       setIsRunning(true);
     },
     stopTimer: () => {
-      recordStopwatchSession();
       lastTickRef.current = null;
       setIsRunning(false);
     },
     resetTimerToCurrentDuration: () => {
-      if (isRunning) {
-        recordStopwatchSession();
-      }
       setIsRunning(false);
       lastTickRef.current = null;
       if (timerTool === 'stopwatch') {
         setStopwatchSeconds(0);
-        stopwatchSessionRecordedRef.current = false;
         return;
       }
       setTimeLeft(safeMinutes * 60);
+    },
+    saveStopwatchSessionToStats: () => {
+      const elapsedSeconds = Math.max(0, stopwatchSeconds);
+      setIsRunning(false);
+      lastTickRef.current = null;
+
+      if (timerTool !== 'stopwatch' || elapsedSeconds < 1) {
+        setStopwatchSeconds(0);
+        return;
+      }
+
+      const endMs = Date.now();
+      const startMs = endMs - elapsedSeconds * 1000;
+      const todayKey = formatDate(new Date(endMs));
+      setStudyData((prev) => addElapsedStudySeconds(prev, startMs, endMs));
+      setSessionsByDay((prev) => ({ ...prev, [todayKey]: (prev[todayKey] ?? 0) + 1 }));
+      setStopwatchSeconds(0);
     },
   };
 }

@@ -158,6 +158,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     startTimer,
     stopTimer,
     resetTimerToCurrentDuration,
+    saveStopwatchSessionToStats,
   } = useDashboardTimer({
     timerModes: TIMER_MODES,
     alarmSoundSrc: alarmSound,
@@ -360,6 +361,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         setEditingTimerValue(Math.max(1, Math.round(safeMinutes)).toString());
       }}
       onEditingCommit={commitTimerEdit}
+      onSaveStopwatchSession={saveStopwatchSessionToStats}
     />
   );
 
