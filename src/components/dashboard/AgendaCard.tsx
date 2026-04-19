@@ -79,7 +79,7 @@ export function AgendaCard({
   onExpandToggle,
 }: AgendaCardProps) {
   return (
-    <Card className={`app-panel rounded-3xl p-6 space-y-2 ${isExpanded ? 'app-scrollbar-hidden min-h-full overflow-auto' : ''}`}>
+    <Card className={`app-panel rounded-3xl p-6 space-y-2 ${isExpanded ? 'app-scrollbar-hidden h-full w-full overflow-auto' : ''}`}>
       <div className={`flex flex-col ${calendarMode === 'tasks' ? 'gap-2' : 'gap-4'}`}>
         <div className="flex items-center justify-between gap-3">
           <p className="app-muted text-sm">Agenda en ligne</p>
