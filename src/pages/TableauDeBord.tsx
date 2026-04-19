@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Flame, LogOut, Settings } from 'lucide-react';
+import { Bug, Flame, LogOut, Settings } from 'lucide-react';
 import { Button } from '../ui/button';
 import { DashboardTaskListPanel } from '../components/dashboard/TaskListPanel';
 import { DashboardAuthGate } from '../components/dashboard/DashboardAuthGate';
@@ -760,6 +760,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
         </div>
       ) : null}
+
+      <a
+        href="https://forms.gle/ZTWbhwHJsR2vTfPE6"
+        target="_blank"
+        rel="noreferrer"
+        className="fixed bottom-5 right-5 z-[80] flex h-14 w-14 items-center justify-center rounded-full border border-[#9F7BFF]/30 bg-[linear-gradient(180deg,rgba(109,66,255,0.95),rgba(81,45,164,0.95))] text-white shadow-[0_18px_42px_rgba(0,0,0,0.45),0_0_28px_rgba(109,66,255,0.28)] transition hover:scale-105 hover:border-[#C7B7FF]/50 hover:shadow-[0_20px_48px_rgba(0,0,0,0.5),0_0_34px_rgba(109,66,255,0.42)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C7B7FF]/60 md:bottom-7 md:right-7"
+        aria-label="Signaler un bug"
+        title="Signaler un bug"
+      >
+        <Bug className="h-6 w-6" />
+      </a>
     </div>
   );
 }
