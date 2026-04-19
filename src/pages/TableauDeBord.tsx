@@ -595,7 +595,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
 
         <div className="grid items-stretch gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div className="w-full min-w-0 md:h-full">{renderTimerCard()}</div>
-          <div className="h-[640px] w-full min-w-0">{renderChatCard()}</div>
+          <div className="h-[720px] w-full min-w-0">{renderChatCard()}</div>
         </div>
 
         {renderAgendaCard()}

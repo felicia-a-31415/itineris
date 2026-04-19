@@ -103,43 +103,42 @@ export function TimerCard({
   return (
     <Card
       className={`app-panel flex w-full flex-col rounded-3xl p-6 ${
-        isExpanded ? 'h-full overflow-auto' : 'h-[640px] overflow-y-auto'
+        isExpanded ? 'h-full overflow-auto' : 'h-[720px] overflow-y-auto'
       }`}
     >
-      <div className="mb-2 flex items-center justify-end gap-3">
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/8 bg-[rgba(16,14,24,0.58)] p-2">
+          {TOOL_OPTIONS.map(({ key, label, Icon }) => {
+            const isActive = timerTool === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => onToolSelect(key)}
+                className={`flex min-h-[68px] min-w-[104px] flex-col items-center justify-center gap-1 rounded-xl border px-3 text-xs font-semibold transition ${
+                  isActive
+                    ? 'border-white/14 bg-white/8 text-white'
+                    : 'border-transparent bg-transparent text-[#C9C3D4] hover:border-white/10 hover:bg-white/6 hover:text-[#F5F2F7]'
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                {label}
+              </button>
+            );
+          })}
+        </div>
         {onExpandToggle ? (
           <Button
             type="button"
             variant="ghost"
             onClick={onExpandToggle}
-            className="h-9 w-9 rounded-full p-0 text-white/72 hover:bg-white/6 hover:text-white"
+            className="h-9 w-9 shrink-0 rounded-full p-0 text-white/72 hover:bg-white/6 hover:text-white"
             aria-label={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
             title={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
           >
             {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </Button>
         ) : null}
-      </div>
-
-      <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl border border-white/8 bg-[rgba(16,14,24,0.58)] p-2">
-        {TOOL_OPTIONS.map(({ key, label, Icon }) => {
-          const isActive = timerTool === key;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => onToolSelect(key)}
-              className={`flex min-h-[68px] flex-col items-center justify-center gap-1 rounded-xl border px-3 text-xs font-semibold transition ${
-                isActive
-                  ? 'border-white/14 bg-white/8 text-white'
-                  : 'border-transparent bg-transparent text-[#C9C3D4] hover:border-white/10 hover:bg-white/6 hover:text-[#F5F2F7]'
-              }`}
-            >
-              <Icon className="h-5 w-5" />
-              {label}
-            </button>
-          );
-        })}
       </div>
 
       <div className={`flex flex-col items-center gap-6 ${isExpanded ? 'flex-1 justify-center py-6' : ''}`}>

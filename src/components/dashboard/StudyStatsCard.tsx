@@ -55,19 +55,7 @@ export function StudyStatsCard({
   return (
     <Card className="app-panel rounded-3xl p-6 space-y-2">
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-3">
-          <p className="app-muted text-sm">Temps étudié</p>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setIsManualEditorOpen((open) => !open)}
-            className="h-10 rounded-xl px-3"
-            aria-expanded={isManualEditorOpen}
-          >
-            <Pencil className="mr-2 h-4 w-4" />
-            Modifier
-          </Button>
-        </div>
+        <p className="app-muted text-sm">Temps étudié</p>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Button
@@ -96,6 +84,16 @@ export function StudyStatsCard({
               </Button>
             </div>
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsManualEditorOpen((open) => !open)}
+            className="h-10 rounded-xl px-3"
+            aria-expanded={isManualEditorOpen}
+          >
+            <Pencil className="mr-2 h-4 w-4" />
+            Modifier
+          </Button>
         </div>
       </div>
 
