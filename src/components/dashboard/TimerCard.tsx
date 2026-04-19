@@ -84,18 +84,34 @@ export function TimerCard({
       : `${durationSeconds / 60} min`;
   const displayTime = timerTool === 'stopwatch' ? formatTime(stopwatchSeconds) : formatTime(timeLeft);
   const statusLabel = timerTool === 'stopwatch' ? 'Chronomètre' : timerDurationLabel;
-  const progressDegrees = timerTool === 'timer' ? progress * 3.6 : timerTool === 'stopwatch' ? 360 : 0;
+  const progressDegrees = timerTool === 'timer' ? progress * 3.6 : 0;
+  const activeRingColors =
+    timerMode === 'pause'
+      ? {
+          first: '#38BDF8',
+          second: '#22D3EE',
+          third: '#34D399',
+          fourth: '#86EFAC',
+        }
+      : {
+          first: '#9f7bff',
+          second: '#6f46ff',
+          third: '#ff4f9b',
+          fourth: '#ffc083',
+        };
   const timerRingGradient =
-    progressDegrees <= 0
-      ? 'conic-gradient(from 180deg, rgba(28,22,42,0.92) 0deg 360deg)'
-      : `conic-gradient(
-          from 180deg,
-          #9f7bff 0deg,
-          #6f46ff ${progressDegrees * 0.2}deg,
-          #ff4f9b ${progressDegrees * 0.68}deg,
-          #ffc083 ${progressDegrees}deg,
-          rgba(28,22,42,0.92) ${progressDegrees}deg 360deg
-        )`;
+    timerTool === 'stopwatch'
+      ? 'conic-gradient(from 180deg, #9f7bff 0deg, #6f46ff 72deg, #ff4f9b 245deg, #ffc083 360deg)'
+      : progressDegrees <= 0
+        ? 'conic-gradient(from 180deg, rgba(28,22,42,0.92) 0deg 360deg)'
+        : `conic-gradient(
+            from 180deg,
+            ${activeRingColors.first} 0deg,
+            ${activeRingColors.second} ${progressDegrees * 0.2}deg,
+            ${activeRingColors.third} ${progressDegrees * 0.68}deg,
+            ${activeRingColors.fourth} ${progressDegrees}deg,
+            rgba(28,22,42,0.92) ${progressDegrees}deg 360deg
+          )`;
   const timerSizeClass = isExpanded ? 'h-72 w-72 md:h-80 md:w-80' : 'h-60 w-60';
   const innerRingInsetClass = isExpanded ? 'inset-4' : 'inset-3';
   const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-4xl';
