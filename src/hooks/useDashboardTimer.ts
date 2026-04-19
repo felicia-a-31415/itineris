@@ -57,6 +57,7 @@ export function useDashboardTimer({
   const [timerTool, setTimerTool] = useState<TimerToolKey>('timer');
   const [stopwatchSeconds, setStopwatchSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [isTimerLocked, setIsTimerLocked] = useState(false);
   const [isEditingTimer, setIsEditingTimer] = useState(false);
   const [editingTimerValue, setEditingTimerValue] = useState('');
   const lastTickRef = useRef<number | null>(null);
@@ -80,6 +81,7 @@ export function useDashboardTimer({
   };
 
   const setCustomTimerMinutes = (nextMinutes: number) => {
+    if (isTimerLocked) return;
     const clamped = Math.max(MIN_TIMER_MINUTES, Math.round(nextMinutes));
     const durationSeconds = Math.max(1, Math.round(clamped * 60));
     setIsRunning(false);
@@ -91,6 +93,10 @@ export function useDashboardTimer({
   };
 
   const commitTimerEdit = () => {
+    if (isTimerLocked) {
+      setIsEditingTimer(false);
+      return;
+    }
     const parsed = Number(editingTimerValue);
     if (Number.isFinite(parsed)) {
       setCustomTimerMinutes(parsed);
@@ -99,6 +105,7 @@ export function useDashboardTimer({
   };
 
   const applyTimerSettings = (nextMode: TimerModeKey, nextMinutes: number) => {
+    if (isTimerLocked) return;
     setTimerMode(nextMode);
     setCustomTimerMinutes(nextMinutes);
   };
@@ -110,6 +117,7 @@ export function useDashboardTimer({
     remainingSeconds: Math.max(0, timeLeft),
     stopwatchSeconds,
     isRunning,
+    isLocked: isTimerLocked,
     updatedAt: Date.now(),
   });
 
@@ -133,6 +141,7 @@ export function useDashboardTimer({
 
     setTimerMode(persistedMode);
     setTimerMinutes(nextMinutes);
+    setIsTimerLocked(Boolean(persistedTimerState.isLocked));
     setEditingTimerValue(nextMinutes.toString());
     setStopwatchSeconds(
       Math.max(0, (persistedTimerState.stopwatchSeconds ?? 0) + (persistedTool === 'stopwatch' && persistedTimerState.isRunning ? elapsedSeconds : 0))
@@ -188,13 +197,14 @@ export function useDashboardTimer({
         return;
       case 'reset':
       case 'set':
+        if (isTimerLocked) return;
         setIsRunning(false);
         lastTickRef.current = null;
         setTimerTool('timer');
         applyTimerSettings(requestedMode, requestedMinutes);
         return;
       case 'start':
-        if (timerAction.mode || Number.isFinite(timerAction.minutes)) {
+        if (!isTimerLocked && (timerAction.mode || Number.isFinite(timerAction.minutes))) {
           setTimerTool('timer');
           applyTimerSettings(requestedMode, requestedMinutes);
         }
@@ -358,6 +368,7 @@ export function useDashboardTimer({
     timerTool,
     stopwatchSeconds,
     isRunning,
+    isTimerLocked,
     isEditingTimer,
     editingTimerValue,
     safeMinutes,
@@ -367,6 +378,7 @@ export function useDashboardTimer({
     formatTime,
     setTimerMode,
     setTimerTool: (nextTool: TimerToolKey) => {
+      if (isTimerLocked) return;
       setIsRunning(false);
       lastTickRef.current = null;
       setIsEditingTimer(false);
@@ -377,6 +389,13 @@ export function useDashboardTimer({
     setEditingTimerValue,
     setTimeLeft,
     setTimerMinutes,
+    setIsTimerLocked,
+    toggleTimerLock: () => {
+      setIsTimerLocked((prev) => {
+        if (!prev) setIsEditingTimer(false);
+        return !prev;
+      });
+    },
     setCustomTimerMinutes,
     commitTimerEdit,
     buildTimerState,
@@ -392,6 +411,7 @@ export function useDashboardTimer({
       setIsRunning(false);
     },
     resetTimerToCurrentDuration: () => {
+      if (isTimerLocked) return;
       setIsRunning(false);
       lastTickRef.current = null;
       if (timerTool === 'stopwatch') {
@@ -401,6 +421,7 @@ export function useDashboardTimer({
       setTimeLeft(safeMinutes * 60);
     },
     saveStopwatchSessionToStats: () => {
+      if (isTimerLocked) return;
       const elapsedSeconds = Math.max(0, stopwatchSeconds);
       setIsRunning(false);
       lastTickRef.current = null;

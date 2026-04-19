@@ -138,6 +138,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     timerTool,
     stopwatchSeconds,
     isRunning,
+    isTimerLocked,
     isEditingTimer,
     editingTimerValue,
     safeMinutes,
@@ -147,6 +148,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     formatTime,
     setTimerMode,
     setTimerTool,
+    toggleTimerLock,
     setIsEditingTimer,
     setEditingTimerValue,
     setCustomTimerMinutes,
@@ -206,7 +208,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     loading,
     location,
   });
-  const timerPersistenceKey = `${timerTool}:${timerMode}:${safeMinutes}:${Math.round(timeLeft)}:${Math.round(stopwatchSeconds)}:${isRunning ? 1 : 0}`;
+  const timerPersistenceKey = `${timerTool}:${timerMode}:${safeMinutes}:${Math.round(timeLeft)}:${Math.round(stopwatchSeconds)}:${isRunning ? 1 : 0}:${isTimerLocked ? 1 : 0}`;
   const { isDashboardHydrated, persistDashboardSnapshot } = useDashboardPersistence({
     userId: user?.id,
     loading,
@@ -309,6 +311,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       progress={progress}
       ringColor={ringColor}
       isRunning={isRunning}
+      isTimerLocked={isTimerLocked}
       isInitialTime={isInitialTime}
       safeMinutes={safeMinutes}
       isEditingTimer={isEditingTimer}
@@ -317,8 +320,12 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       formatTime={formatTime}
       isExpanded={isExpanded}
       onExpandToggle={() => setExpandedPanel(isExpanded ? null : 'timer')}
-      onToolSelect={setTimerTool}
+      onToolSelect={(tool) => {
+        if (isTimerLocked) return;
+        setTimerTool(tool);
+      }}
       onModeSelect={(mode) => {
+        if (isTimerLocked) return;
         const next = TIMER_MODES[mode];
         setTimerMode(mode);
         setIsEditingTimer(false);
@@ -332,6 +339,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         startTimer();
       }}
       onReset={() => {
+        if (isTimerLocked) return;
         resetTimerToCurrentDuration();
         persistDashboardSnapshot({
           tool: timerTool,
@@ -340,11 +348,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           remainingSeconds: Math.max(1, Math.round(safeMinutes * 60)),
           stopwatchSeconds: timerTool === 'stopwatch' ? 0 : stopwatchSeconds,
           isRunning: false,
+          isLocked: isTimerLocked,
           updatedAt: Date.now(),
         });
       }}
-      onPresetSelect={setCustomTimerMinutes}
+      onPresetSelect={(minutes) => {
+        if (isTimerLocked) return;
+        setCustomTimerMinutes(minutes);
+      }}
       onCustomClick={() => {
+        if (isTimerLocked) return;
         setIsEditingTimer(true);
         setEditingTimerValue(Math.max(1, Math.round(safeMinutes)).toString());
       }}
@@ -362,6 +375,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       }}
       onEditingCommit={commitTimerEdit}
       onSaveStopwatchSession={saveStopwatchSessionToStats}
+      onToggleTimerLock={toggleTimerLock}
     />
   );
 

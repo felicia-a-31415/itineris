@@ -37,6 +37,7 @@ export type DashboardTimerState = {
   stopwatchSeconds?: number;
   alarmTime?: string;
   isRunning: boolean;
+  isLocked?: boolean;
   updatedAt: number;
 };
 

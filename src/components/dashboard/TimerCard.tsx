@@ -1,4 +1,4 @@
-import { Clock3, Maximize2, Minimize2, Pause, Play, RotateCcw, Timer } from 'lucide-react';
+import { Clock3, Lock, Maximize2, Minimize2, Pause, Play, RotateCcw, Timer, Unlock } from 'lucide-react';
 
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
@@ -16,6 +16,7 @@ type TimerCardProps = {
   progress: number;
   ringColor: string;
   isRunning: boolean;
+  isTimerLocked: boolean;
   isInitialTime: boolean;
   safeMinutes: number;
   isEditingTimer: boolean;
@@ -34,6 +35,7 @@ type TimerCardProps = {
   onEditingCancel: () => void;
   onEditingCommit: () => void;
   onSaveStopwatchSession: () => void;
+  onToggleTimerLock: () => void;
   isExpanded?: boolean;
   onExpandToggle?: () => void;
 };
@@ -57,6 +59,7 @@ export function TimerCard({
   progress,
   ringColor,
   isRunning,
+  isTimerLocked,
   isInitialTime,
   safeMinutes,
   isEditingTimer,
@@ -75,6 +78,7 @@ export function TimerCard({
   onEditingCancel,
   onEditingCommit,
   onSaveStopwatchSession,
+  onToggleTimerLock,
   isExpanded = false,
   onExpandToggle,
 }: TimerCardProps) {
@@ -121,6 +125,7 @@ export function TimerCard({
   const timerSizeClass = isExpanded ? 'h-72 w-72 md:h-80 md:w-80' : 'h-60 w-60';
   const innerRingInsetClass = isExpanded ? 'inset-4' : 'inset-3';
   const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-4xl';
+  const lockedControlClass = isTimerLocked ? 'cursor-not-allowed opacity-45' : '';
 
   return (
     <Card
@@ -138,11 +143,12 @@ export function TimerCard({
                 key={key}
                 type="button"
                 onClick={() => onToolSelect(key)}
+                disabled={isTimerLocked}
                 className={`flex min-h-[54px] min-w-[124px] flex-col items-center justify-center gap-0.5 rounded-xl border px-3 text-[11px] font-semibold transition ${
                   isActive
                     ? 'border-[#9F7BFF]/38 bg-[linear-gradient(180deg,rgba(109,66,255,0.24),rgba(68,43,112,0.18))] text-white shadow-[0_0_18px_rgba(109,66,255,0.2)]'
                     : 'border-transparent bg-transparent text-[#C9C3D4] hover:border-[#9F7BFF]/22 hover:bg-[#8B61FF]/8 hover:text-[#F5F2F7]'
-                }`}
+                } ${lockedControlClass}`}
               >
                 <Icon className="h-4 w-4" />
                 {label}
@@ -151,18 +157,34 @@ export function TimerCard({
           })}
         </div>
         <div className="flex justify-end">
-          {onExpandToggle ? (
+          <div className="flex items-center gap-2">
             <Button
               type="button"
               variant="ghost"
-              onClick={onExpandToggle}
-              className="h-9 w-9 shrink-0 rounded-full p-0 text-white/72 hover:bg-white/6 hover:text-white"
-              aria-label={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
-              title={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
+              onClick={onToggleTimerLock}
+              className={`h-9 w-9 shrink-0 rounded-full p-0 ${
+                isTimerLocked
+                  ? 'bg-[#6d42ff]/18 text-[#E6DCFF] hover:bg-[#6d42ff]/24 hover:text-white'
+                  : 'text-white/72 hover:bg-white/6 hover:text-white'
+              }`}
+              aria-label={isTimerLocked ? 'Déverrouiller le minuteur' : 'Verrouiller le minuteur'}
+              title={isTimerLocked ? 'Déverrouiller le minuteur' : 'Verrouiller le minuteur'}
             >
-              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              {isTimerLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
             </Button>
-          ) : null}
+            {onExpandToggle ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onExpandToggle}
+                className="h-9 w-9 shrink-0 rounded-full p-0 text-white/72 hover:bg-white/6 hover:text-white"
+                aria-label={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
+                title={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
+              >
+                {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              </Button>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -177,7 +199,8 @@ export function TimerCard({
                   key={key}
                   type="button"
                   onClick={() => onModeSelect(key)}
-                  className="rounded-xl border px-3 py-2 text-sm font-semibold transition shadow-sm"
+                  disabled={isTimerLocked}
+                  className={`rounded-xl border px-3 py-2 text-sm font-semibold transition shadow-sm ${lockedControlClass}`}
                   style={
                     isActive
                       ? {
@@ -232,11 +255,12 @@ export function TimerCard({
                     key={minutes}
                     type="button"
                     onClick={() => onPresetSelect(minutes)}
+                    disabled={isTimerLocked}
                     className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
                       isActive
                         ? 'border-[#6d42ff] bg-[#6d42ff] text-white'
                         : 'border-white/10 bg-[rgba(20,17,30,0.82)] text-[#F5F2F7] hover:bg-[rgba(40,28,60,0.92)]'
-                    }`}
+                    } ${lockedControlClass}`}
                   >
                     {minutes} min
                   </button>
@@ -245,11 +269,12 @@ export function TimerCard({
               <button
                 type="button"
                 onClick={onCustomClick}
+                disabled={isTimerLocked}
                 className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
                   customIsActive
                     ? 'border-[#6d42ff] bg-[#6d42ff] text-white'
                     : 'border-white/10 bg-[rgba(20,17,30,0.82)] text-[#F5F2F7] hover:bg-[rgba(40,28,60,0.92)]'
-                }`}
+                } ${lockedControlClass}`}
               >
                 Personnalisé
               </button>
@@ -262,6 +287,7 @@ export function TimerCard({
                   min={1}
                   step={1}
                   value={editingTimerValue}
+                  disabled={isTimerLocked}
                   onFocus={onEditingFocus}
                   onChange={(e) => onEditingValueChange(e.target.value)}
                   onBlur={onEditingBlur}
@@ -283,6 +309,7 @@ export function TimerCard({
                   type="button"
                   onClick={onEditingCommit}
                   variant="outline"
+                  disabled={isTimerLocked}
                   className="h-10 rounded-xl"
                 >
                   Appliquer
@@ -296,7 +323,7 @@ export function TimerCard({
           <Button
             type="button"
             onClick={onSaveStopwatchSession}
-            disabled={stopwatchSeconds < 1}
+            disabled={stopwatchSeconds < 1 || isTimerLocked}
             variant="outline"
             className="h-10 rounded-xl border-[#9F7BFF]/28 bg-[rgba(109,66,255,0.12)] px-4 text-sm text-[#F5F2F7] hover:bg-[rgba(109,66,255,0.2)] disabled:opacity-45"
           >
@@ -325,7 +352,8 @@ export function TimerCard({
               onClick={onReset}
               type="button"
               variant="ghost"
-              className="h-10 w-10 rounded-xl p-0 text-white/92 hover:bg-transparent hover:text-white"
+              disabled={isTimerLocked}
+              className={`h-10 w-10 rounded-xl p-0 text-white/92 hover:bg-transparent hover:text-white ${lockedControlClass}`}
               aria-label="Réinitialiser le minuteur"
               title="Réinitialiser le minuteur"
             >
