@@ -17,6 +17,9 @@ type TimerCardProps = {
   ringColor: string;
   isRunning: boolean;
   isTimerLocked: boolean;
+  isUnlockingTimer: boolean;
+  unlockPassword: string;
+  unlockError: string | null;
   isInitialTime: boolean;
   safeMinutes: number;
   isEditingTimer: boolean;
@@ -36,6 +39,9 @@ type TimerCardProps = {
   onEditingCommit: () => void;
   onSaveStopwatchSession: () => void;
   onToggleTimerLock: () => void;
+  onUnlockPasswordChange: (value: string) => void;
+  onUnlockSubmit: () => void;
+  onUnlockCancel: () => void;
   isExpanded?: boolean;
   onExpandToggle?: () => void;
 };
@@ -60,6 +66,9 @@ export function TimerCard({
   ringColor,
   isRunning,
   isTimerLocked,
+  isUnlockingTimer,
+  unlockPassword,
+  unlockError,
   isInitialTime,
   safeMinutes,
   isEditingTimer,
@@ -79,6 +88,9 @@ export function TimerCard({
   onEditingCommit,
   onSaveStopwatchSession,
   onToggleTimerLock,
+  onUnlockPasswordChange,
+  onUnlockSubmit,
+  onUnlockCancel,
   isExpanded = false,
   onExpandToggle,
 }: TimerCardProps) {
@@ -126,6 +138,7 @@ export function TimerCard({
   const innerRingInsetClass = isExpanded ? 'inset-4' : 'inset-3';
   const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-4xl';
   const lockedControlClass = isTimerLocked ? 'cursor-not-allowed opacity-45' : '';
+  const runningToggleDisabled = isTimerLocked && isRunning;
 
   return (
     <Card
@@ -331,10 +344,45 @@ export function TimerCard({
           </Button>
         ) : null}
 
+        {isUnlockingTimer ? (
+          <div className="app-panel-soft flex w-full max-w-[360px] flex-col gap-2 rounded-2xl px-4 py-3">
+            <Input
+              type="password"
+              value={unlockPassword}
+              onChange={(event) => onUnlockPasswordChange(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  onUnlockSubmit();
+                }
+
+                if (event.key === 'Escape') {
+                  onUnlockCancel();
+                }
+              }}
+              className="h-10 rounded-xl"
+              placeholder="Mot de passe"
+              aria-label="Mot de passe pour déverrouiller le minuteur"
+              autoFocus
+            />
+            {unlockError ? <p className="text-xs text-[#FFB4B4]">{unlockError}</p> : null}
+            <div className="flex gap-2">
+              <Button type="button" onClick={onUnlockSubmit} className="h-9 flex-1 rounded-xl">
+                Déverrouiller
+              </Button>
+              <Button type="button" onClick={onUnlockCancel} variant="ghost" className="h-9 flex-1 rounded-xl">
+                Annuler
+              </Button>
+            </div>
+          </div>
+        ) : null}
+
           <div className="flex items-center justify-center gap-3">
             <Button
               onClick={onToggleRunning}
+              disabled={runningToggleDisabled}
               className="h-10 min-w-[124px] rounded-xl px-4"
+              title={runningToggleDisabled ? 'Déverrouille le minuteur pour le mettre en pause.' : undefined}
             >
               {isRunning ? (
                 <>

@@ -53,7 +53,7 @@ type ExpandedPanel = 'timer' | 'chat' | 'agenda' | null;
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signOut, user, loading } = useAuth();
+  const { signIn, signOut, user, loading } = useAuth();
   const {
     weekOffset,
     weekDates,
@@ -130,6 +130,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     createDefaultStudyData(currentWeekStart)
   );
   const [expandedPanel, setExpandedPanel] = useState<ExpandedPanel>(null);
+  const [isUnlockingTimer, setIsUnlockingTimer] = useState(false);
+  const [timerUnlockPassword, setTimerUnlockPassword] = useState('');
+  const [timerUnlockError, setTimerUnlockError] = useState<string | null>(null);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
   const {
     timerMinutes,
@@ -301,6 +304,46 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     });
   };
 
+  const handleTimerLockToggle = () => {
+    if (!isTimerLocked) {
+      toggleTimerLock();
+      setIsUnlockingTimer(false);
+      setTimerUnlockPassword('');
+      setTimerUnlockError(null);
+      return;
+    }
+
+    setIsUnlockingTimer(true);
+    setTimerUnlockPassword('');
+    setTimerUnlockError(null);
+  };
+
+  const handleTimerUnlockSubmit = async () => {
+    const email = user?.email?.trim();
+    const password = timerUnlockPassword.trim();
+
+    if (!email) {
+      setTimerUnlockError('Connecte-toi pour déverrouiller le minuteur.');
+      return;
+    }
+
+    if (password.length < 1) {
+      setTimerUnlockError('Entre ton mot de passe.');
+      return;
+    }
+
+    const { error } = await signIn(email, password);
+    if (error) {
+      setTimerUnlockError('Mot de passe incorrect.');
+      return;
+    }
+
+    toggleTimerLock();
+    setIsUnlockingTimer(false);
+    setTimerUnlockPassword('');
+    setTimerUnlockError(null);
+  };
+
   const renderTimerCard = (isExpanded = false) => (
     <TimerCard
       timerTool={timerTool}
@@ -312,6 +355,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       ringColor={ringColor}
       isRunning={isRunning}
       isTimerLocked={isTimerLocked}
+      isUnlockingTimer={isUnlockingTimer}
+      unlockPassword={timerUnlockPassword}
+      unlockError={timerUnlockError}
       isInitialTime={isInitialTime}
       safeMinutes={safeMinutes}
       isEditingTimer={isEditingTimer}
@@ -332,6 +378,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
         setCustomTimerMinutes(next.minutes);
       }}
       onToggleRunning={() => {
+        if (isTimerLocked && isRunning) return;
         if (isRunning) {
           stopTimer();
           return;
@@ -375,7 +422,17 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       }}
       onEditingCommit={commitTimerEdit}
       onSaveStopwatchSession={saveStopwatchSessionToStats}
-      onToggleTimerLock={toggleTimerLock}
+      onToggleTimerLock={handleTimerLockToggle}
+      onUnlockPasswordChange={(value) => {
+        setTimerUnlockPassword(value);
+        setTimerUnlockError(null);
+      }}
+      onUnlockSubmit={() => void handleTimerUnlockSubmit()}
+      onUnlockCancel={() => {
+        setIsUnlockingTimer(false);
+        setTimerUnlockPassword('');
+        setTimerUnlockError(null);
+      }}
     />
   );
 
