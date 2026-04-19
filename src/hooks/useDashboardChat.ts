@@ -160,6 +160,7 @@ export function useDashboardChat({
 
     setMessages(nextMessages);
     setChatInput('');
+    setChatAttachments([]);
     setChatAttachmentError(null);
     setIsSendingChat(true);
 
@@ -197,11 +198,10 @@ export function useDashboardChat({
 
       if (!response.ok) {
         const errorMessage = getFriendlyChatError(response.status, payload?.error, responseText);
+        setChatAttachments(attachmentsForRequest);
         setMessages((prev) => [...prev, { role: 'assistant', content: errorMessage }]);
         return;
       }
-
-      setChatAttachments([]);
 
       if (!payload?.reply) {
         if (!Array.isArray(payload?.actions) || payload.actions.length === 0) {
@@ -306,6 +306,7 @@ export function useDashboardChat({
 
       setMessages((prev) => [...prev, { role: 'assistant', content: assistantReply }]);
     } catch (error) {
+      setChatAttachments(attachmentsForRequest);
       setMessages((prev) => [
         ...prev,
         { role: 'assistant', content: error instanceof Error ? error.message : 'Erreur inconnue.' },
