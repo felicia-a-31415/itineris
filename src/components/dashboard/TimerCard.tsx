@@ -102,7 +102,9 @@ export function TimerCard({
 
   return (
     <Card
-      className={`app-panel flex w-full flex-col rounded-3xl p-6 ${isExpanded ? 'h-full overflow-auto' : ''}`}
+      className={`app-panel flex w-full flex-col rounded-3xl p-6 ${
+        isExpanded ? 'h-full overflow-auto' : 'h-[640px] overflow-y-auto'
+      }`}
     >
       <div className="mb-2 flex items-center justify-end gap-3">
         {onExpandToggle ? (
