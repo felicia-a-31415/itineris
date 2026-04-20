@@ -70,7 +70,7 @@ export function StudyStatsCard({
   };
 
   return (
-    <Card className="mx-auto min-w-0 max-w-4xl overflow-hidden rounded-[28px] border-transparent bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.012))] p-4 shadow-none md:p-5">
+    <Card className="mx-auto min-w-0 max-w-4xl overflow-hidden rounded-[28px] border-transparent bg-transparent p-0 shadow-none">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
@@ -105,16 +105,16 @@ export function StudyStatsCard({
           </div>
         </div>
 
-        <div className="grid min-w-0 gap-2 sm:grid-cols-3">
-          <div className="rounded-2xl bg-white/[0.035] px-4 py-3">
+        <div className="grid min-w-0 gap-4 border-y border-white/[0.06] py-4 sm:grid-cols-3">
+          <div>
             <p className="text-xs app-muted">Semaine</p>
             <p className="mt-1 text-2xl font-semibold text-[#F5F2F7]">{activeWeekTotalMinutes} min</p>
           </div>
-          <div className="rounded-2xl bg-white/[0.035] px-4 py-3">
+          <div>
             <p className="text-xs app-muted">Moyenne</p>
             <p className="mt-1 text-2xl font-semibold text-[#F5F2F7]">{averageDailyMinutes} min</p>
           </div>
-          <div className="rounded-2xl bg-white/[0.035] px-4 py-3">
+          <div>
             <p className="text-xs app-muted">Progression</p>
             <p className="mt-1 text-2xl font-semibold text-[#F5F2F7]">
               {weekDeltaMinutes >= 0 ? '+' : '-'}
@@ -135,7 +135,7 @@ export function StudyStatsCard({
               <div key={index} className="flex flex-col items-center gap-1.5">
                 <div
                   data-study-bar="true"
-                  className="relative flex h-48 w-full touch-none items-end rounded-2xl bg-white/[0.035]"
+                  className="relative flex h-48 w-full touch-none items-end rounded-2xl bg-white/[0.025]"
                 >
                   {showBar ? (
                     <div

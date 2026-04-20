@@ -717,21 +717,21 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
           activeDashboardPage === 'chat' ? 'flex h-full min-h-0 flex-col gap-6' : 'space-y-8'
         }`}
       >
-        <header className="flex shrink-0 items-start justify-between gap-4">
+        <header className="flex shrink-0 items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold tracking-[-0.01em] text-[#F5F2F7] md:text-3xl">Itineris</h1>
             <p className="mt-1 text-sm app-muted md:text-base">Prêt(e) à continuer ton voyage d'apprentissage ?</p>
           </div>
 
           <div
-            className={`inline-flex shrink-0 items-center gap-2 text-2xl font-bold transition-transform md:text-3xl ${
+            className={`inline-flex shrink-0 items-center gap-1.5 text-xl font-medium transition-transform md:text-2xl ${
               streakBump ? 'scale-105' : ''
             }`}
             style={{ color: streakColor }}
             aria-label={`${streakDays} jours de suite`}
             title={`${streakDays} jours de suite`}
           >
-            <Flame className="h-7 w-7 md:h-8 md:w-8" />
+            <Flame className="h-6 w-6 md:h-7 md:w-7" />
             <span>{streakDays}</span>
           </div>
         </header>
