@@ -50,11 +50,14 @@ export function DashboardTaskListPanel({
   renderTaskInfoPopoverContent,
 }: DashboardTaskListPanelProps) {
   return (
-    <div className="space-y-0.5">
+    <div className="space-y-4">
       {agendaTasks.length === 0 ? (
-        <div className="mt-2 text-[#ECECF3] text-lg">Aucune tâche pour l’instant</div>
+        <div className="rounded-[28px] border border-white/[0.08] bg-white/[0.025] px-5 py-8 text-center">
+          <div className="text-lg font-semibold text-[#F5F2F7]">Aucune tâche pour l’instant</div>
+          <p className="mt-2 text-sm text-white/42">Ajoute une tâche depuis l’agenda pour commencer.</p>
+        </div>
       ) : (
-        <div className="mt-3 divide-y divide-[#25293A]">
+        <div className="space-y-2">
           {visibleTasks.map((task) => {
             const taskDate = parseLocalDateString(task.date);
             const displayDate = taskDate
@@ -67,14 +70,16 @@ export function DashboardTaskListPanel({
                 ref={(node) => {
                   taskListItemRefs.current[task.id] = node;
                 }}
-                className={`group relative flex items-start gap-2 py-2 ${task.completed ? 'opacity-60' : ''}`}
+                className={`group relative flex items-start gap-3 rounded-[22px] border border-white/[0.06] bg-white/[0.025] px-3 py-3 transition hover:border-white/[0.1] hover:bg-white/[0.04] ${
+                  task.completed ? 'opacity-60' : ''
+                }`}
               >
                 <div className="mt-0.5">
                   <Checkbox
                     checked={task.completed}
                     onClick={(event) => event.stopPropagation()}
                     onCheckedChange={() => onToggleTask(task.id)}
-                    className="rounded-sm h-4 w-4 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
+                    className="h-4 w-4 rounded-[5px] border-2 border-white/28 bg-[rgba(10,9,18,0.48)] shadow-none data-[state=checked]:border-[#C7B7FF] data-[state=checked]:bg-[#6d42ff] data-[state=checked]:shadow-[0_0_0_3px_rgba(109,66,255,0.18)]"
                   />
                 </div>
 
@@ -95,18 +100,18 @@ export function DashboardTaskListPanel({
                         }
                       }}
                       autoFocus
-                      className="h-7 px-2 text-sm rounded-lg border-[#2B3550] bg-[#101524] text-[#ECECF3]"
+                      className="h-8 rounded-xl border-white/[0.08] bg-[rgba(10,9,18,0.48)] px-3 text-sm text-[#F5F2F7] focus-visible:border-[#9F7BFF]/50 focus-visible:ring-[#9F7BFF]/18"
                     />
                   ) : (
                     <div
-                      className={`text-sm font-medium text-left break-words ${
+                      className={`break-words text-left text-sm font-semibold ${
                         task.completed ? 'line-through' : ''
-                      } ${task.urgent ? 'text-red-400' : 'text-[#ECECF3]'}`}
+                      } ${task.urgent ? 'text-[#FF8FA3]' : 'text-[#F5F2F7]'}`}
                     >
                       {task.name || 'Tâche sans titre'}
                     </div>
                   )}
-                  <div className={`mt-0.5 text-xs text-[#A9ACBA] ${task.completed ? 'line-through' : ''}`}>
+                  <div className={`mt-1 text-xs text-white/42 ${task.completed ? 'line-through' : ''}`}>
                     {displayDate} {task.time ? `· ${task.time}` : ''}
                   </div>
                 </div>
@@ -118,10 +123,10 @@ export function DashboardTaskListPanel({
                         type="button"
                         variant="ghost"
                         onClick={(event) => event.stopPropagation()}
-                        className="opacity-0 group-hover:opacity-100 transition text-[#A9ACBA] hover:text-[#ECECF3] rounded-full border border-[#3B4154] h-6 w-6 p-0"
+                        className="h-7 w-7 rounded-full border border-white/[0.08] p-0 text-white/34 opacity-100 transition hover:bg-white/[0.06] hover:text-white lg:opacity-0 lg:group-hover:opacity-100"
                         aria-label="Détails de la tâche"
                       >
-                        <Info className="w-3.5 h-3.5" />
+                        <Info className="h-3.5 w-3.5" />
                       </Button>
                     </PopoverTrigger>
                     {renderTaskInfoPopoverContent(task, () => onInfoTaskChange(null))}
@@ -132,25 +137,25 @@ export function DashboardTaskListPanel({
           })}
         </div>
       )}
-      <div className="pt-2">
-        <div className="flex items-center gap-2 text-sm text-[#A9ACBA]">
+      <div className="border-t border-white/[0.06] pt-4">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-white/42">
           <span>{completedTasksCount} terminées</span>
-          <span>•</span>
+          <span className="text-white/20">•</span>
           <Button
             type="button"
             onClick={() => onShowCompletedTasksChange((prev) => !prev)}
             variant="ghost"
-            className="h-auto p-0 text-[#F43F5E] hover:text-[#FF5E7A]"
+            className="h-8 rounded-full px-3 text-[#C7B7FF] hover:bg-[#6d42ff]/10 hover:text-white"
           >
             {showCompletedTasks ? 'Masquer' : 'Afficher'}
           </Button>
-          <span>•</span>
+          <span className="text-white/20">•</span>
           <Popover open={deleteCompletedMenuOpen} onOpenChange={onDeleteCompletedMenuOpenChange}>
             <PopoverTrigger asChild>
               <Button
                 type="button"
                 variant="ghost"
-                className="h-auto p-0 text-[#E16941] hover:text-[#F18B6B]"
+                className="h-8 rounded-full px-3 text-[#FF8FA3] hover:bg-[#FF5F8F]/10 hover:text-[#FFB4C2]"
                 disabled={completedTasksCount === 0}
               >
                 Supprimer
@@ -160,35 +165,35 @@ export function DashboardTaskListPanel({
               align="start"
               side="top"
               sideOffset={10}
-              className="w-[260px] rounded-[24px] border border-white/10 bg-[#2B2F3A]/92 p-2 text-[#ECECF3] backdrop-blur-xl shadow-[0_32px_80px_rgba(0,0,0,0.55)]"
+              className="w-[260px] rounded-[24px] border border-white/[0.08] bg-[rgba(15,10,30,0.88)] p-2 text-[#F5F2F7] shadow-[0_32px_80px_rgba(0,0,0,0.55)] backdrop-blur-[22px]"
               onOpenAutoFocus={(event) => event.preventDefault()}
             >
               <div className="space-y-1">
                 <button
                   type="button"
                   onClick={() => onDeleteCompletedTasks(1)}
-                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#ECECF3] transition hover:bg-white/[0.06]"
+                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#F5F2F7] transition hover:bg-white/[0.06]"
                 >
                   Plus vieux qu’un mois
                 </button>
                 <button
                   type="button"
                   onClick={() => onDeleteCompletedTasks(3)}
-                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#ECECF3] transition hover:bg-white/[0.06]"
+                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#F5F2F7] transition hover:bg-white/[0.06]"
                 >
                   Plus vieux que 3 mois
                 </button>
                 <button
                   type="button"
                   onClick={() => onDeleteCompletedTasks(12)}
-                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#ECECF3] transition hover:bg-white/[0.06]"
+                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#F5F2F7] transition hover:bg-white/[0.06]"
                 >
                   Plus vieux qu’un an
                 </button>
                 <button
                   type="button"
                   onClick={() => onDeleteCompletedTasks()}
-                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#E16941] transition hover:bg-[rgba(225,105,65,0.08)]"
+                  className="flex w-full items-center rounded-2xl px-3 py-2.5 text-left text-sm text-[#FF8FA3] transition hover:bg-[#FF5F8F]/10"
                 >
                   Tout supprimer
                 </button>

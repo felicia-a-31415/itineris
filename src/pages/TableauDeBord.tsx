@@ -627,9 +627,15 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
   );
 
   const renderTasksPage = () => (
-    <Card className="border-transparent bg-transparent p-6 shadow-none">
-      <div className="mb-4">
-        <p className="app-muted text-sm">Tâches</p>
+    <Card className="mx-auto max-w-4xl border-transparent bg-transparent px-1 py-2 shadow-none">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-[-0.01em] text-[#F5F2F7]">Tâches</h2>
+          <p className="mt-1 text-sm app-muted">Garde tes devoirs, examens et rappels au même endroit.</p>
+        </div>
+        <div className="inline-flex w-fit items-center rounded-full border border-white/[0.08] bg-white/[0.035] px-3 py-1.5 text-sm text-white/58">
+          {agendaTasks.length} au total
+        </div>
       </div>
       {tasksListContent}
     </Card>
