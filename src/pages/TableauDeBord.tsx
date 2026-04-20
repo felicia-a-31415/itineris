@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bug, Flame, LogOut, Settings } from 'lucide-react';
+import { Bug, CalendarDays, CheckSquare, Flame, LogOut, MessageCircle, Settings, Timer as TimerIcon } from 'lucide-react';
 import { Button } from '../ui/button';
+import { Card } from '../ui/card';
 import { DashboardTaskListPanel } from '../components/dashboard/TaskListPanel';
 import { DashboardAuthGate } from '../components/dashboard/DashboardAuthGate';
 import { AgendaCard } from '../components/dashboard/AgendaCard';
@@ -49,6 +50,15 @@ interface TableauDeBordScreenProps {
 }
 
 type ExpandedPanel = 'timer' | 'chat' | 'agenda' | null;
+type DashboardPage = 'timer' | 'chat' | 'agenda' | 'tasks';
+
+const DASHBOARD_NAV_ITEMS = [
+  { key: 'timer', label: 'Minuteur', Icon: TimerIcon },
+  { key: 'chat', label: 'Chat IA', Icon: MessageCircle },
+  { key: 'agenda', label: 'Agenda', Icon: CalendarDays },
+  { key: 'tasks', label: 'Tâches', Icon: CheckSquare },
+  { key: 'settings', label: 'Paramètres', Icon: Settings },
+] satisfies Array<{ key: DashboardPage | 'settings'; label: string; Icon: typeof TimerIcon }>;
 
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
@@ -133,6 +143,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [isUnlockingTimer, setIsUnlockingTimer] = useState(false);
   const [timerUnlockPassword, setTimerUnlockPassword] = useState('');
   const [timerUnlockError, setTimerUnlockError] = useState<string | null>(null);
+  const [activeDashboardPage, setActiveDashboardPage] = useState<DashboardPage>('timer');
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
   const {
     timerMinutes,
@@ -453,10 +464,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     />
   );
 
-  const renderAgendaCard = (isExpanded = false) => (
+  const renderAgendaCard = (isExpanded = false, modeOverride?: 'calendar' | 'tasks', showModeSwitch = true) => (
     <AgendaCard
       timeView={timeView}
-      calendarMode={calendarMode}
+      calendarMode={modeOverride ?? calendarMode}
       uploadNotice={uploadNotice}
       tasksListContent={tasksListContent}
       headerDates={headerDates}
@@ -468,7 +479,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       editingNameId={editingNameId}
       editingNameValue={editingNameValue}
       onTimeViewChange={setTimeView}
-      onCalendarModeChange={setCalendarMode}
+      onCalendarModeChange={showModeSwitch ? setCalendarMode : () => undefined}
       onToday={handleToday}
       onPrevRange={handlePrevRange}
       onNextRange={handleNextRange}
@@ -484,6 +495,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       onCancelEditingName={cancelEditingName}
       onTaskDetailsChange={setTaskDetailsId}
       renderTaskInfoPopoverContent={renderTaskInfoPopoverContent}
+      showModeSwitch={showModeSwitch}
       isExpanded={isExpanded}
       onExpandToggle={() => setExpandedPanel(isExpanded ? null : 'agenda')}
     />
@@ -575,8 +587,60 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     />
   );
 
+  const renderTasksPage = () => (
+    <Card className="app-panel rounded-3xl p-6">
+      <div className="mb-4">
+        <p className="app-muted text-sm">Tâches</p>
+      </div>
+      {tasksListContent}
+    </Card>
+  );
+
+  const renderActiveDashboardPage = () => {
+    switch (activeDashboardPage) {
+      case 'chat':
+        return <div className="h-[720px] w-full min-w-0">{renderChatCard()}</div>;
+      case 'agenda':
+        return renderAgendaCard(false, 'calendar', false);
+      case 'tasks':
+        return renderTasksPage();
+      case 'timer':
+      default:
+        return (
+          <div className="space-y-8">
+            <div className="w-full min-w-0">{renderTimerCard()}</div>
+            <StudyStatsCard
+              weekDates={weekDates}
+              activeWeekMinutes={activeWeekMinutes}
+              maxWeekMinutes={maxWeekMinutes}
+              activeWeekTotalMinutes={activeWeekTotalMinutes}
+              averageDailyMinutes={averageDailyMinutes}
+              weekDeltaMinutes={weekDeltaMinutes}
+              getDayName={getDayName}
+              formatDate={formatDate}
+              onManualStudyTimeChange={handleManualStudyTimeChange}
+              onToday={handleToday}
+              onPrevRange={handlePrevRange}
+              onNextRange={handleNextRange}
+            />
+          </div>
+        );
+    }
+  };
+
+  const handleDashboardNavSelect = (key: DashboardPage | 'settings') => {
+    if (key === 'settings') {
+      navigate('/parametres');
+      return;
+    }
+
+    setExpandedPanel(null);
+    setActiveDashboardPage(key);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <div className="app-shell min-h-screen p-6 text-[#F5F2F7] md:p-10">
+    <div className="app-shell min-h-screen p-6 pb-28 text-[#F5F2F7] md:p-10 md:pb-32">
       <style>{`
         .streak {
           display: inline-flex;
@@ -674,27 +738,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           </div>
         ) : null}
 
-        <div className="grid items-stretch gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-          <div className="w-full min-w-0 md:h-full">{renderTimerCard()}</div>
-          <div className="h-[720px] w-full min-w-0">{renderChatCard()}</div>
-        </div>
-
-        {renderAgendaCard()}
-
-        <StudyStatsCard
-          weekDates={weekDates}
-          activeWeekMinutes={activeWeekMinutes}
-          maxWeekMinutes={maxWeekMinutes}
-          activeWeekTotalMinutes={activeWeekTotalMinutes}
-          averageDailyMinutes={averageDailyMinutes}
-          weekDeltaMinutes={weekDeltaMinutes}
-          getDayName={getDayName}
-          formatDate={formatDate}
-          onManualStudyTimeChange={handleManualStudyTimeChange}
-          onToday={handleToday}
-          onPrevRange={handlePrevRange}
-          onNextRange={handleNextRange}
-        />
+        <div className="transition-opacity duration-200 ease-out">{renderActiveDashboardPage()}</div>
 
         <TaskCreationDialog
           open={showAddDialog && !!modalTask}
@@ -755,17 +799,42 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
             <div className={`flex min-h-0 w-full ${expandedPanel === 'agenda' ? 'h-[min(100%,900px)]' : 'h-full'}`}>
               {expandedPanel === 'timer' ? renderTimerCard(true) : null}
               {expandedPanel === 'chat' ? renderChatCard(true) : null}
-              {expandedPanel === 'agenda' ? renderAgendaCard(true) : null}
+              {expandedPanel === 'agenda' ? renderAgendaCard(true, 'calendar', false) : null}
             </div>
           </div>
         </div>
       ) : null}
 
+      <nav
+        className="fixed inset-x-0 bottom-0 z-[60] h-[70px] border-t border-white/[0.08] bg-[rgba(15,10,30,0.6)] pb-[env(safe-area-inset-bottom)] backdrop-blur-[20px]"
+        aria-label="Navigation principale"
+      >
+        <div className="mx-auto grid h-full max-w-3xl grid-cols-5 px-2">
+          {DASHBOARD_NAV_ITEMS.map(({ key, label, Icon }) => {
+            const isActive = key === 'settings' ? false : activeDashboardPage === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => handleDashboardNavSelect(key)}
+                className={`flex min-w-0 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors duration-200 ${
+                  isActive ? 'text-[#9F7BFF]' : 'text-white/52 hover:text-[#F5F2F7]'
+                }`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                <Icon className={`h-5 w-5 transition-transform duration-200 ${isActive ? 'scale-105' : ''}`} />
+                <span className="truncate">{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
       <a
         href="https://forms.gle/ZTWbhwHJsR2vTfPE6"
         target="_blank"
         rel="noreferrer"
-        className="fixed bottom-5 right-5 z-[80] flex h-14 w-14 items-center justify-center rounded-full border border-[#9F7BFF]/30 bg-[linear-gradient(180deg,rgba(109,66,255,0.95),rgba(81,45,164,0.95))] text-white shadow-[0_18px_42px_rgba(0,0,0,0.45),0_0_28px_rgba(109,66,255,0.28)] transition hover:scale-105 hover:border-[#C7B7FF]/50 hover:shadow-[0_20px_48px_rgba(0,0,0,0.5),0_0_34px_rgba(109,66,255,0.42)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C7B7FF]/60 md:bottom-7 md:right-7"
+        className="fixed bottom-5 right-5 z-[80] flex h-14 w-14 items-center justify-center rounded-full border border-white/[0.08] bg-[rgba(15,10,30,0.6)] text-white shadow-[0_18px_42px_rgba(0,0,0,0.45)] backdrop-blur-[20px] transition hover:scale-105 hover:border-white/14 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C7B7FF]/60 md:bottom-7 md:right-7"
         aria-label="Signaler un bug"
         title="Signaler un bug"
       >

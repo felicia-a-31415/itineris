@@ -41,6 +41,7 @@ type AgendaCardProps = {
   onCancelEditingName: () => void;
   onTaskDetailsChange: (taskId: string | null) => void;
   renderTaskInfoPopoverContent: (task: AgendaTask, close: () => void) => React.ReactNode;
+  showModeSwitch?: boolean;
   isExpanded?: boolean;
   onExpandToggle?: () => void;
 };
@@ -75,6 +76,7 @@ export function AgendaCard({
   onCancelEditingName,
   onTaskDetailsChange,
   renderTaskInfoPopoverContent,
+  showModeSwitch = true,
   isExpanded = false,
   onExpandToggle,
 }: AgendaCardProps) {
@@ -145,41 +147,43 @@ export function AgendaCard({
                 </SelectContent>
               </Select>
             ) : null}
-            <div className="relative inline-flex items-center h-11 w-[102px] rounded-full border border-white/10 bg-[rgba(21,18,31,0.82)] overflow-hidden">
-              <div
-                className={`absolute top-0 bottom-0 w-1/2 bg-[linear-gradient(90deg,#6d42ff_0%,#8b61ff_100%)] ${
-                  calendarMode === 'calendar'
-                    ? 'left-0 rounded-l-full rounded-r-none'
-                    : 'left-1/2 rounded-r-full rounded-l-none'
-                }`}
-              />
-              <Button
-                type="button"
-                onClick={() => onCalendarModeChange('calendar')}
-                variant="ghost"
-                className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
-                  calendarMode === 'calendar'
-                    ? 'text-white'
-                    : 'text-white/64 hover:text-white hover:bg-white/5'
-                }`}
-                aria-label="Vue calendrier"
-              >
-                <Calendar className="w-5 h-5" />
-              </Button>
-              <Button
-                type="button"
-                onClick={() => onCalendarModeChange('tasks')}
-                variant="ghost"
-                className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
-                  calendarMode === 'tasks'
-                    ? 'text-white'
-                    : 'text-white/64 hover:text-white hover:bg-white/5'
-                }`}
-                aria-label="Vue liste"
-              >
-                <List className="w-5 h-5" />
-              </Button>
-            </div>
+            {showModeSwitch ? (
+              <div className="relative inline-flex items-center h-11 w-[102px] rounded-full border border-white/10 bg-[rgba(21,18,31,0.82)] overflow-hidden">
+                <div
+                  className={`absolute top-0 bottom-0 w-1/2 bg-[linear-gradient(90deg,#6d42ff_0%,#8b61ff_100%)] ${
+                    calendarMode === 'calendar'
+                      ? 'left-0 rounded-l-full rounded-r-none'
+                      : 'left-1/2 rounded-r-full rounded-l-none'
+                  }`}
+                />
+                <Button
+                  type="button"
+                  onClick={() => onCalendarModeChange('calendar')}
+                  variant="ghost"
+                  className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
+                    calendarMode === 'calendar'
+                      ? 'text-white'
+                      : 'text-white/64 hover:text-white hover:bg-white/5'
+                  }`}
+                  aria-label="Vue calendrier"
+                >
+                  <Calendar className="w-5 h-5" />
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => onCalendarModeChange('tasks')}
+                  variant="ghost"
+                  className={`relative z-10 h-full w-1/2 rounded-none flex items-center justify-center transition ${
+                    calendarMode === 'tasks'
+                      ? 'text-white'
+                      : 'text-white/64 hover:text-white hover:bg-white/5'
+                  }`}
+                  aria-label="Vue liste"
+                >
+                  <List className="w-5 h-5" />
+                </Button>
+              </div>
+            ) : null}
             <Button
               asChild
               variant="ghost"
