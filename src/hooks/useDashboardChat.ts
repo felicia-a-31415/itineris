@@ -33,7 +33,12 @@ type ChatTimerAction = {
   minutes?: number;
 };
 
-type ChatAction = ChatTaskAction | ChatDeleteTaskAction | ChatUpdateTaskAction | ChatTimerAction;
+type ChatTitleAction = {
+  tool?: 'set_chat_title';
+  title?: string;
+};
+
+type ChatAction = ChatTaskAction | ChatDeleteTaskAction | ChatUpdateTaskAction | ChatTimerAction | ChatTitleAction;
 
 type CurrentDateContext = {
   localDate: string;
@@ -77,6 +82,8 @@ type UseDashboardChatParams = {
   parseTimerActionFromMessage: (message: string) => ChatTimerAction | null;
   applyChatTimerAction: (action: ChatTimerAction) => void;
   setTasks: React.Dispatch<React.SetStateAction<DashboardTask[]>>;
+  shouldGenerateChatTitle?: () => boolean;
+  onChatTitleGenerated?: (title: string) => void;
 };
 
 export function useDashboardChat({
@@ -94,6 +101,8 @@ export function useDashboardChat({
   parseTimerActionFromMessage,
   applyChatTimerAction,
   setTasks,
+  shouldGenerateChatTitle,
+  onChatTitleGenerated,
 }: UseDashboardChatParams) {
   const [messages, setMessages] = useState<DashboardChatMessage[]>(defaultMessages);
   const [chatInput, setChatInput] = useState('');
@@ -197,6 +206,7 @@ export function useDashboardChat({
             },
             timer: timerContext,
             currentDate: currentDateContext,
+            needsChatTitle: shouldGenerateChatTitle?.() ?? false,
           },
         }),
       });
@@ -333,6 +343,14 @@ export function useDashboardChat({
               action.tool === 'set_timer' && typeof action.action === 'string'
           )
         : [];
+      const titleAction = Array.isArray(payload?.actions)
+        ? payload.actions.find(
+            (action): action is ChatTitleAction =>
+              action.tool === 'set_chat_title' &&
+              typeof action.title === 'string' &&
+              action.title.trim().length > 0
+          )
+        : null;
 
       const fallbackTimerAction = timerActions.length === 0 ? parseTimerActionFromMessage(effectiveMessage) : null;
       const effectiveTimerActions = fallbackTimerAction ? [fallbackTimerAction] : timerActions;
@@ -383,6 +401,10 @@ export function useDashboardChat({
 
       if (effectiveTimerActions.length > 0) {
         effectiveTimerActions.forEach((action) => applyChatTimerAction(action));
+      }
+
+      if (titleAction?.title) {
+        onChatTitleGenerated?.(titleAction.title.trim().slice(0, 42));
       }
 
       const assistantReply =

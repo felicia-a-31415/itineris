@@ -97,10 +97,8 @@ const getDashboardPageFromPath = (pathname: string): DashboardPage => {
 const createChatThreadId = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `chat-${Date.now()}`;
 
-const getChatThreadTitle = (messages: DashboardChatMessage[], fallback: string) => {
-  const firstUserMessage = messages.find((message) => message.role === 'user' && message.content.trim().length > 0);
-  if (!firstUserMessage) return fallback;
-  return firstUserMessage.content.trim().slice(0, 36);
+const getChatThreadTitle = (_messages: DashboardChatMessage[], fallback: string) => {
+  return fallback;
 };
 
 export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBordScreenProps) {
@@ -226,6 +224,16 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
     setStudyData,
     setSessionsByDay,
   });
+  const [activeChatThreadId, setActiveChatThreadId] = useState('current');
+  const [chatThreads, setChatThreads] = useState<ChatThread[]>(() => [
+    {
+      id: 'current',
+      title: 'Nouveau chat',
+      messages: DEFAULT_CHAT_MESSAGES,
+    },
+  ]);
+  const [editingChatThreadId, setEditingChatThreadId] = useState<string | null>(null);
+  const [editingChatTitle, setEditingChatTitle] = useState('');
   const {
     messages,
     setMessages,
@@ -258,17 +266,18 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
     parseTimerActionFromMessage,
     applyChatTimerAction,
     setTasks,
-  });
-  const [activeChatThreadId, setActiveChatThreadId] = useState('current');
-  const [chatThreads, setChatThreads] = useState<ChatThread[]>(() => [
-    {
-      id: 'current',
-      title: 'Conversation actuelle',
-      messages: DEFAULT_CHAT_MESSAGES,
+    shouldGenerateChatTitle: () => {
+      const activeThread = chatThreads.find((thread) => thread.id === activeChatThreadId);
+      return !activeThread || activeThread.title === 'Nouveau chat';
     },
-  ]);
-  const [editingChatThreadId, setEditingChatThreadId] = useState<string | null>(null);
-  const [editingChatTitle, setEditingChatTitle] = useState('');
+    onChatTitleGenerated: (title) => {
+      setChatThreads((currentThreads) =>
+        currentThreads.map((thread) =>
+          thread.id === activeChatThreadId ? { ...thread, title } : thread
+        )
+      );
+    },
+  });
   const { requestedAuthMode, shouldShowDashboardAuthGate, enableGuestAccess } = useDashboardAccess({
     userId: user?.id,
     loading,

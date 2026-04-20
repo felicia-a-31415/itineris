@@ -134,6 +134,7 @@ Deno.serve(async (request) => {
       `Taches et evenements du calendrier: ${JSON.stringify(context?.tasks ?? []).slice(0, 3000)}`,
       `Sessions d'etude du minuteur aujourd'hui: ${JSON.stringify(context?.timerSessions ?? {})}`,
       `Etat actuel du minuteur: ${JSON.stringify(context?.timer ?? {})}`,
+      `Titre de chat requis: ${context?.needsChatTitle ? 'oui' : 'non'}`,
       `Fichiers joints au message: ${
         attachments.length > 0
           ? attachments
@@ -179,6 +180,7 @@ Ne decale jamais un jour vers le lendemain ou la veille. Si l'eleve dit jeudi, l
 Si tu cites une date ou une heure, privilegie le format explicite.
 Si l'eleve demande explicitement de lancer, relancer, mettre en pause, reinitialiser, regler ou changer le minuteur, tu dois utiliser l'outil set_timer.
 Dans ce cas, ne te contente pas de dire que tu vas le faire: emets vraiment set_timer.
+Si le contexte indique "Titre de chat requis: oui", utilise aussi l'outil set_chat_title une seule fois avec un titre court, utile, naturel et sans guillemets. Le titre doit faire 2 a 5 mots et resumer le sujet du chat, par exemple "Revision en biologie" ou "Photo de chien".
 ${image ? "\nSi une image est fournie pour l'agenda, lis attentivement tout le texte visible dans l'image. Repere seulement les devoirs, examens, remises, cours, reunions ou evenements scolaires qui meritent une tache dans l'agenda. Utilise add_task pour chaque element pertinent. N'invente jamais de tache. Si un element est trop flou ou illisible, ignore-le. Si plusieurs lignes parlent du meme devoir, cree une seule tache. Si une date explicite est visible, convertis-la en YYYY-MM-DD. Si seule une date relative est visible, convertis-la avec currentDate. Si une heure explicite est visible, utilise HH:MM. Si aucune heure n'est visible, laisse time vide. Donne au champ name un titre court, propre et utile, sans recopier tout le texte brut." : ''}
 ${hasFileContext ? "\nSi des fichiers sont joints au chat, analyse leur contenu directement et honnetement. Pour une image jointe au chat, decris uniquement ce qui est reellement visible; ne suppose pas que c'est un document scolaire, un devoir ou un horaire. Si l'image montre un animal, un objet, une personne, une page de notes ou autre chose, nomme-le simplement. Pour les PDF et fichiers texte, cite le nom du fichier quand c'est utile. Aide ensuite l'eleve a comprendre, resumer, s'exercer ou creer un quiz a partir du contenu fourni, sans faire un devoir complet a remettre. Si l'intention de l'eleve est de se pratiquer, se faire tester, reviser, memoriser, avoir des questions, ou faire un quiz, deduis qu'il veut un quiz interactif meme s'il n'utilise pas exactement le mot quiz. Dans ce cas, cree 5 a 10 questions basees sur le contenu joint quand il y en a, sinon sur le contenu deja fourni dans la conversation. Pose une seule question a la fois. Attends la reponse de l'eleve avant de donner la question suivante. Apres chaque reponse, donne un feedback clair et une explication detaillee qui explique pourquoi la reponse est correcte ou incorrecte." : ''}
 
@@ -406,6 +408,21 @@ ${item.content}`;
                 },
               },
               required: ['target_name'],
+            },
+          },
+          {
+            name: 'set_chat_title',
+            description:
+              "Genere un titre court pour un nouveau chat quand le contexte indique qu'un titre est requis.",
+            input_schema: {
+              type: 'object',
+              properties: {
+                title: {
+                  type: 'string',
+                  description: 'Titre court, naturel et utile de 2 a 5 mots pour la conversation.',
+                },
+              },
+              required: ['title'],
             },
           },
         ],
