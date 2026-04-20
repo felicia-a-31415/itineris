@@ -1,6 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bug, CalendarDays, CheckSquare, Flame, MessageCircle, Settings, Timer as TimerIcon } from 'lucide-react';
+import {
+  Bug,
+  CalendarDays,
+  Check,
+  CheckSquare,
+  Flame,
+  MessageCircle,
+  Pencil,
+  Settings,
+  Timer as TimerIcon,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { DashboardTaskListPanel } from '../components/dashboard/TaskListPanel';
@@ -251,6 +263,8 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
       messages: DEFAULT_CHAT_MESSAGES,
     },
   ]);
+  const [editingChatThreadId, setEditingChatThreadId] = useState<string | null>(null);
+  const [editingChatTitle, setEditingChatTitle] = useState('');
   const { requestedAuthMode, shouldShowDashboardAuthGate, enableGuestAccess } = useDashboardAccess({
     userId: user?.id,
     loading,
@@ -650,31 +664,33 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCreateNewChat = () => {
-    const nextThreadId = createChatThreadId();
-    setChatThreads((currentThreads) => {
-      const savedThreads = currentThreads.map((thread) =>
-        thread.id === activeChatThreadId
-          ? {
-              ...thread,
-              title: getChatThreadTitle(messages, thread.title),
-              messages,
-            }
-          : thread
-      );
-      return [
-        {
-          id: nextThreadId,
-          title: 'Nouveau chat',
-          messages: DEFAULT_CHAT_MESSAGES,
-        },
-        ...savedThreads,
-      ];
-    });
-    setActiveChatThreadId(nextThreadId);
-    setMessages(DEFAULT_CHAT_MESSAGES);
+  const getSavedChatThreads = () =>
+    chatThreads.map((thread) =>
+      thread.id === activeChatThreadId
+        ? {
+            ...thread,
+            title: getChatThreadTitle(messages, thread.title),
+            messages,
+          }
+        : thread
+    );
+
+  const clearChatDraft = () => {
     setChatInput('');
     chatAttachments.forEach((attachment) => removeChatAttachment(attachment.id));
+  };
+
+  const handleCreateNewChat = () => {
+    const nextThreadId = createChatThreadId();
+    const nextThread: ChatThread = {
+      id: nextThreadId,
+      title: 'Nouveau chat',
+      messages: DEFAULT_CHAT_MESSAGES,
+    };
+    setChatThreads([nextThread, ...getSavedChatThreads()]);
+    setActiveChatThreadId(nextThreadId);
+    setMessages(DEFAULT_CHAT_MESSAGES);
+    clearChatDraft();
     requestAnimationFrame(() => {
       if (!chatScrollRef.current) return;
       chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
@@ -682,28 +698,63 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
   };
 
   const handleSelectChatThread = (threadId: string) => {
-    const selectedThread = chatThreads.find((thread) => thread.id === threadId);
+    const savedThreads = getSavedChatThreads();
+    const selectedThread = savedThreads.find((thread) => thread.id === threadId);
     if (!selectedThread) return;
 
-    setChatThreads((currentThreads) => {
-      const savedThreads = currentThreads.map((thread) => {
-        if (thread.id === activeChatThreadId) {
-          return {
-            ...thread,
-            title: getChatThreadTitle(messages, thread.title),
-            messages,
-          };
-        }
-
-        return thread;
-      });
-      return savedThreads;
-    });
-
+    setChatThreads(savedThreads);
     setActiveChatThreadId(threadId);
     setMessages(selectedThread.messages);
-    setChatInput('');
-    chatAttachments.forEach((attachment) => removeChatAttachment(attachment.id));
+    setEditingChatThreadId(null);
+    setEditingChatTitle('');
+    clearChatDraft();
+  };
+
+  const handleStartRenameChatThread = (thread: ChatThread) => {
+    setEditingChatThreadId(thread.id);
+    setEditingChatTitle(thread.title);
+  };
+
+  const handleCommitRenameChatThread = () => {
+    if (!editingChatThreadId) return;
+
+    const nextTitle = editingChatTitle.trim() || 'Sans titre';
+    setChatThreads((currentThreads) =>
+      currentThreads.map((thread) => (thread.id === editingChatThreadId ? { ...thread, title: nextTitle } : thread))
+    );
+    setEditingChatThreadId(null);
+    setEditingChatTitle('');
+  };
+
+  const handleCancelRenameChatThread = () => {
+    setEditingChatThreadId(null);
+    setEditingChatTitle('');
+  };
+
+  const handleDeleteChatThread = (threadId: string) => {
+    const savedThreads = getSavedChatThreads();
+    const remainingThreads = savedThreads.filter((thread) => thread.id !== threadId);
+    const nextThreads =
+      remainingThreads.length > 0
+        ? remainingThreads
+        : [
+            {
+              id: createChatThreadId(),
+              title: 'Nouveau chat',
+              messages: DEFAULT_CHAT_MESSAGES,
+            },
+          ];
+
+    setChatThreads(nextThreads);
+    setEditingChatThreadId(null);
+    setEditingChatTitle('');
+
+    if (threadId !== activeChatThreadId) return;
+
+    const nextActiveThread = nextThreads[0];
+    setActiveChatThreadId(nextActiveThread.id);
+    setMessages(nextActiveThread.messages);
+    clearChatDraft();
   };
 
   return (
@@ -724,14 +775,14 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
           </div>
 
           <div
-            className={`inline-flex shrink-0 items-center gap-1.5 text-xl font-medium transition-transform md:text-2xl ${
+            className={`inline-flex shrink-0 items-center gap-1.5 text-lg font-medium transition-transform md:text-xl ${
               streakBump ? 'scale-105' : ''
             }`}
             style={{ color: streakColor }}
             aria-label={`${streakDays} jours de suite`}
             title={`${streakDays} jours de suite`}
           >
-            <Flame className="h-6 w-6 md:h-7 md:w-7" />
+            <Flame className="h-5 w-5 md:h-6 md:w-6" />
             <span>{streakDays}</span>
           </div>
         </header>
@@ -759,12 +810,12 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
           }`}
         >
           {activeDashboardPage === 'chat' ? (
-            <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:grid-rows-1">
-              <aside className="flex min-h-0 gap-2 rounded-3xl bg-white/[0.03] p-3 lg:flex-col">
+            <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:grid-rows-1">
+              <aside className="flex min-h-0 gap-3 border-b border-white/[0.06] pb-3 lg:flex-col lg:border-b-0 lg:border-r lg:pb-0 lg:pr-4">
                 <button
                   type="button"
                   onClick={handleCreateNewChat}
-                  className="h-10 rounded-2xl bg-[rgba(109,66,255,0.18)] px-3 text-left text-sm font-semibold text-[#F5F2F7] transition hover:bg-[rgba(109,66,255,0.26)]"
+                  className="h-10 shrink-0 rounded-full bg-[#6d42ff] px-4 text-left text-sm font-semibold text-white transition hover:bg-[#7b55ff]"
                 >
                   + Nouveau chat
                 </button>
@@ -772,19 +823,81 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
                   <div className="flex gap-2 lg:flex-col">
                     {chatThreads.map((thread) => {
                       const isActiveThread = thread.id === activeChatThreadId;
+                      const isEditingThread = editingChatThreadId === thread.id;
                       return (
-                        <button
+                        <div
                           key={thread.id}
-                          type="button"
-                          onClick={() => handleSelectChatThread(thread.id)}
-                          className={`min-w-[150px] rounded-2xl px-3 py-3 text-left text-sm transition lg:min-w-0 ${
+                          className={`group flex min-w-[210px] items-center gap-2 rounded-2xl px-2 py-2 transition lg:min-w-0 ${
                             isActiveThread
-                              ? 'bg-white/[0.08] text-[#F5F2F7]'
-                              : 'bg-transparent text-white/54 hover:bg-white/[0.05] hover:text-[#F5F2F7]'
+                              ? 'bg-white/[0.055] text-[#F5F2F7]'
+                              : 'bg-transparent text-white/54 hover:bg-white/[0.035] hover:text-[#F5F2F7]'
                           }`}
                         >
-                          <span className="block truncate">{thread.title}</span>
-                        </button>
+                          {isEditingThread ? (
+                            <>
+                              <input
+                                value={editingChatTitle}
+                                onChange={(event) => setEditingChatTitle(event.target.value)}
+                                onKeyDown={(event) => {
+                                  if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    handleCommitRenameChatThread();
+                                  }
+                                  if (event.key === 'Escape') {
+                                    handleCancelRenameChatThread();
+                                  }
+                                }}
+                                onBlur={handleCommitRenameChatThread}
+                                className="min-w-0 flex-1 rounded-lg bg-white/[0.06] px-2 py-1 text-sm text-[#F5F2F7] outline-none"
+                                autoFocus
+                              />
+                              <button
+                                type="button"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={handleCommitRenameChatThread}
+                                className="rounded-lg p-1 text-white/58 hover:bg-white/[0.06] hover:text-white"
+                                aria-label="Sauvegarder le nom"
+                              >
+                                <Check className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={handleCancelRenameChatThread}
+                                className="rounded-lg p-1 text-white/58 hover:bg-white/[0.06] hover:text-white"
+                                aria-label="Annuler le renommage"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleSelectChatThread(thread.id)}
+                                className="min-w-0 flex-1 py-1 text-left text-sm"
+                              >
+                                <span className="block truncate">{thread.title}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleStartRenameChatThread(thread)}
+                                className="rounded-lg p-1 text-white/34 opacity-100 hover:bg-white/[0.06] hover:text-white lg:opacity-0 lg:group-hover:opacity-100"
+                                aria-label={`Renommer ${thread.title}`}
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteChatThread(thread.id)}
+                                className="rounded-lg p-1 text-white/34 opacity-100 hover:bg-white/[0.06] hover:text-[#FFB4B4] lg:opacity-0 lg:group-hover:opacity-100"
+                                aria-label={`Supprimer ${thread.title}`}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       );
                     })}
                   </div>

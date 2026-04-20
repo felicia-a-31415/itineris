@@ -41,21 +41,24 @@ export function ChatCard({
 
   return (
     <Card
-      className={`flex h-full w-full min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl border-transparent bg-transparent p-6 shadow-none ${
+      className={`flex h-full w-full min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl border-transparent bg-transparent p-0 shadow-none ${
         isExpanded ? 'h-full overflow-hidden' : 'h-full'
       }`}
     >
-      <div className="mb-2 flex items-center justify-between">
-        <p className="app-muted text-sm">Chat IA</p>
+      <div className="mb-3 flex shrink-0 items-center justify-between border-b border-white/[0.06] pb-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Chat IA</p>
+          <p className="mt-1 text-sm app-muted">Pose une question, joins tes notes, puis continue la discussion.</p>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-white/40">Bêta</span>
         </div>
       </div>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div
           ref={chatScrollRef}
-          className="app-scrollbar-hidden min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-3 text-sm app-muted"
+          className="app-scrollbar-hidden min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-1 py-3 text-sm app-muted"
         >
           <div className="flex min-h-full flex-col justify-end space-y-3">
             {messages.map((message, index) => (
@@ -66,8 +69,8 @@ export function ChatCard({
                 <div
                   className={
                     message.role === 'user'
-                      ? 'inline-block max-w-[90%] break-words whitespace-pre-wrap rounded-2xl bg-[linear-gradient(90deg,rgba(109,66,255,0.22),rgba(95,44,142,0.24))] px-3 py-2 text-left text-[#F5F2F7]'
-                      : 'max-w-[90%] break-words whitespace-pre-wrap rounded-2xl bg-[rgba(18,16,28,0.88)] px-3 py-2'
+                      ? 'inline-block max-w-[90%] break-words whitespace-pre-wrap rounded-2xl bg-[rgba(109,66,255,0.18)] px-3 py-2 text-left text-[#F5F2F7]'
+                      : 'max-w-[90%] break-words whitespace-pre-wrap border-l border-white/[0.08] px-3 py-2'
                   }
                 >
                   {renderFormattedMessage(message.content)}
@@ -78,8 +81,8 @@ export function ChatCard({
           </div>
         </div>
 
-        <div className="min-w-0 border-t border-white/8 p-2.5">
-          <div className="min-w-0 rounded-[28px] border border-white/10 bg-[rgba(18,16,28,0.92)] p-2 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+        <div className="min-w-0 border-t border-white/[0.06] pt-3">
+          <div className="min-w-0 rounded-[24px] bg-white/[0.035] p-2">
             {attachments.length > 0 || attachmentError || isPreparingAttachments ? (
               <div className="mb-2 flex min-w-0 flex-wrap items-center gap-2 px-1">
                 {attachments.map((attachment) => {
@@ -87,7 +90,7 @@ export function ChatCard({
                   return (
                     <span
                       key={attachment.id}
-                      className="inline-flex max-w-full items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/70"
+                      className="inline-flex max-w-full items-center gap-2 rounded-lg bg-white/[0.06] px-2 py-1 text-xs text-white/70"
                     >
                       <Icon className="h-3.5 w-3.5 shrink-0" />
                       <span className="max-w-[160px] truncate">{attachment.name}</span>
@@ -107,7 +110,7 @@ export function ChatCard({
               </div>
             ) : null}
             <div className="flex items-end gap-2">
-              <label className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-white/55 hover:bg-white/6 hover:text-white">
+              <label className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-white/55 hover:bg-white/[0.06] hover:text-white">
                 <Paperclip className="h-4 w-4" />
                 <input
                   type="file"
@@ -152,7 +155,7 @@ export function ChatCard({
               <Button
                 onClick={onSend}
                 disabled={!canSend}
-                className="h-10 w-10 shrink-0 rounded-full bg-[#111318] p-0 text-white hover:bg-[#1B1E26]"
+                className="h-10 w-10 shrink-0 rounded-full bg-[#6d42ff] p-0 text-white hover:bg-[#7b55ff]"
                 aria-label="Envoyer"
               >
                 <ArrowUp className="h-4 w-4" />

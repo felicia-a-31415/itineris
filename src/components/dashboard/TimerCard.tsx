@@ -220,8 +220,9 @@ export function TimerCard({
             </div>
           </div>
 
-          {timerTool === 'timer' ? (
-            <div className="flex w-full max-w-2xl flex-col items-center gap-4">
+          <div className="flex min-h-[146px] w-full max-w-2xl flex-col items-center justify-center gap-4">
+            {timerTool === 'timer' ? (
+              <>
                 <div className="flex flex-col items-center gap-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Mode</p>
                   <div className="flex flex-wrap justify-center gap-6">
@@ -244,95 +245,97 @@ export function TimerCard({
                   </div>
                 </div>
 
-              <div className={`flex w-full flex-col items-center text-sm app-muted ${isExpanded ? 'max-w-full' : ''}`}>
-                <div className="mb-2 text-center">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Durée</span>
-            </div>
+                <div className={`flex w-full flex-col items-center text-sm app-muted ${isExpanded ? 'max-w-full' : ''}`}>
+                  <div className="mb-2 text-center">
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Durée</span>
+                  </div>
 
-                <div className="flex flex-wrap justify-center gap-2">
-              {presetMinutes.map((minutes) => {
-                const isActive = safeMinutes === minutes;
-                return (
-                  <button
-                    key={minutes}
-                    type="button"
-                    onClick={() => onPresetSelect(minutes)}
-                    disabled={isTimerLocked}
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {presetMinutes.map((minutes) => {
+                      const isActive = safeMinutes === minutes;
+                      return (
+                        <button
+                          key={minutes}
+                          type="button"
+                          onClick={() => onPresetSelect(minutes)}
+                          disabled={isTimerLocked}
                         className={`h-9 rounded-full px-4 text-xs font-semibold transition ${
-                      isActive
-                        ? 'bg-[#6d42ff] text-white'
-                        : 'bg-transparent text-[#F5F2F7] hover:bg-white/[0.06]'
-                    } ${lockedControlClass}`}
-                  >
-                    {minutes} min
-                  </button>
-                );
-              })}
-              <button
-                type="button"
-                onClick={onCustomClick}
-                disabled={isTimerLocked}
-                    className={`h-9 rounded-full px-4 text-xs font-semibold transition ${
-                  customIsActive
-                    ? 'bg-[#6d42ff] text-white'
-                    : 'bg-transparent text-[#F5F2F7] hover:bg-white/[0.06]'
-                } ${lockedControlClass}`}
-              >
-                Personnalisé
-              </button>
-            </div>
+                            isActive
+                              ? 'bg-[#6d42ff] text-white'
+                              : 'bg-transparent text-[#F5F2F7] hover:bg-white/[0.06]'
+                          } ${lockedControlClass}`}
+                        >
+                          {minutes} min
+                        </button>
+                      );
+                    })}
+                  </div>
 
-            {isEditingTimer ? (
+                  <div className="mt-2 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={onCustomClick}
+                      disabled={isTimerLocked}
+                      className={`h-9 rounded-full px-4 text-xs font-semibold transition ${
+                        customIsActive
+                          ? 'bg-[#6d42ff] text-white'
+                          : 'bg-transparent text-[#F5F2F7] hover:bg-white/[0.06]'
+                      } ${lockedControlClass}`}
+                    >
+                      Personnalisé
+                    </button>
+                  </div>
+
+                  {isEditingTimer ? (
                   <div className="mt-3 flex w-full max-w-[260px] flex-col gap-2">
-                <Input
-                  type="number"
-                  min={1}
-                  step={1}
-                  value={editingTimerValue}
-                  disabled={isTimerLocked}
-                  onFocus={onEditingFocus}
-                  onChange={(e) => onEditingValueChange(e.target.value)}
-                  onBlur={onEditingBlur}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      onEditingCommit();
-                    }
-                    if (e.key === 'Escape') {
-                      onEditingCancel();
-                    }
-                  }}
+                    <Input
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={editingTimerValue}
+                      disabled={isTimerLocked}
+                      onFocus={onEditingFocus}
+                      onChange={(e) => onEditingValueChange(e.target.value)}
+                      onBlur={onEditingBlur}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          onEditingCommit();
+                        }
+                        if (e.key === 'Escape') {
+                          onEditingCancel();
+                        }
+                      }}
                       className="h-10 rounded-xl"
-                  placeholder={`${Math.max(1, Math.round(safeMinutes))}`}
-                  autoFocus
-                  aria-label="Durée personnalisée en minutes"
-                />
-                <Button
-                  type="button"
-                  onClick={onEditingCommit}
-                  variant="outline"
-                  disabled={isTimerLocked}
-                  className="h-10 rounded-xl"
-                >
-                  Appliquer
-                </Button>
-              </div>
-            ) : null}
+                      placeholder={`${Math.max(1, Math.round(safeMinutes))}`}
+                      autoFocus
+                      aria-label="Durée personnalisée en minutes"
+                    />
+                    <Button
+                      type="button"
+                      onClick={onEditingCommit}
+                      variant="outline"
+                      disabled={isTimerLocked}
+                      className="h-10 rounded-xl"
+                    >
+                      Appliquer
+                    </Button>
+                  </div>
+                  ) : null}
+                </div>
+              </>
+            ) : (
+              <Button
+                type="button"
+                onClick={onSaveStopwatchSession}
+                disabled={stopwatchSeconds < 1 || isTimerLocked}
+                variant="outline"
+                className="h-10 rounded-xl border-[#9F7BFF]/28 bg-[rgba(109,66,255,0.12)] px-4 text-sm text-[#F5F2F7] hover:bg-[rgba(109,66,255,0.2)] disabled:opacity-45"
+              >
+                Ajouter aux stats
+              </Button>
+            )}
           </div>
-            </div>
-          ) : null}
-
-        {timerTool === 'stopwatch' ? (
-          <Button
-            type="button"
-            onClick={onSaveStopwatchSession}
-            disabled={stopwatchSeconds < 1 || isTimerLocked}
-            variant="outline"
-            className="h-10 rounded-xl border-[#9F7BFF]/28 bg-[rgba(109,66,255,0.12)] px-4 text-sm text-[#F5F2F7] hover:bg-[rgba(109,66,255,0.2)] disabled:opacity-45"
-          >
-            Ajouter aux stats
-          </Button>
-        ) : null}
 
         {isUnlockingTimer ? (
           <div className="app-panel-soft mx-auto flex w-full max-w-[360px] flex-col gap-2 rounded-2xl px-4 py-3">
