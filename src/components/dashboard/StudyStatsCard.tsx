@@ -70,24 +70,27 @@ export function StudyStatsCard({
   };
 
   return (
-    <Card className="min-w-0 overflow-hidden rounded-3xl border-transparent bg-transparent p-6 shadow-none space-y-2">
+    <Card className="mx-auto min-w-0 max-w-4xl overflow-hidden rounded-[28px] border-transparent bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.012))] p-4 shadow-none md:p-5">
       <div className="flex flex-col gap-4">
-        <p className="app-muted text-sm">Temps étudié</p>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Temps étudié</p>
+            <p className="mt-1 text-sm app-muted">Tire le haut d'une barre pour ajuster les minutes.</p>
+          </div>
+
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              className="h-11 rounded-full px-5"
+              className="h-10 rounded-full px-4 text-sm"
               onClick={onToday}
             >
               Aujourd&apos;hui
             </Button>
-            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 onClick={onPrevRange}
                 variant="ghost"
-                className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#F5F2F7] p-0 hover:bg-white/6"
+                className="h-10 w-10 rounded-full border border-transparent bg-transparent p-0 text-[#F5F2F7] hover:bg-white/6"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
@@ -95,32 +98,48 @@ export function StudyStatsCard({
                 type="button"
                 onClick={onNextRange}
                 variant="ghost"
-                className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#F5F2F7] p-0 hover:bg-white/6"
+                className="h-10 w-10 rounded-full border border-transparent bg-transparent p-0 text-[#F5F2F7] hover:bg-white/6"
               >
                 <ChevronRight className="h-5 w-5" />
               </Button>
-            </div>
           </div>
-          <p className="text-xs app-muted">Tire le haut d'une barre pour ajuster les minutes.</p>
+        </div>
+
+        <div className="grid min-w-0 gap-2 sm:grid-cols-3">
+          <div className="rounded-2xl bg-white/[0.035] px-4 py-3">
+            <p className="text-xs app-muted">Semaine</p>
+            <p className="mt-1 text-2xl font-semibold text-[#F5F2F7]">{activeWeekTotalMinutes} min</p>
+          </div>
+          <div className="rounded-2xl bg-white/[0.035] px-4 py-3">
+            <p className="text-xs app-muted">Moyenne</p>
+            <p className="mt-1 text-2xl font-semibold text-[#F5F2F7]">{averageDailyMinutes} min</p>
+          </div>
+          <div className="rounded-2xl bg-white/[0.035] px-4 py-3">
+            <p className="text-xs app-muted">Progression</p>
+            <p className="mt-1 text-2xl font-semibold text-[#F5F2F7]">
+              {weekDeltaMinutes >= 0 ? '+' : '-'}
+              {Math.abs(weekDeltaMinutes)} min
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="mt-2 min-w-0 overflow-x-hidden">
-        <div className="grid min-w-0 grid-cols-7 items-end gap-2 sm:gap-3">
+      <div className="mt-5 min-w-0 overflow-x-hidden">
+        <div className="grid min-w-0 grid-cols-7 items-end gap-1.5 sm:gap-3">
           {weekDates.map((date, index) => {
             const minutes = Math.round(activeWeekMinutes[index] ?? 0);
             const showBar = minutes > 0;
-            const barHeight = Math.max(showBar ? 8 : 0, Math.min(220, (minutes / chartMaxMinutes) * 220));
+            const barHeight = Math.max(showBar ? 8 : 0, Math.min(190, (minutes / chartMaxMinutes) * 190));
             const isDragging = draggingDayIndex === index;
             return (
-              <div key={index} className="flex flex-col items-center gap-2">
+              <div key={index} className="flex flex-col items-center gap-1.5">
                 <div
                   data-study-bar="true"
-                  className="relative flex h-56 w-full touch-none items-end rounded-2xl border border-white/6 bg-[rgba(16,14,24,0.88)]"
+                  className="relative flex h-48 w-full touch-none items-end rounded-2xl bg-white/[0.035]"
                 >
                   {showBar ? (
                     <div
-                      className="absolute bottom-0 left-0 w-full rounded-2xl bg-[linear-gradient(180deg,#8357ff_0%,#ff5f8f_100%)] transition-all"
+                      className="absolute bottom-0 left-0 w-full rounded-2xl bg-[linear-gradient(180deg,#8B61FF_0%,#FF5F8F_100%)] shadow-[0_0_22px_rgba(139,97,255,0.18)] transition-all"
                       style={{ height: `${barHeight}px` }}
                     />
                   ) : null}
@@ -132,36 +151,16 @@ export function StudyStatsCard({
                         ? 'border-white/80 bg-white/70 shadow-[0_0_18px_rgba(255,255,255,0.28)]'
                         : 'border-white/20 bg-white/18 hover:border-white/48 hover:bg-white/32'
                     }`}
-                    style={{ bottom: `${Math.min(216, Math.max(0, barHeight - 8))}px` }}
+                    style={{ bottom: `${Math.min(186, Math.max(0, barHeight - 8))}px` }}
                     aria-label={`Ajuster le temps étudié ${getDayName(date)}`}
                     title="Tire pour ajuster"
                   />
                 </div>
-                <div className="text-xs text-[#F5F2F7] font-medium">{minutes} min</div>
-                <div className="text-xs app-muted uppercase mb-1">{getDayName(date)}</div>
+                <div className="text-xs font-semibold text-[#F5F2F7]">{minutes}</div>
+                <div className="mb-1 text-[10px] uppercase tracking-[0.08em] app-muted">{getDayName(date)}</div>
               </div>
             );
           })}
-        </div>
-      </div>
-
-      <div className="mt-6 min-w-0 overflow-x-hidden">
-        <div className="grid min-w-0 gap-4 sm:grid-cols-3">
-          <div className="space-y-1">
-            <p className="text-sm app-muted">Total de cette semaine</p>
-            <p className="text-2xl text-[#F5F2F7]">{activeWeekTotalMinutes} min</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm app-muted">Moyenne quotidienne</p>
-            <p className="text-2xl text-[#F5F2F7]">{averageDailyMinutes} min</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm app-muted">Écart depuis la semaine passée</p>
-            <p className="text-2xl text-[#F5F2F7]">
-              {weekDeltaMinutes >= 0 ? '+' : '-'}
-              {Math.abs(weekDeltaMinutes)} min
-            </p>
-          </div>
         </div>
       </div>
     </Card>

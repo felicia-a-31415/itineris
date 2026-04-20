@@ -619,7 +619,7 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
       case 'timer':
       default:
         return (
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div className="w-full min-w-0">{renderTimerCard(false, 'seamless')}</div>
             <StudyStatsCard
               weekDates={weekDates}
@@ -682,7 +682,9 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
   };
 
   const handleSelectChatThread = (threadId: string) => {
-    let selectedMessages: DashboardChatMessage[] | null = null;
+    const selectedThread = chatThreads.find((thread) => thread.id === threadId);
+    if (!selectedThread) return;
+
     setChatThreads((currentThreads) => {
       const savedThreads = currentThreads.map((thread) => {
         if (thread.id === activeChatThreadId) {
@@ -693,21 +695,15 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
           };
         }
 
-        if (thread.id === threadId) {
-          selectedMessages = thread.messages;
-        }
-
         return thread;
       });
       return savedThreads;
     });
 
-    if (selectedMessages) {
-      setActiveChatThreadId(threadId);
-      setMessages(selectedMessages);
-      setChatInput('');
-      chatAttachments.forEach((attachment) => removeChatAttachment(attachment.id));
-    }
+    setActiveChatThreadId(threadId);
+    setMessages(selectedThread.messages);
+    setChatInput('');
+    chatAttachments.forEach((attachment) => removeChatAttachment(attachment.id));
   };
 
   return (
@@ -728,14 +724,14 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
           </div>
 
           <div
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full bg-white/[0.05] px-3.5 py-2 text-sm font-bold shadow-[0_12px_32px_rgba(0,0,0,0.24)] transition-transform ${
+            className={`inline-flex shrink-0 items-center gap-2 text-2xl font-bold transition-transform md:text-3xl ${
               streakBump ? 'scale-105' : ''
             }`}
             style={{ color: streakColor }}
             aria-label={`${streakDays} jours de suite`}
             title={`${streakDays} jours de suite`}
           >
-            <Flame className="h-4 w-4" />
+            <Flame className="h-7 w-7 md:h-8 md:w-8" />
             <span>{streakDays}</span>
           </div>
         </header>

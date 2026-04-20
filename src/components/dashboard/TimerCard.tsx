@@ -140,15 +140,15 @@ export function TimerCard({
 
   return (
     <Card
-      className={`flex w-full flex-col rounded-3xl p-6 ${
-        isSeamless ? 'border-transparent bg-transparent shadow-none' : 'app-panel'
+      className={`mx-auto flex w-full max-w-4xl flex-col rounded-[28px] p-4 md:p-5 ${
+        isSeamless
+          ? 'border-transparent bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.012))] shadow-none'
+          : 'app-panel'
       } ${
-        isExpanded ? 'app-scrollbar-hidden h-full overflow-auto' : isSeamless ? 'min-h-[640px]' : 'app-scrollbar-hidden h-[720px] overflow-y-auto'
+        isExpanded ? 'app-scrollbar-hidden h-full overflow-auto' : isSeamless ? 'min-h-[540px]' : 'app-scrollbar-hidden h-[660px] overflow-y-auto'
       }`}
     >
-      <div className="mb-5 grid grid-cols-[1fr_auto_1fr] items-start gap-3">
-        <div />
-        <div className="grid w-full max-w-[320px] grid-cols-2 gap-2 rounded-2xl p-1">
+      <div className="mx-auto mb-3 grid w-full max-w-[360px] grid-cols-2 gap-1 rounded-2xl bg-white/[0.035] p-1">
           {TOOL_OPTIONS.map(({ key, label, Icon }) => {
             const isActive = timerTool === key;
             return (
@@ -157,9 +157,9 @@ export function TimerCard({
                 type="button"
                 onClick={() => onToolSelect(key)}
                 disabled={isTimerLocked}
-                className={`flex min-h-[50px] min-w-[124px] flex-col items-center justify-center gap-0.5 rounded-2xl px-3 text-[11px] font-semibold transition ${
+                className={`flex min-h-[42px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl px-3 text-[11px] font-semibold transition ${
                   isActive
-                    ? 'bg-[rgba(109,66,255,0.18)] text-white shadow-[0_0_18px_rgba(109,66,255,0.12)]'
+                    ? 'bg-[rgba(109,66,255,0.22)] text-white shadow-[0_10px_28px_rgba(109,66,255,0.14)]'
                     : 'bg-transparent text-[#C9C3D4] hover:bg-white/5 hover:text-[#F5F2F7]'
                 } ${lockedControlClass}`}
               >
@@ -168,17 +168,65 @@ export function TimerCard({
               </button>
             );
           })}
-        </div>
-        <div className="flex justify-end">
-          <div className="flex items-center gap-2">
-          </div>
-        </div>
       </div>
 
-      <div className={`flex flex-col items-center gap-6 ${isExpanded ? 'flex-1 justify-center py-6' : ''}`}>
+      <div className={`grid min-h-0 gap-4 ${isExpanded ? 'flex-1 content-center py-4' : ''}`}>
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-center">
+          <div className="flex min-w-0 flex-col items-center gap-3">
+            <div className={isExpanded ? 'flex items-center justify-center' : 'flex h-[19rem] items-center justify-center md:h-[21rem]'}>
+              <div
+                className={`relative flex items-center justify-center rounded-full ${timerSizeClass}`}
+                style={{
+                  background: timerRingGradient,
+                  boxShadow: timerRingGlow,
+                }}
+              >
+                <div
+                  className={`absolute ${innerRingInsetClass} rounded-full shadow-inner flex flex-col items-center justify-center bg-[linear-gradient(180deg,rgba(11,12,20,0.95),rgba(21,17,32,0.92))]`}
+                >
+                  <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_52%)]" />
+                  <span className={`font-semibold text-[#F5F2F7] ${timeLabelClass}`}>{displayTime}</span>
+                  <span className={`mt-1 app-muted ${isExpanded ? 'text-sm' : 'text-xs'}`}>{statusLabel}</span>
+                </div>
+              </div>
+            </div>
 
-        <div className="flex h-10 items-center justify-center">
-          <div className={`flex flex-wrap justify-center gap-3.5 ${timerTool === 'timer' ? '' : 'invisible'}`}>
+            <div className="flex items-center justify-center gap-3">
+              <Button
+                onClick={onToggleRunning}
+                className="h-11 min-w-[140px] rounded-xl px-5"
+                title={isTimerLocked && isRunning ? 'Mot de passe requis pour mettre en pause.' : undefined}
+              >
+                {isRunning ? (
+                  <>
+                    {isTimerLocked ? <Lock className="w-4 h-4 mr-2" /> : <Pause className="w-4 h-4 mr-2" />}
+                    Pause
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    {timerTool === 'stopwatch' ? 'Lancer' : isInitialTime ? 'Lancer' : 'Relancer'}
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={onReset}
+                type="button"
+                variant="ghost"
+                disabled={isTimerLocked}
+                className={`h-11 w-11 rounded-xl p-0 text-white/92 hover:bg-white/[0.05] hover:text-white ${lockedControlClass}`}
+                aria-label="Réinitialiser le minuteur"
+                title="Réinitialiser le minuteur"
+              >
+                <RotateCcw className="h-5 w-5 stroke-[2.75]" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex min-w-0 flex-col gap-3 rounded-3xl bg-white/[0.035] p-4">
+            <div className={`min-h-[72px] ${timerTool === 'timer' ? '' : 'opacity-35'}`}>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Mode</p>
+              <div className="grid grid-cols-2 gap-2">
             {MODE_OPTIONS.map(({ key, label }) => {
               const isActive = timerMode === key;
               return (
@@ -187,7 +235,7 @@ export function TimerCard({
                   type="button"
                   onClick={() => onModeSelect(key)}
                   disabled={isTimerLocked}
-                  className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${lockedControlClass}`}
+                  className={`h-9 rounded-xl px-3 text-sm font-semibold transition ${lockedControlClass}`}
                   style={
                     isActive
                       ? {
@@ -205,34 +253,16 @@ export function TimerCard({
                 </button>
               );
             })}
-          </div>
-        </div>
-
-          <div className={isExpanded ? 'flex items-center justify-center' : 'flex h-80 items-center justify-center md:h-[22rem]'}>
-            <div
-              className={`relative flex items-center justify-center rounded-full ${timerSizeClass}`}
-              style={{
-                background: timerRingGradient,
-                boxShadow: timerRingGlow,
-              }}
-            >
-              <div
-                className={`absolute ${innerRingInsetClass} rounded-full shadow-inner flex flex-col items-center justify-center bg-[linear-gradient(180deg,rgba(11,12,20,0.95),rgba(21,17,32,0.92))]`}
-              >
-                <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_52%)]" />
-                <span className={`font-semibold text-[#F5F2F7] ${timeLabelClass}`}>{displayTime}</span>
-                <span className={`mt-1 app-muted ${isExpanded ? 'text-sm' : 'text-xs'}`}>{statusLabel}</span>
               </div>
             </div>
-          </div>
 
         {timerTool === 'timer' ? (
-          <div className={`rounded-2xl px-0 py-2 text-sm app-muted ${isExpanded ? 'w-fit max-w-full' : ''}`}>
-            <div className="mb-3">
-              <span className="text-sm app-muted">Durée du minuteur</span>
+              <div className={`rounded-2xl text-sm app-muted ${isExpanded ? 'w-fit max-w-full' : ''}`}>
+                <div className="mb-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Durée</span>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2">
               {presetMinutes.map((minutes) => {
                 const isActive = safeMinutes === minutes;
                 return (
@@ -241,7 +271,7 @@ export function TimerCard({
                     type="button"
                     onClick={() => onPresetSelect(minutes)}
                     disabled={isTimerLocked}
-                    className={`h-9 rounded-xl px-3 text-xs font-medium transition ${
+                        className={`h-9 rounded-xl px-3 text-xs font-semibold transition ${
                       isActive
                         ? 'bg-[#6d42ff] text-white'
                         : 'bg-white/[0.04] text-[#F5F2F7] hover:bg-white/[0.08]'
@@ -255,7 +285,7 @@ export function TimerCard({
                 type="button"
                 onClick={onCustomClick}
                 disabled={isTimerLocked}
-                className={`h-9 rounded-xl px-3 text-xs font-medium transition ${
+                    className={`h-9 rounded-xl px-3 text-xs font-semibold transition ${
                   customIsActive
                     ? 'bg-[#6d42ff] text-white'
                     : 'bg-white/[0.04] text-[#F5F2F7] hover:bg-white/[0.08]'
@@ -266,7 +296,7 @@ export function TimerCard({
             </div>
 
             {isEditingTimer ? (
-              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <div className="mt-3 flex flex-col gap-2">
                 <Input
                   type="number"
                   min={1}
@@ -285,7 +315,7 @@ export function TimerCard({
                       onEditingCancel();
                     }
                   }}
-                  className="h-10 rounded-xl sm:max-w-[150px]"
+                      className="h-10 rounded-xl"
                   placeholder={`${Math.max(1, Math.round(safeMinutes))}`}
                   autoFocus
                   aria-label="Durée personnalisée en minutes"
@@ -315,9 +345,11 @@ export function TimerCard({
             Ajouter aux stats
           </Button>
         ) : null}
+          </div>
+        </div>
 
         {isUnlockingTimer ? (
-          <div className="app-panel-soft flex w-full max-w-[360px] flex-col gap-2 rounded-2xl px-4 py-3">
+          <div className="app-panel-soft mx-auto flex w-full max-w-[360px] flex-col gap-2 rounded-2xl px-4 py-3">
             <Input
               type="password"
               value={unlockPassword}
@@ -349,36 +381,6 @@ export function TimerCard({
           </div>
         ) : null}
 
-          <div className="flex items-center justify-center gap-3">
-            <Button
-              onClick={onToggleRunning}
-              className="h-10 min-w-[124px] rounded-xl px-4"
-              title={isTimerLocked && isRunning ? 'Mot de passe requis pour mettre en pause.' : undefined}
-            >
-              {isRunning ? (
-                <>
-                  {isTimerLocked ? <Lock className="w-4 h-4 mr-2" /> : <Pause className="w-4 h-4 mr-2" />}
-                  Pause
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4 mr-2" />
-                  {timerTool === 'stopwatch' ? 'Lancer' : isInitialTime ? 'Lancer' : 'Relancer'}
-                </>
-              )}
-            </Button>
-            <Button
-              onClick={onReset}
-              type="button"
-              variant="ghost"
-              disabled={isTimerLocked}
-              className={`h-10 w-10 rounded-xl p-0 text-white/92 hover:bg-transparent hover:text-white ${lockedControlClass}`}
-              aria-label="Réinitialiser le minuteur"
-              title="Réinitialiser le minuteur"
-            >
-              <RotateCcw className="h-6 w-6 stroke-[2.75]" />
-            </Button>
-          </div>
       </div>
     </Card>
   );
