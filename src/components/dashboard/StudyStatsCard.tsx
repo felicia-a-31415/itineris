@@ -35,6 +35,28 @@ export function StudyStatsCard({
 }: StudyStatsCardProps) {
   const [draggingDayIndex, setDraggingDayIndex] = useState<number | null>(null);
   const chartMaxMinutes = Math.max(15, Math.ceil(((maxWeekMinutes || 15) * 1.08) / 5) * 5);
+  const monthNames = [
+    'janvier',
+    'février',
+    'mars',
+    'avril',
+    'mai',
+    'juin',
+    'juillet',
+    'août',
+    'septembre',
+    'octobre',
+    'novembre',
+    'décembre',
+  ];
+  const firstWeekDate = weekDates[0];
+  const lastWeekDate = weekDates[weekDates.length - 1];
+  const weekRangeLabel =
+    firstWeekDate && lastWeekDate
+      ? firstWeekDate.getMonth() === lastWeekDate.getMonth()
+        ? `Semaine du ${firstWeekDate.getDate()} au ${lastWeekDate.getDate()} ${monthNames[lastWeekDate.getMonth()]}`
+        : `Semaine du ${firstWeekDate.getDate()} ${monthNames[firstWeekDate.getMonth()]} au ${lastWeekDate.getDate()} ${monthNames[lastWeekDate.getMonth()]}`
+      : 'Semaine';
 
   const startDraggingStudyTime = (
     event: React.PointerEvent<HTMLButtonElement>,
@@ -72,36 +94,10 @@ export function StudyStatsCard({
   return (
     <Card className="mx-auto min-w-0 max-w-4xl overflow-visible rounded-[28px] border-transparent bg-transparent px-1 pt-1 shadow-none">
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Temps étudié</p>
             <p className="mt-1 text-sm app-muted">Tire le haut d'une barre pour ajuster les minutes.</p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              className="h-10 rounded-full px-4 text-sm"
-              onClick={onToday}
-            >
-              Aujourd&apos;hui
-            </Button>
-              <Button
-                type="button"
-                onClick={onPrevRange}
-                variant="ghost"
-                className="h-10 w-10 rounded-full border border-transparent bg-transparent p-0 text-[#F5F2F7] hover:bg-white/6"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-              <Button
-                type="button"
-                onClick={onNextRange}
-                variant="ghost"
-                className="h-10 w-10 rounded-full border border-transparent bg-transparent p-0 text-[#F5F2F7] hover:bg-white/6"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </Button>
           </div>
         </div>
 
@@ -125,6 +121,32 @@ export function StudyStatsCard({
       </div>
 
       <div className="mt-5 min-w-0 overflow-x-hidden">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-[#F5F2F7]">{weekRangeLabel}</p>
+
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="h-10 rounded-full px-4 text-sm" onClick={onToday}>
+              Aujourd&apos;hui
+            </Button>
+            <Button
+              type="button"
+              onClick={onPrevRange}
+              variant="ghost"
+              className="h-10 w-10 rounded-full border border-transparent bg-transparent p-0 text-[#F5F2F7] hover:bg-white/6"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button
+              type="button"
+              onClick={onNextRange}
+              variant="ghost"
+              className="h-10 w-10 rounded-full border border-transparent bg-transparent p-0 text-[#F5F2F7] hover:bg-white/6"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+
         <div className="grid min-w-0 grid-cols-7 items-end gap-1.5 sm:gap-3">
           {weekDates.map((date, index) => {
             const minutes = Math.round(activeWeekMinutes[index] ?? 0);

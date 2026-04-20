@@ -229,7 +229,7 @@ export function TimerCard({
               <>
                 <div className="flex flex-col items-center gap-2 lg:items-start">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Mode</p>
-                  <div className="flex flex-wrap justify-center gap-6 lg:justify-start">
+                  <div className="flex flex-wrap justify-center gap-2 lg:justify-start">
                     {MODE_OPTIONS.map(({ key, label }) => {
                       const isActive = timerMode === key;
                       return (
@@ -238,8 +238,10 @@ export function TimerCard({
                           type="button"
                           onClick={() => onModeSelect(key)}
                           disabled={isTimerLocked}
-                          className={`border-b-2 px-1 pb-1 text-sm font-semibold transition ${
-                            isActive ? 'border-[#9F7BFF] text-white' : 'border-transparent text-white/55 hover:text-white'
+                          className={`h-9 rounded-full px-4 text-xs font-semibold transition ${
+                            isActive
+                              ? 'bg-[#6d42ff] text-white'
+                              : 'bg-transparent text-[#F5F2F7] hover:bg-white/[0.06]'
                           } ${lockedControlClass}`}
                         >
                           {label}
