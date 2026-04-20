@@ -348,7 +348,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     setTimerUnlockError(null);
   };
 
-  const renderTimerCard = (isExpanded = false) => (
+  const renderTimerCard = (isExpanded = false, variant: 'panel' | 'seamless' = 'panel') => (
     <TimerCard
       timerTool={timerTool}
       timerMode={timerMode}
@@ -368,6 +368,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       editingTimerValue={editingTimerValue}
       presetMinutes={TIMER_PRESET_MINUTES}
       formatTime={formatTime}
+      variant={variant}
       isExpanded={isExpanded}
       onExpandToggle={() => setExpandedPanel(isExpanded ? null : 'timer')}
       onToolSelect={(tool) => {
@@ -608,7 +609,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       default:
         return (
           <div className="space-y-8">
-            <div className="w-full min-w-0">{renderTimerCard()}</div>
+            <div className="w-full min-w-0">{renderTimerCard(false, 'seamless')}</div>
             <StudyStatsCard
               weekDates={weekDates}
               activeWeekMinutes={activeWeekMinutes}
@@ -806,10 +807,10 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       ) : null}
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-[60] h-[70px] border-t border-white/[0.08] bg-[rgba(15,10,30,0.6)] pb-[env(safe-area-inset-bottom)] backdrop-blur-[20px]"
+        className="fixed inset-x-0 bottom-4 z-[60] flex justify-center px-4 pb-[env(safe-area-inset-bottom)]"
         aria-label="Navigation principale"
       >
-        <div className="mx-auto grid h-full max-w-3xl grid-cols-5 px-2">
+        <div className="grid h-[70px] w-full max-w-[560px] grid-cols-5 rounded-[28px] border border-white/[0.08] bg-[rgba(15,10,30,0.6)] px-2 shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-[20px]">
           {DASHBOARD_NAV_ITEMS.map(({ key, label, Icon }) => {
             const isActive = key === 'settings' ? false : activeDashboardPage === key;
             return (

@@ -41,6 +41,7 @@ type TimerCardProps = {
   onUnlockPasswordChange: (value: string) => void;
   onUnlockSubmit: () => void;
   onUnlockCancel: () => void;
+  variant?: 'panel' | 'seamless';
   isExpanded?: boolean;
   onExpandToggle?: () => void;
 };
@@ -89,6 +90,7 @@ export function TimerCard({
   onUnlockPasswordChange,
   onUnlockSubmit,
   onUnlockCancel,
+  variant = 'panel',
   isExpanded = false,
   onExpandToggle,
 }: TimerCardProps) {
@@ -136,11 +138,14 @@ export function TimerCard({
   const innerRingInsetClass = isExpanded ? 'inset-4' : 'inset-3';
   const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-4xl';
   const lockedControlClass = isTimerLocked ? 'cursor-not-allowed opacity-45' : '';
+  const isSeamless = variant === 'seamless';
 
   return (
     <Card
-      className={`app-panel flex w-full flex-col rounded-3xl p-6 ${
-        isExpanded ? 'app-scrollbar-hidden h-full overflow-auto' : 'app-scrollbar-hidden h-[720px] overflow-y-auto'
+      className={`flex w-full flex-col rounded-3xl p-6 ${
+        isSeamless ? 'border-transparent bg-transparent shadow-none' : 'app-panel'
+      } ${
+        isExpanded ? 'app-scrollbar-hidden h-full overflow-auto' : isSeamless ? 'min-h-[640px]' : 'app-scrollbar-hidden h-[720px] overflow-y-auto'
       }`}
     >
       <div className="mb-5 grid grid-cols-[1fr_auto_1fr] items-start gap-3">
