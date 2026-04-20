@@ -24,6 +24,8 @@ function addDaysToYmd(ymd: string, days: number) {
   return `${nextYear}-${nextMonth}-${nextDay}`;
 }
 
+const encodeSse = (event: string, data: unknown) => `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+
 async function callAnthropicWithRetry(apiKey: string, payload: unknown) {
   const maxAttempts = 3;
 
@@ -426,37 +428,120 @@ ${item.content}`;
       );
     }
 
-    const data = await anthropicResponse.json();
-    const content = Array.isArray(data?.content) ? data.content : [];
-    const reply = content
-      .filter((item: { type?: string; text?: string }) => item?.type === 'text' && typeof item.text === 'string')
-      .map((item: { text: string }) => item.text)
-      .join('\n\n');
-    const actions = content
-      .filter(
-        (item: { type?: string; name?: string; input?: unknown }) =>
-          item?.type === 'tool_use' &&
-          (item?.name === 'add_task' ||
-            item?.name === 'set_timer' ||
-            item?.name === 'delete_task' ||
-            item?.name === 'update_task')
-      )
-      .map((item: { name?: string; input?: unknown }) => ({
-        tool: item.name,
-        ...(typeof item.input === 'object' && item.input ? item.input : {}),
-      }))
-      .filter(Boolean);
-
-    if (!reply && actions.length === 0) {
-      return new Response(JSON.stringify({ error: 'Anthropic returned no text content.' }), {
+    if (!anthropicResponse.body) {
+      return new Response(JSON.stringify({ error: 'Anthropic returned no stream.' }), {
         status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(JSON.stringify({ reply, actions }), {
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+        const reader = anthropicResponse.body!.getReader();
+        const textBlocks = new Map<number, string>();
+        const toolBlocks = new Map<number, { name: string; inputJson: string }>();
+        let buffer = '';
+
+        const emit = (event: string, data: unknown) => {
+          controller.enqueue(encoder.encode(encodeSse(event, data)));
+        };
+
+        const handlePayload = (payload: Record<string, unknown>) => {
+          if (payload.type === 'content_block_start') {
+            const index = typeof payload.index === 'number' ? payload.index : -1;
+            const contentBlock = payload.content_block as Record<string, unknown> | undefined;
+            if (index >= 0 && contentBlock?.type === 'text') {
+              textBlocks.set(index, typeof contentBlock.text === 'string' ? contentBlock.text : '');
+            }
+            if (index >= 0 && contentBlock?.type === 'tool_use' && typeof contentBlock.name === 'string') {
+              toolBlocks.set(index, { name: contentBlock.name, inputJson: '' });
+            }
+            return;
+          }
+
+          if (payload.type !== 'content_block_delta') return;
+
+          const index = typeof payload.index === 'number' ? payload.index : -1;
+          const delta = payload.delta as Record<string, unknown> | undefined;
+          if (index < 0 || !delta) return;
+
+          if (delta.type === 'text_delta' && typeof delta.text === 'string') {
+            textBlocks.set(index, `${textBlocks.get(index) ?? ''}${delta.text}`);
+            emit('delta', { text: delta.text });
+            return;
+          }
+
+          if (delta.type === 'input_json_delta' && typeof delta.partial_json === 'string') {
+            const toolBlock = toolBlocks.get(index);
+            if (toolBlock) {
+              toolBlock.inputJson += delta.partial_json;
+            }
+          }
+        };
+
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const events = buffer.split('\n\n');
+            buffer = events.pop() ?? '';
+
+            events.forEach((eventChunk) => {
+              const dataLines = eventChunk
+                .split('\n')
+                .filter((line) => line.startsWith('data:'))
+                .map((line) => line.slice(5).trim());
+              if (dataLines.length === 0) return;
+              const data = dataLines.join('\n');
+              if (data === '[DONE]') return;
+
+              try {
+                handlePayload(JSON.parse(data));
+              } catch {
+                // Ignore malformed provider stream chunks.
+              }
+            });
+          }
+
+          const reply = Array.from(textBlocks.entries())
+            .sort(([left], [right]) => left - right)
+            .map(([, text]) => text)
+            .join('\n\n');
+          const actions = Array.from(toolBlocks.values())
+            .map((toolBlock) => {
+              try {
+                const input = JSON.parse(toolBlock.inputJson || '{}');
+                return {
+                  tool: toolBlock.name,
+                  ...(typeof input === 'object' && input ? input : {}),
+                };
+              } catch {
+                return null;
+              }
+            })
+            .filter(Boolean);
+
+          emit('done', { reply, actions });
+        } catch (error) {
+          emit('error', { error: error instanceof Error ? error.message : 'Stream error' });
+        } finally {
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      },
     });
   } catch (error) {
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {

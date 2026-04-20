@@ -201,28 +201,108 @@ export function useDashboardChat({
         }),
       });
 
-      const responseText = await response.text();
       let payload: { reply?: string; error?: string; actions?: ChatAction[] } | null = null;
-
-      try {
-        payload = responseText ? JSON.parse(responseText) : null;
-      } catch {
-        payload = null;
-      }
+      let responseText = '';
+      let hasStreamingAssistant = false;
+      const responseContentType = response.headers.get('content-type') ?? '';
+      const replaceLastAssistantMessage = (content: string) => {
+        setMessages((prev) => {
+          const next = [...prev];
+          for (let index = next.length - 1; index >= 0; index -= 1) {
+            if (next[index]?.role === 'assistant') {
+              next[index] = { role: 'assistant', content };
+              return next;
+            }
+          }
+          return [...prev, { role: 'assistant', content }];
+        });
+      };
 
       if (!response.ok) {
+        responseText = await response.text();
+
+        try {
+          payload = responseText ? JSON.parse(responseText) : null;
+        } catch {
+          payload = null;
+        }
+
         const errorMessage = getFriendlyChatError(response.status, payload?.error, responseText);
         setChatAttachments(attachmentsForRequest);
         setMessages((prev) => [...prev, { role: 'assistant', content: errorMessage }]);
         return;
       }
 
+      if (responseContentType.includes('text/event-stream') && response.body) {
+        hasStreamingAssistant = true;
+        setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let streamBuffer = '';
+        let streamedReply = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          streamBuffer += decoder.decode(value, { stream: true });
+          const eventChunks = streamBuffer.split('\n\n');
+          streamBuffer = eventChunks.pop() ?? '';
+
+          for (const eventChunk of eventChunks) {
+            const eventName =
+              eventChunk
+                .split('\n')
+                .find((line) => line.startsWith('event:'))
+                ?.slice(6)
+                .trim() ?? 'message';
+            const data = eventChunk
+              .split('\n')
+              .filter((line) => line.startsWith('data:'))
+              .map((line) => line.slice(5).trim())
+              .join('\n');
+
+            if (!data) continue;
+
+            if (eventName === 'delta') {
+              const chunk = JSON.parse(data) as { text?: string };
+              if (chunk.text) {
+                streamedReply += chunk.text;
+                replaceLastAssistantMessage(streamedReply);
+              }
+              continue;
+            }
+
+            if (eventName === 'done') {
+              payload = JSON.parse(data) as { reply?: string; actions?: ChatAction[] };
+              continue;
+            }
+
+            if (eventName === 'error') {
+              const streamError = JSON.parse(data) as { error?: string };
+              throw new Error(streamError.error ?? 'Erreur de diffusion du chat.');
+            }
+          }
+        }
+      } else {
+        responseText = await response.text();
+
+        try {
+          payload = responseText ? JSON.parse(responseText) : null;
+        } catch {
+          payload = null;
+        }
+      }
+
       if (!payload?.reply) {
         if (!Array.isArray(payload?.actions) || payload.actions.length === 0) {
-          setMessages((prev) => [
-            ...prev,
-            { role: 'assistant', content: 'La fonction a repondu sans message exploitable.' },
-          ]);
+          const emptyMessage = 'La fonction a repondu sans message exploitable.';
+          if (hasStreamingAssistant) {
+            replaceLastAssistantMessage(emptyMessage);
+          } else {
+            setMessages((prev) => [...prev, { role: 'assistant', content: emptyMessage }]);
+          }
           return;
         }
       }
@@ -318,7 +398,11 @@ export function useDashboardChat({
                   ? 'Le minuteur a ete mis a jour.'
                   : 'Aucune reponse.';
 
-      setMessages((prev) => [...prev, { role: 'assistant', content: assistantReply }]);
+      if (hasStreamingAssistant) {
+        replaceLastAssistantMessage(assistantReply);
+      } else {
+        setMessages((prev) => [...prev, { role: 'assistant', content: assistantReply }]);
+      }
     } catch (error) {
       setChatAttachments(attachmentsForRequest);
       setMessages((prev) => [

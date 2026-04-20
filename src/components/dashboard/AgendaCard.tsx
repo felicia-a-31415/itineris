@@ -78,18 +78,46 @@ export function AgendaCard({
   showModeSwitch = true,
   isExpanded = false,
 }: AgendaCardProps) {
+  const monthNames = [
+    'janvier',
+    'février',
+    'mars',
+    'avril',
+    'mai',
+    'juin',
+    'juillet',
+    'août',
+    'septembre',
+    'octobre',
+    'novembre',
+    'décembre',
+  ];
+  const firstHeaderDate = headerDates[0];
+  const lastHeaderDate = headerDates[headerDates.length - 1];
+  const rangeLabel =
+    timeView === 'month'
+      ? `${monthNames[monthRangeStart.getMonth()]} ${monthRangeStart.getFullYear()}`
+      : firstHeaderDate && lastHeaderDate
+        ? firstHeaderDate.getMonth() === lastHeaderDate.getMonth()
+          ? `Semaine du ${firstHeaderDate.getDate()} au ${lastHeaderDate.getDate()} ${monthNames[lastHeaderDate.getMonth()]}`
+          : `Semaine du ${firstHeaderDate.getDate()} ${monthNames[firstHeaderDate.getMonth()]} au ${lastHeaderDate.getDate()} ${monthNames[lastHeaderDate.getMonth()]}`
+        : 'Semaine';
+
   return (
-    <Card className={`rounded-3xl border-transparent bg-transparent p-6 shadow-none space-y-2 ${isExpanded ? 'app-scrollbar-hidden h-full w-full overflow-auto' : ''}`}>
-      <div className={`flex flex-col ${calendarMode === 'tasks' ? 'gap-2' : 'gap-4'}`}>
-        <div className="flex items-center justify-between gap-3">
-          <p className="app-muted text-sm">Agenda en ligne</p>
+    <Card className={`rounded-3xl border-transparent bg-transparent p-0 shadow-none space-y-4 ${isExpanded ? 'app-scrollbar-hidden h-full w-full overflow-auto' : ''}`}>
+      <div className={`flex flex-col ${calendarMode === 'tasks' ? 'gap-3' : 'gap-4'}`}>
+        <div className="flex flex-col gap-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Agenda</p>
+          <p className="text-sm app-muted">Planifie tes remises, examens et blocs de travail.</p>
         </div>
-        <div className="flex flex-wrap items-start justify-between gap-3">
+
+        <div className="flex flex-wrap items-center justify-between gap-3 border-y border-white/[0.06] py-3">
           {calendarMode === 'calendar' ? (
             <div className="flex flex-wrap items-center gap-3">
+              <p className="min-w-[190px] text-sm font-semibold text-[#F5F2F7] first-letter:uppercase">{rangeLabel}</p>
               <Button
                 variant="outline"
-                className="h-11 rounded-full px-5"
+                className="h-10 rounded-full px-4 text-sm"
                 onClick={onToday}
               >
                 Aujourd&apos;hui
@@ -99,7 +127,7 @@ export function AgendaCard({
                   type="button"
                   onClick={onPrevRange}
                   variant="ghost"
-                  className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#F5F2F7] p-0 hover:bg-white/6"
+                  className="h-10 w-10 rounded-full border border-transparent bg-transparent text-[#F5F2F7] p-0 hover:bg-white/6"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </Button>
@@ -107,7 +135,7 @@ export function AgendaCard({
                   type="button"
                   onClick={onNextRange}
                   variant="ghost"
-                  className="h-11 w-11 rounded-full border border-transparent bg-transparent text-[#F5F2F7] p-0 hover:bg-white/6"
+                  className="h-10 w-10 rounded-full border border-transparent bg-transparent text-[#F5F2F7] p-0 hover:bg-white/6"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </Button>
@@ -120,7 +148,7 @@ export function AgendaCard({
           <div className="flex flex-wrap items-center gap-2">
             {calendarMode === 'calendar' ? (
               <Select value={timeView} onValueChange={onTimeViewChange}>
-                <SelectTrigger className="h-11 min-h-11 w-[128px] rounded-full border-white/10 bg-[rgba(21,18,31,0.82)] px-4 text-sm font-semibold text-[#F5F2F7] hover:bg-[rgba(37,29,54,0.92)] focus-visible:border-white/12 focus-visible:ring-0 data-[size=default]:h-11">
+                <SelectTrigger className="h-10 min-h-10 w-[124px] rounded-full border-white/10 bg-white/[0.035] px-4 text-sm font-semibold text-[#F5F2F7] hover:bg-white/[0.06] focus-visible:border-white/12 focus-visible:ring-0 data-[size=default]:h-10">
                   <SelectValue>{timeView === 'week' ? 'Semaine' : 'Mois'}</SelectValue>
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border border-white/10 bg-[rgba(20,17,30,0.96)] text-[#F5F2F7] shadow-[0_22px_60px_rgba(0,0,0,0.35)]">
@@ -134,7 +162,7 @@ export function AgendaCard({
               </Select>
             ) : null}
             {showModeSwitch ? (
-              <div className="relative inline-flex items-center h-11 w-[102px] rounded-full border border-white/10 bg-[rgba(21,18,31,0.82)] overflow-hidden">
+              <div className="relative inline-flex items-center h-10 w-[98px] rounded-full bg-white/[0.035] overflow-hidden">
                 <div
                   className={`absolute top-0 bottom-0 w-1/2 bg-[linear-gradient(90deg,#6d42ff_0%,#8b61ff_100%)] ${
                     calendarMode === 'calendar'
@@ -173,7 +201,7 @@ export function AgendaCard({
             <Button
               asChild
               variant="ghost"
-              className="h-11 px-4 rounded-full border border-white/10 bg-[rgba(21,18,31,0.82)] text-sm font-semibold text-[#F5F2F7] hover:bg-[rgba(37,29,54,0.92)]"
+              className="h-10 px-4 rounded-full bg-white/[0.035] text-sm font-semibold text-[#F5F2F7] hover:bg-white/[0.06]"
             >
               <label htmlFor="agendaUpload" className="flex items-center gap-2 cursor-pointer">
                 <Upload className="w-4 h-4" />
@@ -195,7 +223,7 @@ export function AgendaCard({
       </div>
 
       {uploadNotice ? (
-        <div className="mt-3 text-xs app-muted bg-[rgba(18,15,28,0.88)] rounded-2xl px-3 py-2 inline-flex items-center gap-2 border border-white/8">
+        <div className="text-xs app-muted rounded-2xl px-3 py-2 inline-flex items-center gap-2 bg-white/[0.035]">
           <Sparkles className="w-4 h-4 text-[#8b61ff]" />
           {uploadNotice}
         </div>
@@ -204,21 +232,21 @@ export function AgendaCard({
       {calendarMode === 'tasks' ? (
         <div className="mt-0">{tasksListContent}</div>
       ) : (
-        <div className="app-scrollbar-hidden mt-2 overflow-x-auto">
+        <div className="app-scrollbar-hidden overflow-x-auto">
           <div className="w-[1104px] min-w-[1104px] shrink-0">
-            <div className="grid grid-cols-7 border-b border-[#1F2230]">
+            <div className="grid grid-cols-7 border-b border-white/[0.06]">
               {headerDates.map((date, index) => (
                 <div
                   key={index}
-                  className={`p-3 text-center border-r border-[#1F2230] last:border-r-0 ${
-                    timeView === 'week' && isCurrentRangeToday(date) ? 'bg-[#4169E1]/5' : ''
+                  className={`p-3 text-center border-r border-white/[0.06] last:border-r-0 ${
+                    timeView === 'week' && isCurrentRangeToday(date) ? 'bg-white/[0.035]' : ''
                   }`}
                 >
                   <div className="text-[10px] text-[#A9ACBA] uppercase mb-1">{getDayName(date)}</div>
                   {timeView === 'week' ? (
                     <div
                       className={`text-base font-semibold w-8 h-8 rounded-full flex items-center justify-center mx-auto transition ${
-                        isCurrentRangeToday(date) ? 'text-white bg-[#4169E1]' : 'text-[#ECECF3] hover:bg-[#2B2F3A]'
+                        isCurrentRangeToday(date) ? 'text-white bg-[#6d42ff]' : 'text-[#ECECF3] hover:bg-white/[0.06]'
                       }`}
                     >
                       {date.getDate()}
@@ -240,17 +268,17 @@ export function AgendaCard({
                   <div
                     key={index}
                     onClick={() => onCreateTask(dateString)}
-                    className={`group border-r border-b border-[#1F2230] last:border-r-0 cursor-pointer ${
+                    className={`group border-r border-b border-white/[0.06] last:border-r-0 cursor-pointer transition hover:bg-white/[0.025] ${
                       timeView === 'month' ? 'aspect-square p-2.5' : 'p-3'
-                    } ${isCurrentRangeToday(date) ? 'bg-[#4169E1]/5' : ''} ${
-                      isOutsideMonth ? 'bg-[#121520] text-[#6F7587]' : ''
+                    } ${isCurrentRangeToday(date) ? 'bg-white/[0.035]' : ''} ${
+                      isOutsideMonth ? 'opacity-35' : ''
                     }`}
                   >
                     {timeView === 'month' ? (
                       <div className="flex items-center justify-center mb-2">
                         <div
                           className={`text-xs font-semibold w-8 h-8 rounded-full flex items-center justify-center ${
-                            isCurrentRangeToday(date) ? 'text-white bg-[#4169E1]' : 'text-[#A9ACBA]'
+                            isCurrentRangeToday(date) ? 'text-white bg-[#6d42ff]' : 'text-[#A9ACBA]'
                           }`}
                         >
                           {date.getDate()}
@@ -263,7 +291,7 @@ export function AgendaCard({
 
                         const taskCard = (
                           <div
-                            className="rounded-xl px-2.5 py-1.5 text-xs bg-[#182032] border border-[#2B3550] text-[#ECECF3] shadow-[0_4px_12px_rgba(65,105,225,0.06)]"
+                            className="rounded-xl px-2.5 py-1.5 text-xs bg-white/[0.035] text-[#ECECF3]"
                             style={{ borderLeft: `${isMonthView ? 3 : 4}px solid ${task.color}` }}
                           >
                             <div className="flex items-center gap-2 min-h-[18px]">
@@ -272,7 +300,7 @@ export function AgendaCard({
                                   checked={task.completed}
                                   onClick={(e) => e.stopPropagation()}
                                   onCheckedChange={() => onToggleTask(task.id)}
-                                  className="rounded-sm h-4 w-4 border-2 border-[#7C8DB5] bg-[#101524] shadow-[0_0_0_1px_rgba(65,105,225,0.25)] data-[state=checked]:bg-[#4169E1] data-[state=checked]:border-[#A5C4FF] data-[state=checked]:shadow-[0_0_0_2px_rgba(65,105,225,0.35)]"
+                                  className="rounded-sm h-4 w-4 border-2 border-[#7C8DB5] bg-[#101524] data-[state=checked]:bg-[#6d42ff] data-[state=checked]:border-[#C7B7FF]"
                                 />
                               </div>
                               <div className="flex-1 min-w-0 flex flex-col items-start gap-1">

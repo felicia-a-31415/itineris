@@ -815,15 +815,17 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
           }`}
         >
           {activeDashboardPage === 'chat' ? (
-            <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:grid-rows-1">
-              <aside className="flex min-h-0 flex-col gap-3 border-b border-white/[0.06] pb-3 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-4">
-                <div className="shrink-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Chat IA</p>
-                    <span className="text-xs text-white/40">Bêta</span>
-                  </div>
-                  <p className="mt-1 hidden text-sm app-muted lg:block">Pose une question ou joins tes notes.</p>
+            <div className="flex h-full min-h-0 flex-col gap-4">
+              <div className="shrink-0 border-b border-white/[0.06] pb-3">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Chat IA</p>
+                  <span className="text-xs text-white/40">Bêta</span>
                 </div>
+                <p className="mt-1 text-sm app-muted">Pose une question ou joins tes notes.</p>
+              </div>
+
+              <div className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] gap-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:grid-rows-1">
+                <aside className="flex min-h-0 flex-col gap-3 border-b border-white/[0.06] pb-3 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-4">
                 <button
                   type="button"
                   onClick={handleCreateNewChat}
@@ -914,8 +916,9 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
                     })}
                   </div>
                 </div>
-              </aside>
-              <div className="min-h-0 overflow-hidden">{renderActiveDashboardPage()}</div>
+                </aside>
+                <div className="min-h-0 overflow-hidden">{renderActiveDashboardPage()}</div>
+              </div>
             </div>
           ) : (
             renderActiveDashboardPage()
