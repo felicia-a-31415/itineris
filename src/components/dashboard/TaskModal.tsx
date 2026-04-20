@@ -40,11 +40,11 @@ export function TaskEditor({
             onClose();
           }}
           onMouseDown={(e) => e.stopPropagation()}
-          className="text-sm font-semibold text-[#9DD0FF] hover:text-[#C6E2FF]"
+          className="rounded-full px-3 py-1.5 text-sm font-semibold text-white/56 transition hover:bg-white/[0.06] hover:text-white"
         >
           Annuler
         </button>
-        <div className="text-sm font-semibold text-[#ECECF3]">Nouvelle tâche</div>
+        <div className="text-sm font-semibold text-[#F5F2F7]">Nouvelle tâche</div>
         <button
           type="button"
           onClick={(e) => {
@@ -52,49 +52,49 @@ export function TaskEditor({
             onSave();
           }}
           onMouseDown={(e) => e.stopPropagation()}
-          className="text-sm font-semibold text-[#9DD0FF] hover:text-[#C6E2FF]"
+          className="rounded-full bg-[#6d42ff] px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-[#7b55ff]"
         >
           Enregistrer
         </button>
       </div>
 
-      <div className="max-h-[75vh] overflow-y-auto space-y-4">
-        <div className="rounded-2xl bg-[#1C2130] border border-[#2B3550]">
+      <div className="max-h-[75vh] space-y-4 overflow-y-auto pt-4 app-scrollbar-hidden">
+        <div className="overflow-hidden rounded-[22px] border border-white/[0.08] bg-white/[0.035]">
           <Input
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder={titlePlaceholder}
-            className="w-full bg-transparent border-0 border-b border-[#2B3550] px-4 py-3 text-sm text-[#ECECF3] placeholder:text-[#A9ACBA] rounded-none"
+            className="h-12 w-full rounded-none border-0 border-b border-white/[0.08] bg-transparent px-4 text-sm text-[#F5F2F7] placeholder:text-white/36 focus-visible:ring-0"
           />
           <div className="grid gap-3 p-4">
-            <label className="text-xs uppercase tracking-wide text-[#A9ACBA]">Date</label>
+            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Date</label>
             <Input
               type="date"
               value={date}
               onChange={(e) => onDateChange(e.target.value)}
-              className="h-10 rounded-xl bg-[#0F1117] border-[#2B3550] px-3 text-sm text-[#ECECF3] focus:border-[#4169E1]"
+              className="h-10 rounded-xl border-white/[0.08] bg-[rgba(10,9,18,0.48)] px-3 text-sm text-[#F5F2F7] focus-visible:border-[#9F7BFF]/50 focus-visible:ring-[#9F7BFF]/18"
             />
 
-            <label className="text-xs uppercase tracking-wide text-[#A9ACBA]">Heure (optionnel)</label>
+            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Heure (optionnel)</label>
             <Input
               type="time"
               value={time}
               onChange={(e) => onTimeChange(e.target.value)}
-              className="h-10 rounded-xl bg-[#0F1117] border-[#2B3550] px-3 text-sm text-[#ECECF3] focus:border-[#4169E1]"
+              className="h-10 rounded-xl border-white/[0.08] bg-[rgba(10,9,18,0.48)] px-3 text-sm text-[#F5F2F7] focus-visible:border-[#9F7BFF]/50 focus-visible:ring-[#9F7BFF]/18"
             />
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl bg-[#1C2130] border border-[#2B3550] p-4">
-          <div className="text-xs uppercase tracking-wide text-[#A9ACBA] mb-3">Couleur</div>
+        <div className="rounded-[22px] border border-white/[0.08] bg-white/[0.035] p-4">
+          <div className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Couleur</div>
           <div className="flex flex-wrap gap-2">
             {colors.map((color) => (
               <button
                 key={color}
                 type="button"
                 onClick={() => onColorChange(color)}
-                className={`w-8 h-8 rounded-xl transition ring-offset-2 ring-offset-[#1C2130] ${
-                  selectedColor === color ? 'ring-2 ring-[#9DD0FF]' : ''
+                className={`h-8 w-8 rounded-xl border border-white/10 transition ring-offset-2 ring-offset-[rgba(15,10,30,0.86)] ${
+                  selectedColor === color ? 'scale-105 ring-2 ring-[#C7B7FF]' : 'hover:scale-105'
                 }`}
                 style={{ backgroundColor: color }}
               />

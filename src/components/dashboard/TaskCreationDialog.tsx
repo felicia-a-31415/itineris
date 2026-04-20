@@ -35,7 +35,7 @@ export function TaskCreationDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/10 bg-[#2B2F3A]/95 p-4 text-sm text-[#ECECF3] shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
+        className="w-[360px] max-w-[calc(100vw-2rem)] rounded-[24px] border border-white/[0.08] bg-[rgba(15,10,30,0.86)] p-4 text-sm text-[#F5F2F7] shadow-[0_32px_80px_rgba(0,0,0,0.62)] backdrop-blur-[22px]"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <TaskEditor

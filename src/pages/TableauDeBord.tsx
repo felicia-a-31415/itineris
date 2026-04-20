@@ -850,7 +850,7 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
                       return (
                         <div
                           key={thread.id}
-                          className={`group flex min-w-[210px] items-center gap-2 rounded-2xl px-2 py-2 transition lg:min-w-0 ${
+                          className={`group flex min-w-[210px] items-center gap-2 rounded-2xl py-2 pl-4 pr-2 transition lg:min-w-0 ${
                             isActiveThread
                               ? 'bg-white/[0.055] text-[#F5F2F7]'
                               : 'bg-transparent text-white/54 hover:bg-white/[0.035] hover:text-[#F5F2F7]'
