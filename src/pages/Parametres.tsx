@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react';
 import {
   ArrowLeft,
+  CalendarDays,
+  CheckSquare,
   CircleUserRound,
+  MessageCircle,
   OctagonAlert,
   KeyRound,
   Mail,
   Save,
+  Settings,
+  Timer,
 } from 'lucide-react';
 
 import { deleteAccount } from '../lib/account';
@@ -32,7 +37,7 @@ interface ParametresScreenProps {
 }
 
 const cardClassName =
-  'app-panel rounded-3xl p-4 md:p-5';
+  'rounded-3xl border-transparent bg-transparent p-4 shadow-none md:p-5';
 
 const inputClassName =
   'app-input mt-2 rounded-xl';
@@ -158,7 +163,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
   };
 
   return (
-    <div className="app-shell min-h-screen p-4 text-[#F5F2F7] md:p-8">
+    <div className="app-shell min-h-screen p-4 pb-28 text-[#F5F2F7] md:p-8 md:pb-32">
       <div className="max-w-6xl mx-auto space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
@@ -384,6 +389,32 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
           </div>
         </div>
       </div>
+      <nav
+        className="fixed inset-x-0 bottom-4 z-[60] flex justify-center px-4 pb-[env(safe-area-inset-bottom)]"
+        aria-label="Navigation principale"
+      >
+        <div className="grid h-[70px] w-full max-w-[560px] grid-cols-5 rounded-[28px] border border-white/[0.08] bg-[rgba(15,10,30,0.6)] px-2 shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-[20px]">
+          {[
+            { label: 'Minuteur', Icon: Timer, href: '/' },
+            { label: 'Chat IA', Icon: MessageCircle, href: '/?tab=chat' },
+            { label: 'Agenda', Icon: CalendarDays, href: '/?tab=agenda' },
+            { label: 'Tâches', Icon: CheckSquare, href: '/?tab=tasks' },
+            { label: 'Paramètres', Icon: Settings, href: '/parametres', active: true },
+          ].map(({ label, Icon, href, active }) => (
+            <a
+              key={label}
+              href={href}
+              className={`flex min-w-0 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors duration-200 ${
+                active ? 'text-[#9F7BFF]' : 'text-white/52 hover:text-[#F5F2F7]'
+              }`}
+              aria-current={active ? 'page' : undefined}
+            >
+              <Icon className={`h-5 w-5 transition-transform duration-200 ${active ? 'scale-105' : ''}`} />
+              <span className="truncate">{label}</span>
+            </a>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }

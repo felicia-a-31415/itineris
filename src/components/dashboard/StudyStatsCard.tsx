@@ -70,7 +70,7 @@ export function StudyStatsCard({
   };
 
   return (
-    <Card className="app-panel min-w-0 overflow-hidden rounded-3xl p-6 space-y-2">
+    <Card className="min-w-0 overflow-hidden rounded-3xl border-transparent bg-transparent p-6 shadow-none space-y-2">
       <div className="flex flex-col gap-4">
         <p className="app-muted text-sm">Temps étudié</p>
         <div className="flex flex-wrap items-center justify-between gap-3">

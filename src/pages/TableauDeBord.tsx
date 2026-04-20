@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Bug, CalendarDays, CheckSquare, Flame, LogOut, MessageCircle, Settings, Timer as TimerIcon } from 'lucide-react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Bug, CalendarDays, CheckSquare, MessageCircle, Settings, Timer as TimerIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { DashboardTaskListPanel } from '../components/dashboard/TaskListPanel';
@@ -49,7 +49,6 @@ interface TableauDeBordScreenProps {
   userName?: string;
 }
 
-type ExpandedPanel = 'timer' | 'chat' | 'agenda' | null;
 type DashboardPage = 'timer' | 'chat' | 'agenda' | 'tasks';
 
 const DASHBOARD_NAV_ITEMS = [
@@ -63,7 +62,8 @@ const DASHBOARD_NAV_ITEMS = [
 export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, signOut, user, loading } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { signIn, user, loading } = useAuth();
   const {
     weekOffset,
     weekDates,
@@ -139,11 +139,13 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [studyData, setStudyData] = useState<Record<string, number[]>>(() =>
     createDefaultStudyData(currentWeekStart)
   );
-  const [expandedPanel, setExpandedPanel] = useState<ExpandedPanel>(null);
   const [isUnlockingTimer, setIsUnlockingTimer] = useState(false);
   const [timerUnlockPassword, setTimerUnlockPassword] = useState('');
   const [timerUnlockError, setTimerUnlockError] = useState<string | null>(null);
-  const [activeDashboardPage, setActiveDashboardPage] = useState<DashboardPage>('timer');
+  const requestedTab = searchParams.get('tab');
+  const initialDashboardPage: DashboardPage =
+    requestedTab === 'chat' || requestedTab === 'agenda' || requestedTab === 'tasks' ? requestedTab : 'timer';
+  const [activeDashboardPage, setActiveDashboardPage] = useState<DashboardPage>(initialDashboardPage);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
   const {
     timerMinutes,
@@ -249,26 +251,15 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   useEffect(() => {
     if (!chatScrollRef.current) return;
     chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-  }, [messages, isSendingChat, isDashboardHydrated, expandedPanel]);
+  }, [messages, isSendingChat, isDashboardHydrated, activeDashboardPage]);
 
   useEffect(() => {
-    if (!expandedPanel) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setExpandedPanel(null);
-      }
-    };
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [expandedPanel]);
+    if (requestedTab === 'chat' || requestedTab === 'agenda' || requestedTab === 'tasks') {
+      setActiveDashboardPage(requestedTab);
+    } else if (!requestedTab) {
+      setActiveDashboardPage('timer');
+    }
+  }, [requestedTab]);
 
   useEffect(() => {
     setStudyData((prev) => {
@@ -370,7 +361,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       formatTime={formatTime}
       variant={variant}
       isExpanded={isExpanded}
-      onExpandToggle={() => setExpandedPanel(isExpanded ? null : 'timer')}
       onToolSelect={(tool) => {
         if (isTimerLocked) return;
         setTimerTool(tool);
@@ -461,7 +451,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       onSend={() => void handleSendChat()}
       renderFormattedMessage={renderFormattedMessage}
       isExpanded={isExpanded}
-      onExpandToggle={() => setExpandedPanel(isExpanded ? null : 'chat')}
     />
   );
 
@@ -498,7 +487,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       renderTaskInfoPopoverContent={renderTaskInfoPopoverContent}
       showModeSwitch={showModeSwitch}
       isExpanded={isExpanded}
-      onExpandToggle={() => setExpandedPanel(isExpanded ? null : 'agenda')}
     />
   );
 
@@ -589,7 +577,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   );
 
   const renderTasksPage = () => (
-    <Card className="app-panel rounded-3xl p-6">
+    <Card className="border-transparent bg-transparent p-6 shadow-none">
       <div className="mb-4">
         <p className="app-muted text-sm">Tâches</p>
       </div>
@@ -635,95 +623,16 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       return;
     }
 
-    setExpandedPanel(null);
     setActiveDashboardPage(key);
+    setSearchParams(key === 'timer' ? {} : { tab: key });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="app-shell min-h-screen p-6 pb-28 text-[#F5F2F7] md:p-10 md:pb-32">
-      <style>{`
-        .streak {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-        }
-        .streak__icon {
-          width: 1.6rem;
-          height: 1.6rem;
-          line-height: 1;
-        }
-        .streak__num {
-          font-size: 0.95rem;
-          font-weight: 700;
-        }
-        .streak--bump {
-          animation: streakBump 220ms ease-out;
-        }
-        @keyframes streakBump {
-          0% {
-            transform: scale(1);
-            filter: drop-shadow(0 0 0 rgba(249, 115, 22, 0));
-          }
-          60% {
-            transform: scale(1.08);
-            filter: drop-shadow(0 0 16px rgba(249, 115, 22, 0.55));
-          }
-          100% {
-            transform: scale(1);
-            filter: drop-shadow(0 0 0 rgba(249, 115, 22, 0));
-          }
-        }
-      `}</style>
       <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex flex-col gap-1">
-                <h1 className="text-xl md:text-2xl font-semibold text-[#ECECF3]">
-                  {greeting}, {userName} 👋
-                </h1>
-                <p className="app-muted text-sm">Prêt(e) à continuer ton voyage d&apos;apprentissage ?</p>
-              </div>
-              <div
-                className={`streak text-sm font-bold ${streakBump ? 'streak--bump' : ''}`}
-                style={{ color: streakColor }}
-              >
-                <Flame className="streak__icon" />
-                <span className="streak__num">{streakDays}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {user ? (
-              <Button
-                onClick={async () => {
-                  const { error } = await signOut();
-                  if (error) {
-                    console.error('Supabase sign out error:', error);
-                    return;
-                  }
-                  clearUserData();
-                  navigate('/');
-                }}
-                variant="ghost"
-                className="text-white/72 hover:text-white hover:bg-white/6 rounded-xl"
-              >
-                <LogOut className="w-5 h-5" />
-              </Button>
-            ) : null}
-            <Button
-              onClick={() => navigate('/parametres')}
-              variant="ghost"
-              className="text-white/72 hover:text-white hover:bg-white/6 rounded-xl"
-            >
-              <Settings className="w-5 h-5" />
-            </Button>
-          </div>
-        </div>
         {!user ? (
-          <div className="app-panel rounded-2xl p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="rounded-2xl border border-white/8 bg-transparent p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
               <p className="text-sm app-muted">Mode invité</p>
               <p className="text-base text-[#F5F2F7]">
@@ -789,22 +698,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
           onContinueWithoutAccount={enableGuestAccess}
         />
       </div>
-
-      {expandedPanel ? (
-        <div className="fixed inset-0 z-50 bg-[rgba(8,10,18,0.82)] p-3 backdrop-blur-xl md:p-5">
-          <div
-            className={`mx-auto flex h-full min-h-0 ${
-              expandedPanel === 'agenda' ? 'max-w-[1240px] items-center justify-center' : 'max-w-[1440px]'
-            }`}
-          >
-            <div className={`flex min-h-0 w-full ${expandedPanel === 'agenda' ? 'h-[min(100%,900px)]' : 'h-full'}`}>
-              {expandedPanel === 'timer' ? renderTimerCard(true) : null}
-              {expandedPanel === 'chat' ? renderChatCard(true) : null}
-              {expandedPanel === 'agenda' ? renderAgendaCard(true, 'calendar', false) : null}
-            </div>
-          </div>
-        </div>
-      ) : null}
 
       <nav
         className="fixed inset-x-0 bottom-4 z-[60] flex justify-center px-4 pb-[env(safe-area-inset-bottom)]"

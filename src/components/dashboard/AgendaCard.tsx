@@ -1,5 +1,5 @@
 import type React from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Info, List, Maximize2, Minimize2, Sparkles, Upload } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Info, List, Sparkles, Upload } from 'lucide-react';
 
 import { type DashboardTask } from '../../lib/storage';
 import { Button } from '../../ui/button';
@@ -43,7 +43,6 @@ type AgendaCardProps = {
   renderTaskInfoPopoverContent: (task: AgendaTask, close: () => void) => React.ReactNode;
   showModeSwitch?: boolean;
   isExpanded?: boolean;
-  onExpandToggle?: () => void;
 };
 
 export function AgendaCard({
@@ -78,25 +77,12 @@ export function AgendaCard({
   renderTaskInfoPopoverContent,
   showModeSwitch = true,
   isExpanded = false,
-  onExpandToggle,
 }: AgendaCardProps) {
   return (
-    <Card className={`app-panel rounded-3xl p-6 space-y-2 ${isExpanded ? 'app-scrollbar-hidden h-full w-full overflow-auto' : ''}`}>
+    <Card className={`rounded-3xl border-transparent bg-transparent p-6 shadow-none space-y-2 ${isExpanded ? 'app-scrollbar-hidden h-full w-full overflow-auto' : ''}`}>
       <div className={`flex flex-col ${calendarMode === 'tasks' ? 'gap-2' : 'gap-4'}`}>
         <div className="flex items-center justify-between gap-3">
           <p className="app-muted text-sm">Agenda en ligne</p>
-          {onExpandToggle ? (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onExpandToggle}
-              className="h-9 w-9 rounded-full p-0 text-white/72 hover:bg-white/6 hover:text-white"
-              aria-label={isExpanded ? "Réduire l'agenda" : "Agrandir l'agenda"}
-              title={isExpanded ? "Réduire l'agenda" : "Agrandir l'agenda"}
-            >
-              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            </Button>
-          ) : null}
         </div>
         <div className="flex flex-wrap items-start justify-between gap-3">
           {calendarMode === 'calendar' ? (

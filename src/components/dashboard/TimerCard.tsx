@@ -1,4 +1,4 @@
-import { Clock3, Lock, Maximize2, Minimize2, Pause, Play, RotateCcw, Timer } from 'lucide-react';
+import { Clock3, Lock, Pause, Play, RotateCcw, Timer } from 'lucide-react';
 
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
@@ -43,7 +43,6 @@ type TimerCardProps = {
   onUnlockCancel: () => void;
   variant?: 'panel' | 'seamless';
   isExpanded?: boolean;
-  onExpandToggle?: () => void;
 };
 
 const MODE_OPTIONS: Array<{ key: TimerModeKey; label: string; color: string }> = [
@@ -92,7 +91,6 @@ export function TimerCard({
   onUnlockCancel,
   variant = 'panel',
   isExpanded = false,
-  onExpandToggle,
 }: TimerCardProps) {
   const customIsActive = isEditingTimer || !presetMinutes.includes(safeMinutes);
   const durationSeconds = Math.max(1, Math.round(safeMinutes * 60));
@@ -173,18 +171,6 @@ export function TimerCard({
         </div>
         <div className="flex justify-end">
           <div className="flex items-center gap-2">
-            {onExpandToggle ? (
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={onExpandToggle}
-                className="h-9 w-9 shrink-0 rounded-full p-0 text-white/72 hover:bg-white/6 hover:text-white"
-                aria-label={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
-                title={isExpanded ? 'Réduire le minuteur' : 'Agrandir le minuteur'}
-              >
-                {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-              </Button>
-            ) : null}
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import type React from 'react';
-import { ArrowUp, FileText, Image, Maximize2, Minimize2, Paperclip, X } from 'lucide-react';
+import { ArrowUp, FileText, Image, Paperclip, X } from 'lucide-react';
 
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
@@ -20,7 +20,6 @@ type ChatCardProps = {
   onSend: () => void;
   renderFormattedMessage: (content: string) => React.ReactNode;
   isExpanded?: boolean;
-  onExpandToggle?: () => void;
 };
 
 export function ChatCard({
@@ -37,13 +36,12 @@ export function ChatCard({
   onSend,
   renderFormattedMessage,
   isExpanded = false,
-  onExpandToggle,
 }: ChatCardProps) {
   const canSend = !isSendingChat && !isPreparingAttachments && (chatInput.trim().length > 0 || attachments.length > 0);
 
   return (
     <Card
-      className={`app-panel flex h-full w-full min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl p-6 ${
+      className={`flex h-full w-full min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl border-transparent bg-transparent p-6 shadow-none ${
         isExpanded ? 'h-full overflow-hidden' : 'h-full'
       }`}
     >
@@ -51,22 +49,10 @@ export function ChatCard({
         <p className="app-muted text-sm">Chat IA</p>
         <div className="flex items-center gap-2">
           <span className="text-xs text-white/40">Bêta</span>
-          {onExpandToggle ? (
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onExpandToggle}
-              className="h-9 w-9 rounded-full p-0 text-white/72 hover:bg-white/6 hover:text-white"
-              aria-label={isExpanded ? 'Réduire le chat IA' : 'Agrandir le chat IA'}
-              title={isExpanded ? 'Réduire le chat IA' : 'Agrandir le chat IA'}
-            >
-              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            </Button>
-          ) : null}
         </div>
       </div>
 
-      <div className="app-panel-soft flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl">
         <div
           ref={chatScrollRef}
           className="app-scrollbar-hidden min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-3 text-sm app-muted"
