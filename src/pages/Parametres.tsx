@@ -4,6 +4,7 @@ import {
   CalendarDays,
   CheckSquare,
   CircleUserRound,
+  LogOut,
   MessageCircle,
   OctagonAlert,
   KeyRound,
@@ -162,6 +163,12 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
     window.location.assign(`${import.meta.env.BASE_URL ?? '/'}`);
   };
 
+  const handleSignOut = async () => {
+    clearUserData();
+    await signOut();
+    window.location.assign(`${import.meta.env.BASE_URL ?? '/'}`);
+  };
+
   return (
     <div className="app-shell min-h-screen p-4 pb-28 text-[#F5F2F7] md:p-8 md:pb-32">
       <div className="max-w-6xl mx-auto space-y-4">
@@ -185,6 +192,14 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             >
               <Save className="w-4 h-4 mr-2" />
               {saved ? 'Sauvegardé' : 'Sauvegarder'}
+            </Button>
+            <Button
+              onClick={handleSignOut}
+              variant="ghost"
+              className="h-11 rounded-xl bg-white/[0.04] px-4 text-sm text-[#F5F2F7] hover:bg-white/[0.08]"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Déconnexion
             </Button>
           </div>
         </div>
@@ -395,10 +410,10 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
       >
         <div className="grid h-[70px] w-full max-w-[560px] grid-cols-5 rounded-[28px] border border-white/[0.08] bg-[rgba(15,10,30,0.6)] px-2 shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-[20px]">
           {[
-            { label: 'Minuteur', Icon: Timer, href: '/' },
-            { label: 'Chat IA', Icon: MessageCircle, href: '/?tab=chat' },
-            { label: 'Agenda', Icon: CalendarDays, href: '/?tab=agenda' },
-            { label: 'Tâches', Icon: CheckSquare, href: '/?tab=tasks' },
+            { label: 'Minuteur', Icon: Timer, href: '/minuteur' },
+            { label: 'Chat IA', Icon: MessageCircle, href: '/chat-ia' },
+            { label: 'Agenda', Icon: CalendarDays, href: '/agenda' },
+            { label: 'Tâches', Icon: CheckSquare, href: '/taches' },
             { label: 'Paramètres', Icon: Settings, href: '/parametres', active: true },
           ].map(({ label, Icon, href, active }) => (
             <a

@@ -1,4 +1,4 @@
-import { Clock3, Lock, Pause, Play, RotateCcw, Timer } from 'lucide-react';
+import { Clock3, Flame, Lock, Pause, Play, RotateCcw, Timer } from 'lucide-react';
 
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
@@ -22,6 +22,9 @@ type TimerCardProps = {
   unlockError: string | null;
   isInitialTime: boolean;
   safeMinutes: number;
+  streakDays: number;
+  streakColor: string;
+  streakBump: boolean;
   isEditingTimer: boolean;
   editingTimerValue: string;
   presetMinutes: readonly number[];
@@ -70,6 +73,9 @@ export function TimerCard({
   unlockError,
   isInitialTime,
   safeMinutes,
+  streakDays,
+  streakColor,
+  streakBump,
   isEditingTimer,
   editingTimerValue,
   presetMinutes,
@@ -132,9 +138,9 @@ export function TimerCard({
     timerTool === 'timer' && timerMode === 'pause'
       ? '0 0 22px rgba(56,189,248,0.62), 0 0 56px rgba(34,211,238,0.42), 0 0 118px rgba(52,211,153,0.28)'
       : '0 0 22px rgba(159,123,255,0.72), 0 0 54px rgba(255,79,155,0.48), 0 0 118px rgba(255,192,131,0.3)';
-  const timerSizeClass = isExpanded ? 'h-72 w-72 md:h-80 md:w-80' : 'h-60 w-60';
-  const innerRingInsetClass = isExpanded ? 'inset-4' : 'inset-3';
-  const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-4xl';
+  const timerSizeClass = isExpanded ? 'h-80 w-80 md:h-96 md:w-96' : 'h-72 w-72 md:h-80 md:w-80';
+  const innerRingInsetClass = isExpanded ? 'inset-5' : 'inset-4';
+  const timeLabelClass = isExpanded ? 'text-4xl md:text-5xl' : 'text-4xl md:text-5xl';
   const lockedControlClass = isTimerLocked ? 'cursor-not-allowed opacity-45' : '';
   const isSeamless = variant === 'seamless';
 
@@ -148,7 +154,7 @@ export function TimerCard({
     >
       <div className="mb-5 grid grid-cols-[1fr_auto_1fr] items-start gap-3">
         <div />
-        <div className="grid w-full max-w-[300px] grid-cols-2 gap-1.5 rounded-2xl border border-[#8B61FF]/16 bg-[rgba(22,17,34,0.62)] p-1.5 shadow-[0_10px_28px_rgba(109,66,255,0.08)]">
+        <div className="grid w-full max-w-[320px] grid-cols-2 gap-2 rounded-2xl p-1">
           {TOOL_OPTIONS.map(({ key, label, Icon }) => {
             const isActive = timerTool === key;
             return (
@@ -157,10 +163,10 @@ export function TimerCard({
                 type="button"
                 onClick={() => onToolSelect(key)}
                 disabled={isTimerLocked}
-                className={`flex min-h-[54px] min-w-[124px] flex-col items-center justify-center gap-0.5 rounded-xl border px-3 text-[11px] font-semibold transition ${
+                className={`flex min-h-[50px] min-w-[124px] flex-col items-center justify-center gap-0.5 rounded-2xl px-3 text-[11px] font-semibold transition ${
                   isActive
-                    ? 'border-[#9F7BFF]/38 bg-[linear-gradient(180deg,rgba(109,66,255,0.24),rgba(68,43,112,0.18))] text-white shadow-[0_0_18px_rgba(109,66,255,0.2)]'
-                    : 'border-transparent bg-transparent text-[#C9C3D4] hover:border-[#9F7BFF]/22 hover:bg-[#8B61FF]/8 hover:text-[#F5F2F7]'
+                    ? 'bg-[rgba(109,66,255,0.18)] text-white shadow-[0_0_18px_rgba(109,66,255,0.12)]'
+                    : 'bg-transparent text-[#C9C3D4] hover:bg-white/5 hover:text-[#F5F2F7]'
                 } ${lockedControlClass}`}
               >
                 <Icon className="h-4 w-4" />
@@ -187,19 +193,17 @@ export function TimerCard({
                   type="button"
                   onClick={() => onModeSelect(key)}
                   disabled={isTimerLocked}
-                  className={`rounded-xl border px-3 py-2 text-sm font-semibold transition shadow-sm ${lockedControlClass}`}
+                  className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${lockedControlClass}`}
                   style={
                     isActive
                       ? {
                           background: 'linear-gradient(90deg,#6d42ff 0%,#8c4fff 100%)',
                           color: '#ffffff',
-                          borderColor: 'rgba(255,255,255,0.08)',
                           boxShadow: '0 0 18px rgba(109,66,255,0.34)',
                         }
                       : {
-                          backgroundColor: 'rgba(24,20,35,0.9)',
+                          backgroundColor: 'rgba(255,255,255,0.05)',
                           color: '#F5F2F7',
-                          borderColor: 'rgba(124,98,154,0.28)',
                         }
                   }
                 >
@@ -210,7 +214,7 @@ export function TimerCard({
           </div>
         </div>
 
-          <div className={isExpanded ? 'flex items-center justify-center' : 'flex h-64 items-center justify-center'}>
+          <div className={isExpanded ? 'flex items-center justify-center' : 'flex h-80 items-center justify-center md:h-[22rem]'}>
             <div
               className={`relative flex items-center justify-center rounded-full ${timerSizeClass}`}
               style={{
@@ -224,12 +228,22 @@ export function TimerCard({
                 <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_52%)]" />
                 <span className={`font-semibold text-[#F5F2F7] ${timeLabelClass}`}>{displayTime}</span>
                 <span className={`mt-1 app-muted ${isExpanded ? 'text-sm' : 'text-xs'}`}>{statusLabel}</span>
+                <div
+                  className={`pointer-events-none absolute bottom-6 left-6 inline-flex items-center gap-1.5 rounded-full bg-black/25 px-2.5 py-1 text-xs font-bold text-[#F5F2F7] shadow-[0_8px_24px_rgba(0,0,0,0.26)] transition-transform ${
+                    streakBump ? 'scale-105' : ''
+                  }`}
+                  style={{ color: streakColor }}
+                  aria-label={`${streakDays} jours de suite`}
+                >
+                  <Flame className="h-3.5 w-3.5" />
+                  <span>{streakDays}</span>
+                </div>
               </div>
             </div>
           </div>
 
         {timerTool === 'timer' ? (
-          <div className={`app-panel-soft rounded-2xl px-4 py-4 text-sm app-muted ${isExpanded ? 'w-fit max-w-full' : ''}`}>
+          <div className={`rounded-2xl px-0 py-2 text-sm app-muted ${isExpanded ? 'w-fit max-w-full' : ''}`}>
             <div className="mb-3">
               <span className="text-sm app-muted">Durée du minuteur</span>
             </div>
@@ -243,10 +257,10 @@ export function TimerCard({
                     type="button"
                     onClick={() => onPresetSelect(minutes)}
                     disabled={isTimerLocked}
-                    className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
+                    className={`h-9 rounded-xl px-3 text-xs font-medium transition ${
                       isActive
-                        ? 'border-[#6d42ff] bg-[#6d42ff] text-white'
-                        : 'border-white/10 bg-[rgba(20,17,30,0.82)] text-[#F5F2F7] hover:bg-[rgba(40,28,60,0.92)]'
+                        ? 'bg-[#6d42ff] text-white'
+                        : 'bg-white/[0.04] text-[#F5F2F7] hover:bg-white/[0.08]'
                     } ${lockedControlClass}`}
                   >
                     {minutes} min
@@ -257,10 +271,10 @@ export function TimerCard({
                 type="button"
                 onClick={onCustomClick}
                 disabled={isTimerLocked}
-                className={`h-9 rounded-xl border px-3 text-xs font-medium transition ${
+                className={`h-9 rounded-xl px-3 text-xs font-medium transition ${
                   customIsActive
-                    ? 'border-[#6d42ff] bg-[#6d42ff] text-white'
-                    : 'border-white/10 bg-[rgba(20,17,30,0.82)] text-[#F5F2F7] hover:bg-[rgba(40,28,60,0.92)]'
+                    ? 'bg-[#6d42ff] text-white'
+                    : 'bg-white/[0.04] text-[#F5F2F7] hover:bg-white/[0.08]'
                 } ${lockedControlClass}`}
               >
                 Personnalisé

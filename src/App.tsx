@@ -142,13 +142,17 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<AppFrame />}>
-        <Route index element={isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />} />
+        <Route index element={<Navigate to="/minuteur" replace />} />
+        <Route path="minuteur" element={isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />} />
+        <Route path="chat-ia" element={isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />} />
+        <Route path="agenda" element={isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />} />
+        <Route path="taches" element={isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />} />
         <Route
           path="parametres"
           element={
             isInitialAppLoading ? null : (
               <Parametres
-                onBack={() => navigate('/')}
+                onBack={() => navigate('/minuteur')}
                 userData={userData ?? defaultUserData}
                 onSave={handleSettingsSave}
               />
@@ -157,7 +161,7 @@ export default function App() {
         />
       </Route>
       <Route path="/login" element={<LoginRoute />} />
-      <Route path="/tableaudebord" element={<Navigate to="/" replace />} />
+      <Route path="/tableaudebord" element={<Navigate to="/minuteur" replace />} />
       <Route path="*" element={<Erreur />} />
     </Routes>
   );

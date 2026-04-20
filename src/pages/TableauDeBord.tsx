@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Bug, CalendarDays, CheckSquare, MessageCircle, Settings, Timer as TimerIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
@@ -43,7 +43,7 @@ import { useDashboardPersistence } from '../hooks/useDashboardPersistence';
 import { useDashboardTasks } from '../hooks/useDashboardTasks';
 import { useDashboardTimer } from '../hooks/useDashboardTimer';
 import { useDashboardView } from '../hooks/useDashboardView';
-import { clearUserData, type DashboardTask } from '../lib/storage';
+import { type DashboardTask } from '../lib/storage';
 
 interface TableauDeBordScreenProps {
   userName?: string;
@@ -59,10 +59,23 @@ const DASHBOARD_NAV_ITEMS = [
   { key: 'settings', label: 'Paramètres', Icon: Settings },
 ] satisfies Array<{ key: DashboardPage | 'settings'; label: string; Icon: typeof TimerIcon }>;
 
-export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenProps) {
+const DASHBOARD_PAGE_PATHS: Record<DashboardPage, string> = {
+  timer: '/minuteur',
+  chat: '/chat-ia',
+  agenda: '/agenda',
+  tasks: '/taches',
+};
+
+const getDashboardPageFromPath = (pathname: string): DashboardPage => {
+  if (pathname === DASHBOARD_PAGE_PATHS.chat) return 'chat';
+  if (pathname === DASHBOARD_PAGE_PATHS.agenda) return 'agenda';
+  if (pathname === DASHBOARD_PAGE_PATHS.tasks) return 'tasks';
+  return 'timer';
+};
+
+export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBordScreenProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { signIn, user, loading } = useAuth();
   const {
     weekOffset,
@@ -142,10 +155,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   const [isUnlockingTimer, setIsUnlockingTimer] = useState(false);
   const [timerUnlockPassword, setTimerUnlockPassword] = useState('');
   const [timerUnlockError, setTimerUnlockError] = useState<string | null>(null);
-  const requestedTab = searchParams.get('tab');
-  const initialDashboardPage: DashboardPage =
-    requestedTab === 'chat' || requestedTab === 'agenda' || requestedTab === 'tasks' ? requestedTab : 'timer';
-  const [activeDashboardPage, setActiveDashboardPage] = useState<DashboardPage>(initialDashboardPage);
+  const activeDashboardPage = getDashboardPageFromPath(location.pathname);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
   const {
     timerMinutes,
@@ -254,14 +264,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
   }, [messages, isSendingChat, isDashboardHydrated, activeDashboardPage]);
 
   useEffect(() => {
-    if (requestedTab === 'chat' || requestedTab === 'agenda' || requestedTab === 'tasks') {
-      setActiveDashboardPage(requestedTab);
-    } else if (!requestedTab) {
-      setActiveDashboardPage('timer');
-    }
-  }, [requestedTab]);
-
-  useEffect(() => {
     setStudyData((prev) => {
       if (prev[currentWeekStart]) return prev;
       return { ...prev, [currentWeekStart]: [0, 0, 0, 0, 0, 0, 0] };
@@ -277,7 +279,6 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
     averageDailyMinutes,
     weekDeltaMinutes,
     isCurrentRangeToday,
-    greeting,
   } = useDashboardMetrics({
     tasks,
     studyData,
@@ -355,6 +356,9 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       unlockError={timerUnlockError}
       isInitialTime={isInitialTime}
       safeMinutes={safeMinutes}
+      streakDays={streakDays}
+      streakColor={streakColor}
+      streakBump={streakBump}
       isEditingTimer={isEditingTimer}
       editingTimerValue={editingTimerValue}
       presetMinutes={TIMER_PRESET_MINUTES}
@@ -623,8 +627,7 @@ export function TableauDeBord({ userName = 'étudiant' }: TableauDeBordScreenPro
       return;
     }
 
-    setActiveDashboardPage(key);
-    setSearchParams(key === 'timer' ? {} : { tab: key });
+    navigate(DASHBOARD_PAGE_PATHS[key]);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
