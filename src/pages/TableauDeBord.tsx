@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Bug,
+  BarChart3,
   CalendarDays,
   Check,
   CheckSquare,
@@ -61,7 +62,7 @@ interface TableauDeBordScreenProps {
   userName?: string;
 }
 
-type DashboardPage = 'timer' | 'chat' | 'agenda' | 'tasks';
+type DashboardPage = 'timer' | 'stats' | 'chat' | 'agenda' | 'tasks';
 type ChatThread = {
   id: string;
   title: string;
@@ -70,6 +71,7 @@ type ChatThread = {
 
 const DASHBOARD_NAV_ITEMS = [
   { key: 'timer', label: 'Minuteur', Icon: TimerIcon },
+  { key: 'stats', label: 'Stats', Icon: BarChart3 },
   { key: 'chat', label: 'Chat IA', Icon: MessageCircle },
   { key: 'agenda', label: 'Agenda', Icon: CalendarDays },
   { key: 'tasks', label: 'Tâches', Icon: CheckSquare },
@@ -78,6 +80,7 @@ const DASHBOARD_NAV_ITEMS = [
 
 const DASHBOARD_PAGE_PATHS: Record<DashboardPage, string> = {
   timer: '/minuteur',
+  stats: '/stats',
   chat: '/chat-ia',
   agenda: '/agenda',
   tasks: '/taches',
@@ -85,6 +88,7 @@ const DASHBOARD_PAGE_PATHS: Record<DashboardPage, string> = {
 
 const getDashboardPageFromPath = (pathname: string): DashboardPage => {
   if (pathname === DASHBOARD_PAGE_PATHS.chat) return 'chat';
+  if (pathname === DASHBOARD_PAGE_PATHS.stats) return 'stats';
   if (pathname === DASHBOARD_PAGE_PATHS.agenda) return 'agenda';
   if (pathname === DASHBOARD_PAGE_PATHS.tasks) return 'tasks';
   return 'timer';
@@ -630,26 +634,27 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
         return renderAgendaCard(false, 'calendar', false);
       case 'tasks':
         return renderTasksPage();
+      case 'stats':
+        return (
+          <StudyStatsCard
+            weekDates={weekDates}
+            activeWeekMinutes={activeWeekMinutes}
+            maxWeekMinutes={maxWeekMinutes}
+            activeWeekTotalMinutes={activeWeekTotalMinutes}
+            averageDailyMinutes={averageDailyMinutes}
+            weekDeltaMinutes={weekDeltaMinutes}
+            getDayName={getDayName}
+            formatDate={formatDate}
+            onManualStudyTimeChange={handleManualStudyTimeChange}
+            onToday={handleToday}
+            onPrevRange={handlePrevRange}
+            onNextRange={handleNextRange}
+          />
+        );
       case 'timer':
       default:
         return (
-          <div className="space-y-6">
-            <div className="w-full min-w-0">{renderTimerCard(false, 'seamless')}</div>
-            <StudyStatsCard
-              weekDates={weekDates}
-              activeWeekMinutes={activeWeekMinutes}
-              maxWeekMinutes={maxWeekMinutes}
-              activeWeekTotalMinutes={activeWeekTotalMinutes}
-              averageDailyMinutes={averageDailyMinutes}
-              weekDeltaMinutes={weekDeltaMinutes}
-              getDayName={getDayName}
-              formatDate={formatDate}
-              onManualStudyTimeChange={handleManualStudyTimeChange}
-              onToday={handleToday}
-              onPrevRange={handlePrevRange}
-              onNextRange={handleNextRange}
-            />
-          </div>
+          <div className="w-full min-w-0">{renderTimerCard(false, 'seamless')}</div>
         );
     }
   };
@@ -811,7 +816,14 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
         >
           {activeDashboardPage === 'chat' ? (
             <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:grid-rows-1">
-              <aside className="flex min-h-0 gap-3 border-b border-white/[0.06] pb-3 lg:flex-col lg:border-b-0 lg:border-r lg:pb-0 lg:pr-4">
+              <aside className="flex min-h-0 flex-col gap-3 border-b border-white/[0.06] pb-3 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-4">
+                <div className="shrink-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Chat IA</p>
+                    <span className="text-xs text-white/40">Bêta</span>
+                  </div>
+                  <p className="mt-1 hidden text-sm app-muted lg:block">Pose une question ou joins tes notes.</p>
+                </div>
                 <button
                   type="button"
                   onClick={handleCreateNewChat}
@@ -963,7 +975,7 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
         className="fixed inset-x-0 bottom-4 z-[60] flex justify-center px-4 pb-[env(safe-area-inset-bottom)]"
         aria-label="Navigation principale"
       >
-        <div className="grid h-[70px] w-full max-w-[560px] grid-cols-5 rounded-[28px] border border-white/[0.08] bg-[rgba(15,10,30,0.6)] px-2 shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-[20px]">
+        <div className="grid h-[70px] w-full max-w-[640px] grid-cols-6 rounded-[28px] border border-white/[0.08] bg-[rgba(15,10,30,0.6)] px-2 shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-[20px]">
           {DASHBOARD_NAV_ITEMS.map(({ key, label, Icon }) => {
             const isActive = key === 'settings' ? false : activeDashboardPage === key;
             return (

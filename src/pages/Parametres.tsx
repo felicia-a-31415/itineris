@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
+  BarChart3,
   CalendarDays,
   CheckSquare,
   CircleUserRound,
@@ -409,9 +410,10 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
         className="fixed inset-x-0 bottom-4 z-[60] flex justify-center px-4 pb-[env(safe-area-inset-bottom)]"
         aria-label="Navigation principale"
       >
-        <div className="grid h-[70px] w-full max-w-[560px] grid-cols-5 rounded-[28px] border border-white/[0.08] bg-[rgba(15,10,30,0.6)] px-2 shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-[20px]">
+        <div className="grid h-[70px] w-full max-w-[640px] grid-cols-6 rounded-[28px] border border-white/[0.08] bg-[rgba(15,10,30,0.6)] px-2 shadow-[0_18px_52px_rgba(0,0,0,0.42)] backdrop-blur-[20px]">
           {[
             { label: 'Minuteur', Icon: Timer, href: '/minuteur' },
+            { label: 'Stats', Icon: BarChart3, href: '/stats' },
             { label: 'Chat IA', Icon: MessageCircle, href: '/chat-ia' },
             { label: 'Agenda', Icon: CalendarDays, href: '/agenda' },
             { label: 'Tâches', Icon: CheckSquare, href: '/taches' },

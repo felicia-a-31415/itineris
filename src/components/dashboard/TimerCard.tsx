@@ -168,7 +168,11 @@ export function TimerCard({
           })}
       </div>
 
-      <div className={`flex min-h-0 flex-col items-center gap-5 ${isExpanded ? 'flex-1 justify-center py-4' : ''}`}>
+      <div
+        className={`grid min-h-0 gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-center ${
+          isExpanded ? 'flex-1 content-center py-4' : ''
+        }`}
+      >
           <div className="flex min-w-0 flex-col items-center gap-3">
             <div className={isExpanded ? 'flex items-center justify-center' : 'flex h-[19rem] items-center justify-center md:h-[21rem]'}>
               <div
@@ -220,12 +224,12 @@ export function TimerCard({
             </div>
           </div>
 
-          <div className="flex min-h-[146px] w-full max-w-2xl flex-col items-center justify-center gap-4">
+          <div className="flex min-h-[240px] w-full min-w-0 flex-col items-center justify-center gap-4 lg:items-start">
             {timerTool === 'timer' ? (
               <>
-                <div className="flex flex-col items-center gap-2">
+                <div className="flex flex-col items-center gap-2 lg:items-start">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Mode</p>
-                  <div className="flex flex-wrap justify-center gap-6">
+                  <div className="flex flex-wrap justify-center gap-6 lg:justify-start">
                     {MODE_OPTIONS.map(({ key, label }) => {
                       const isActive = timerMode === key;
                       return (
@@ -245,12 +249,12 @@ export function TimerCard({
                   </div>
                 </div>
 
-                <div className={`flex w-full flex-col items-center text-sm app-muted ${isExpanded ? 'max-w-full' : ''}`}>
-                  <div className="mb-2 text-center">
+                <div className={`flex w-full flex-col items-center text-sm app-muted lg:items-start ${isExpanded ? 'max-w-full' : ''}`}>
+                  <div className="mb-2 text-center lg:text-left">
                     <span className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Durée</span>
                   </div>
 
-                  <div className="flex flex-wrap justify-center gap-2">
+                  <div className="flex flex-wrap justify-center gap-2 lg:justify-start">
                     {presetMinutes.map((minutes) => {
                       const isActive = safeMinutes === minutes;
                       return (
@@ -271,7 +275,7 @@ export function TimerCard({
                     })}
                   </div>
 
-                  <div className="mt-2 flex justify-center">
+                  <div className="mt-2 flex justify-center lg:justify-start">
                     <button
                       type="button"
                       onClick={onCustomClick}

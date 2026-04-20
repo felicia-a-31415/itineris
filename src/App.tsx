@@ -144,6 +144,7 @@ export default function App() {
       <Route path="/" element={<AppFrame />}>
         <Route index element={<Navigate to="/minuteur" replace />} />
         <Route path="minuteur" element={isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />} />
+        <Route path="stats" element={isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />} />
         <Route path="chat-ia" element={isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />} />
         <Route path="agenda" element={isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />} />
         <Route path="taches" element={isInitialAppLoading ? null : <TableauDeBord userName={userData?.name} />} />

@@ -45,16 +45,6 @@ export function ChatCard({
         isExpanded ? 'h-full overflow-hidden' : 'h-full'
       }`}
     >
-      <div className="mb-3 flex shrink-0 items-center justify-between border-b border-white/[0.06] pb-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Chat IA</p>
-          <p className="mt-1 text-sm app-muted">Pose une question, joins tes notes, puis continue la discussion.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-white/40">Bêta</span>
-        </div>
-      </div>
-
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div
           ref={chatScrollRef}
