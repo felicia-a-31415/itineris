@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
   CalendarDays,
@@ -416,9 +417,9 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             { label: 'Tâches', Icon: CheckSquare, href: '/taches' },
             { label: 'Paramètres', Icon: Settings, href: '/parametres', active: true },
           ].map(({ label, Icon, href, active }) => (
-            <a
+            <Link
               key={label}
-              href={href}
+              to={href}
               className={`flex min-w-0 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors duration-200 ${
                 active ? 'text-[#9F7BFF]' : 'text-white/52 hover:text-[#F5F2F7]'
               }`}
@@ -426,7 +427,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             >
               <Icon className={`h-5 w-5 transition-transform duration-200 ${active ? 'scale-105' : ''}`} />
               <span className="truncate">{label}</span>
-            </a>
+            </Link>
           ))}
         </div>
       </nav>

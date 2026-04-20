@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bug, CalendarDays, CheckSquare, MessageCircle, Settings, Timer as TimerIcon } from 'lucide-react';
+import { Bug, CalendarDays, CheckSquare, Flame, MessageCircle, Settings, Timer as TimerIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { DashboardTaskListPanel } from '../components/dashboard/TaskListPanel';
@@ -43,13 +43,18 @@ import { useDashboardPersistence } from '../hooks/useDashboardPersistence';
 import { useDashboardTasks } from '../hooks/useDashboardTasks';
 import { useDashboardTimer } from '../hooks/useDashboardTimer';
 import { useDashboardView } from '../hooks/useDashboardView';
-import { type DashboardTask } from '../lib/storage';
+import { type DashboardChatMessage, type DashboardTask } from '../lib/storage';
 
 interface TableauDeBordScreenProps {
   userName?: string;
 }
 
 type DashboardPage = 'timer' | 'chat' | 'agenda' | 'tasks';
+type ChatThread = {
+  id: string;
+  title: string;
+  messages: DashboardChatMessage[];
+};
 
 const DASHBOARD_NAV_ITEMS = [
   { key: 'timer', label: 'Minuteur', Icon: TimerIcon },
@@ -71,6 +76,15 @@ const getDashboardPageFromPath = (pathname: string): DashboardPage => {
   if (pathname === DASHBOARD_PAGE_PATHS.agenda) return 'agenda';
   if (pathname === DASHBOARD_PAGE_PATHS.tasks) return 'tasks';
   return 'timer';
+};
+
+const createChatThreadId = () =>
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `chat-${Date.now()}`;
+
+const getChatThreadTitle = (messages: DashboardChatMessage[], fallback: string) => {
+  const firstUserMessage = messages.find((message) => message.role === 'user' && message.content.trim().length > 0);
+  if (!firstUserMessage) return fallback;
+  return firstUserMessage.content.trim().slice(0, 36);
 };
 
 export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBordScreenProps) {
@@ -229,6 +243,14 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
     applyChatTimerAction,
     setTasks,
   });
+  const [activeChatThreadId, setActiveChatThreadId] = useState('current');
+  const [chatThreads, setChatThreads] = useState<ChatThread[]>(() => [
+    {
+      id: 'current',
+      title: 'Conversation actuelle',
+      messages: DEFAULT_CHAT_MESSAGES,
+    },
+  ]);
   const { requestedAuthMode, shouldShowDashboardAuthGate, enableGuestAccess } = useDashboardAccess({
     userId: user?.id,
     loading,
@@ -356,9 +378,6 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
       unlockError={timerUnlockError}
       isInitialTime={isInitialTime}
       safeMinutes={safeMinutes}
-      streakDays={streakDays}
-      streakColor={streakColor}
-      streakBump={streakBump}
       isEditingTimer={isEditingTimer}
       editingTimerValue={editingTimerValue}
       presetMinutes={TIMER_PRESET_MINUTES}
@@ -592,7 +611,7 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
   const renderActiveDashboardPage = () => {
     switch (activeDashboardPage) {
       case 'chat':
-        return <div className="h-[720px] w-full min-w-0">{renderChatCard()}</div>;
+        return <div className="h-full min-h-0 w-full min-w-0 overflow-hidden">{renderChatCard()}</div>;
       case 'agenda':
         return renderAgendaCard(false, 'calendar', false);
       case 'tasks':
@@ -631,9 +650,96 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleCreateNewChat = () => {
+    const nextThreadId = createChatThreadId();
+    setChatThreads((currentThreads) => {
+      const savedThreads = currentThreads.map((thread) =>
+        thread.id === activeChatThreadId
+          ? {
+              ...thread,
+              title: getChatThreadTitle(messages, thread.title),
+              messages,
+            }
+          : thread
+      );
+      return [
+        {
+          id: nextThreadId,
+          title: 'Nouveau chat',
+          messages: DEFAULT_CHAT_MESSAGES,
+        },
+        ...savedThreads,
+      ];
+    });
+    setActiveChatThreadId(nextThreadId);
+    setMessages(DEFAULT_CHAT_MESSAGES);
+    setChatInput('');
+    chatAttachments.forEach((attachment) => removeChatAttachment(attachment.id));
+    requestAnimationFrame(() => {
+      if (!chatScrollRef.current) return;
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    });
+  };
+
+  const handleSelectChatThread = (threadId: string) => {
+    let selectedMessages: DashboardChatMessage[] | null = null;
+    setChatThreads((currentThreads) => {
+      const savedThreads = currentThreads.map((thread) => {
+        if (thread.id === activeChatThreadId) {
+          return {
+            ...thread,
+            title: getChatThreadTitle(messages, thread.title),
+            messages,
+          };
+        }
+
+        if (thread.id === threadId) {
+          selectedMessages = thread.messages;
+        }
+
+        return thread;
+      });
+      return savedThreads;
+    });
+
+    if (selectedMessages) {
+      setActiveChatThreadId(threadId);
+      setMessages(selectedMessages);
+      setChatInput('');
+      chatAttachments.forEach((attachment) => removeChatAttachment(attachment.id));
+    }
+  };
+
   return (
-    <div className="app-shell min-h-screen p-6 pb-28 text-[#F5F2F7] md:p-10 md:pb-32">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div
+      className={`app-shell p-6 pb-28 text-[#F5F2F7] md:p-10 md:pb-32 ${
+        activeDashboardPage === 'chat' ? 'h-screen overflow-hidden' : 'min-h-screen'
+      }`}
+    >
+      <div
+        className={`mx-auto max-w-6xl ${
+          activeDashboardPage === 'chat' ? 'flex h-full min-h-0 flex-col gap-6' : 'space-y-8'
+        }`}
+      >
+        <header className="flex shrink-0 items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-[-0.01em] text-[#F5F2F7] md:text-3xl">Itineris</h1>
+            <p className="mt-1 text-sm app-muted md:text-base">Prêt(e) à continuer ton voyage d'apprentissage ?</p>
+          </div>
+
+          <div
+            className={`inline-flex shrink-0 items-center gap-2 rounded-full bg-white/[0.05] px-3.5 py-2 text-sm font-bold shadow-[0_12px_32px_rgba(0,0,0,0.24)] transition-transform ${
+              streakBump ? 'scale-105' : ''
+            }`}
+            style={{ color: streakColor }}
+            aria-label={`${streakDays} jours de suite`}
+            title={`${streakDays} jours de suite`}
+          >
+            <Flame className="h-4 w-4" />
+            <span>{streakDays}</span>
+          </div>
+        </header>
+
         {!user ? (
           <div className="rounded-2xl border border-white/8 bg-transparent p-4 md:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
@@ -651,7 +757,49 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
           </div>
         ) : null}
 
-        <div className="transition-opacity duration-200 ease-out">{renderActiveDashboardPage()}</div>
+        <div
+          className={`transition-opacity duration-200 ease-out ${
+            activeDashboardPage === 'chat' ? 'min-h-0 flex-1 overflow-hidden' : ''
+          }`}
+        >
+          {activeDashboardPage === 'chat' ? (
+            <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:grid-rows-1">
+              <aside className="flex min-h-0 gap-2 rounded-3xl bg-white/[0.03] p-3 lg:flex-col">
+                <button
+                  type="button"
+                  onClick={handleCreateNewChat}
+                  className="h-10 rounded-2xl bg-[rgba(109,66,255,0.18)] px-3 text-left text-sm font-semibold text-[#F5F2F7] transition hover:bg-[rgba(109,66,255,0.26)]"
+                >
+                  + Nouveau chat
+                </button>
+                <div className="min-h-0 flex-1 overflow-y-auto app-scrollbar-hidden lg:mt-1">
+                  <div className="flex gap-2 lg:flex-col">
+                    {chatThreads.map((thread) => {
+                      const isActiveThread = thread.id === activeChatThreadId;
+                      return (
+                        <button
+                          key={thread.id}
+                          type="button"
+                          onClick={() => handleSelectChatThread(thread.id)}
+                          className={`min-w-[150px] rounded-2xl px-3 py-3 text-left text-sm transition lg:min-w-0 ${
+                            isActiveThread
+                              ? 'bg-white/[0.08] text-[#F5F2F7]'
+                              : 'bg-transparent text-white/54 hover:bg-white/[0.05] hover:text-[#F5F2F7]'
+                          }`}
+                        >
+                          <span className="block truncate">{thread.title}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </aside>
+              <div className="min-h-0 overflow-hidden">{renderActiveDashboardPage()}</div>
+            </div>
+          ) : (
+            renderActiveDashboardPage()
+          )}
+        </div>
 
         <TaskCreationDialog
           open={showAddDialog && !!modalTask}

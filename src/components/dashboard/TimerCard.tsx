@@ -1,4 +1,4 @@
-import { Clock3, Flame, Lock, Pause, Play, RotateCcw, Timer } from 'lucide-react';
+import { Clock3, Lock, Pause, Play, RotateCcw, Timer } from 'lucide-react';
 
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
@@ -22,9 +22,6 @@ type TimerCardProps = {
   unlockError: string | null;
   isInitialTime: boolean;
   safeMinutes: number;
-  streakDays: number;
-  streakColor: string;
-  streakBump: boolean;
   isEditingTimer: boolean;
   editingTimerValue: string;
   presetMinutes: readonly number[];
@@ -73,9 +70,6 @@ export function TimerCard({
   unlockError,
   isInitialTime,
   safeMinutes,
-  streakDays,
-  streakColor,
-  streakBump,
   isEditingTimer,
   editingTimerValue,
   presetMinutes,
@@ -228,16 +222,6 @@ export function TimerCard({
                 <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_52%)]" />
                 <span className={`font-semibold text-[#F5F2F7] ${timeLabelClass}`}>{displayTime}</span>
                 <span className={`mt-1 app-muted ${isExpanded ? 'text-sm' : 'text-xs'}`}>{statusLabel}</span>
-                <div
-                  className={`pointer-events-none absolute bottom-6 left-6 inline-flex items-center gap-1.5 rounded-full bg-black/25 px-2.5 py-1 text-xs font-bold text-[#F5F2F7] shadow-[0_8px_24px_rgba(0,0,0,0.26)] transition-transform ${
-                    streakBump ? 'scale-105' : ''
-                  }`}
-                  style={{ color: streakColor }}
-                  aria-label={`${streakDays} jours de suite`}
-                >
-                  <Flame className="h-3.5 w-3.5" />
-                  <span>{streakDays}</span>
-                </div>
               </div>
             </div>
           </div>
