@@ -40,10 +40,10 @@ interface ParametresScreenProps {
 }
 
 const cardClassName =
-  'rounded-3xl border-transparent bg-transparent p-4 shadow-none md:p-5';
+  'rounded-[28px] border border-white/[0.06] bg-white/[0.025] p-4 shadow-none transition md:p-5';
 
 const inputClassName =
-  'app-input mt-2 rounded-xl';
+  'mt-2 rounded-xl border-white/[0.08] bg-[rgba(10,9,18,0.48)] text-[#F5F2F7] placeholder:text-white/36 focus-visible:border-[#9F7BFF]/50 focus-visible:ring-[#9F7BFF]/18';
 
 export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) {
   const { user, updateEmail, updatePassword, signOut } = useAuth();
@@ -173,34 +173,35 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
 
   return (
     <div className="app-shell min-h-screen p-4 pb-28 text-[#F5F2F7] md:p-8 md:pb-32">
-      <div className="max-w-6xl mx-auto space-y-4">
+      <div className="mx-auto max-w-6xl space-y-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-[#F5F2F7]">Paramètres</h1>
+            <h1 className="text-2xl font-semibold tracking-[-0.01em] text-[#F5F2F7]">Paramètres</h1>
+            <p className="mt-1 text-sm app-muted">Gère ton profil, ton compte et tes préférences.</p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               onClick={onBack}
               variant="ghost"
-              className="h-11 rounded-xl border border-white/10 bg-[rgba(21,18,31,0.82)] px-4 text-sm text-[#F5F2F7] hover:bg-[rgba(37,29,54,0.92)]"
+              className="h-10 rounded-full border border-white/[0.08] bg-white/[0.035] px-4 text-sm text-white/72 hover:bg-white/[0.07] hover:text-white"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Retour
             </Button>
             <Button
               onClick={handleSaveProfile}
-              className="h-11 rounded-xl px-4 text-sm"
+              className="h-10 rounded-full bg-[#6d42ff] px-4 text-sm text-white hover:bg-[#7b55ff]"
             >
-              <Save className="w-4 h-4 mr-2" />
+              <Save className="mr-2 h-4 w-4" />
               {saved ? 'Sauvegardé' : 'Sauvegarder'}
             </Button>
             <Button
               onClick={handleSignOut}
               variant="ghost"
-              className="h-11 rounded-xl bg-white/[0.04] px-4 text-sm text-[#F5F2F7] hover:bg-white/[0.08]"
+              className="h-10 rounded-full border border-white/[0.08] bg-white/[0.035] px-4 text-sm text-white/72 hover:bg-white/[0.07] hover:text-white"
             >
-              <LogOut className="w-4 h-4 mr-2" />
+              <LogOut className="mr-2 h-4 w-4" />
               Déconnexion
             </Button>
           </div>
