@@ -247,27 +247,31 @@ ${item.content}`;
           });
 
           return {
+            type: 'message',
             role: item.role,
             content,
           };
         }
 
         return {
+          type: 'message',
           role: item.role,
-          content: [{ type: 'input_text', text: promptText }],
+          content: promptText,
         };
       }
 
       if (item.role === 'assistant') {
         return {
+          type: 'message',
           role: item.role,
           content: [{ type: 'output_text', text: item.content }],
         };
       }
 
       return {
+        type: 'message',
         role: item.role,
-        content: [{ type: 'input_text', text: item.content }],
+        content: item.content,
       };
     });
 
@@ -280,14 +284,8 @@ ${item.content}`;
     const openAiPayload = {
         model: openAiModel,
         max_output_tokens: 800,
-        stream: true,
-        input: [
-          {
-            role: 'developer',
-            content: [{ type: 'input_text', text: systemPrompt }],
-          },
-          ...openAiMessages,
-        ],
+        instructions: systemPrompt,
+        input: openAiMessages,
         tools: [
           {
             type: 'function',
@@ -459,119 +457,49 @@ ${item.content}`;
       );
     }
 
-    if (!openAiResponse.body) {
-      return new Response(JSON.stringify({ error: 'OpenAI returned no stream.' }), {
-        status: 502,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const stream = new ReadableStream({
-      async start(controller) {
-        const encoder = new TextEncoder();
-        const decoder = new TextDecoder();
-        const reader = openAiResponse.body!.getReader();
-        let reply = '';
-        const toolCalls = new Map<string, { name: string; arguments: string }>();
-        let buffer = '';
-
-        const emit = (event: string, data: unknown) => {
-          controller.enqueue(encoder.encode(encodeSse(event, data)));
-        };
-
-        const handlePayload = (payload: Record<string, unknown>) => {
-          if (payload.type === 'response.output_text.delta' && typeof payload.delta === 'string') {
-            reply += payload.delta;
-            emit('delta', { text: payload.delta });
-            return;
+    const responsePayload = await openAiResponse.json();
+    const output = Array.isArray(responsePayload?.output) ? responsePayload.output : [];
+    let reply = '';
+    const actions = output
+      .map((item: Record<string, unknown>) => {
+        if (item?.type === 'message' && item?.role === 'assistant' && Array.isArray(item.content) && !reply) {
+          const textPart = item.content.find(
+            (part: Record<string, unknown>) => part?.type === 'output_text' && typeof part?.text === 'string'
+          ) as Record<string, unknown> | undefined;
+          if (textPart?.text && typeof textPart.text === 'string') {
+            reply = textPart.text;
           }
-
-          if (payload.type === 'response.function_call_arguments.delta' && typeof payload.call_id === 'string') {
-            const existing = toolCalls.get(payload.call_id) ?? { name: '', arguments: '' };
-            if (typeof payload.delta === 'string') {
-              existing.arguments += payload.delta;
-            }
-            toolCalls.set(payload.call_id, existing);
-            return;
-          }
-
-          if (payload.type === 'response.function_call_arguments.done' && typeof payload.call_id === 'string') {
-            toolCalls.set(payload.call_id, {
-              name: typeof payload.name === 'string' ? payload.name : '',
-              arguments: typeof payload.arguments === 'string' ? payload.arguments : '{}',
-            });
-            return;
-          }
-
-          if (payload.type === 'error') {
-            emit('error', {
-              error:
-                typeof payload.message === 'string'
-                  ? payload.message
-                  : typeof payload.error === 'object' && payload.error && 'message' in payload.error
-                    ? String((payload.error as { message?: unknown }).message ?? 'Stream error')
-                    : 'Stream error',
-            });
-          }
-        };
-
-        try {
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const events = buffer.split('\n\n');
-            buffer = events.pop() ?? '';
-
-            events.forEach((eventChunk) => {
-              const dataLines = eventChunk
-                .split('\n')
-                .filter((line) => line.startsWith('data:'))
-                .map((line) => line.slice(5).trim());
-              if (dataLines.length === 0) return;
-              const data = dataLines.join('\n');
-              if (data === '[DONE]') return;
-
-              try {
-                handlePayload(JSON.parse(data));
-              } catch {
-                // Ignore malformed provider stream chunks.
-              }
-            });
-          }
-
-          const actions = Array.from(toolCalls.values())
-            .map((toolCall) => {
-              try {
-                const input = JSON.parse(toolCall.arguments || '{}');
-                return {
-                  tool: toolCall.name,
-                  ...(typeof input === 'object' && input ? input : {}),
-                };
-              } catch {
-                return null;
-              }
-            })
-            .filter(Boolean);
-
-          emit('done', { reply, actions });
-        } catch (error) {
-          emit('error', { error: error instanceof Error ? error.message : 'Stream error' });
-        } finally {
-          controller.close();
+          return null;
         }
-      },
-    });
 
-    return new Response(stream, {
+        if (item?.type === 'function_call' && typeof item?.name === 'string') {
+          try {
+            const input = JSON.parse(typeof item.arguments === 'string' ? item.arguments : '{}');
+            return {
+              tool: item.name,
+              ...(typeof input === 'object' && input ? input : {}),
+            };
+          } catch {
+            return null;
+          }
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+
+    console.info(
+      'study-chat openai response summary',
+      JSON.stringify({
+        outputCount: output.length,
+        replyLength: reply.length,
+        actionCount: actions.length,
+      })
+    );
+
+    return new Response(JSON.stringify({ reply, actions }), {
       status: 200,
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-      },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
