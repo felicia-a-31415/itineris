@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 
 import { buildTasksFromAiActions, extractAddTaskActions } from '../lib/dashboardAi';
-import { prepareImageForAnthropic } from '../lib/chatAttachments';
+import { prepareImageForOpenAi } from '../lib/chatAttachments';
 import type { DashboardTask } from '../lib/storage';
 
 type Task = DashboardTask;
@@ -188,7 +188,7 @@ export function useDashboardTasks({
     setUploadNotice(`Analyse de la photo en cours : ${file.name}`);
 
     try {
-      const preparedImage = await prepareImageForAnthropic(file);
+      const preparedImage = await prepareImageForOpenAi(file);
 
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-chat`, {
         method: 'POST',

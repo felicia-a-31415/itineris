@@ -1,5 +1,5 @@
-const MAX_ANTHROPIC_IMAGE_BYTES = 5 * 1024 * 1024;
-const TARGET_ANTHROPIC_IMAGE_BYTES = 4.5 * 1024 * 1024;
+const MAX_OPENAI_IMAGE_BYTES = 5 * 1024 * 1024;
+const TARGET_OPENAI_IMAGE_BYTES = 4.5 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 4.5 * 1024 * 1024;
 const MAX_TEXT_CHARS = 120_000;
 
@@ -79,7 +79,7 @@ function getDecodedByteLengthFromBase64(base64: string) {
   return Math.floor((base64.length * 3) / 4) - padding;
 }
 
-export async function prepareImageForAnthropic(file: File): Promise<{ mediaType: string; data: string }> {
+export async function prepareImageForOpenAi(file: File): Promise<{ mediaType: string; data: string }> {
   const image = await loadImageFromFile(file);
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
@@ -115,12 +115,12 @@ export async function prepareImageForAnthropic(file: File): Promise<{ mediaType:
     context.drawImage(image, 0, 0, attemptWidth, attemptHeight);
 
     const blob = await canvasToBlob(canvas, attempt.quality);
-    if (blob.size > TARGET_ANTHROPIC_IMAGE_BYTES) continue;
+    if (blob.size > TARGET_OPENAI_IMAGE_BYTES) continue;
 
     const dataUrl = await readFileAsDataUrl(blob);
     const [, base64 = ''] = dataUrl.split(',');
     if (!base64) throw new Error("Impossible de convertir l'image.");
-    if (getDecodedByteLengthFromBase64(base64) > MAX_ANTHROPIC_IMAGE_BYTES) continue;
+    if (getDecodedByteLengthFromBase64(base64) > MAX_OPENAI_IMAGE_BYTES) continue;
 
     return {
       mediaType: 'image/jpeg',
@@ -136,7 +136,7 @@ export async function prepareChatAttachment(file: File): Promise<ChatAttachment>
   const id = `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`;
 
   if (mediaType.startsWith('image/')) {
-    const image = await prepareImageForAnthropic(file);
+    const image = await prepareImageForOpenAi(file);
     return {
       id,
       name: file.name,
