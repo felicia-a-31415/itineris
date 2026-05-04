@@ -258,6 +258,13 @@ ${item.content}`;
         };
       }
 
+      if (item.role === 'assistant') {
+        return {
+          role: item.role,
+          content: [{ type: 'output_text', text: item.content }],
+        };
+      }
+
       return {
         role: item.role,
         content: [{ type: 'input_text', text: item.content }],
