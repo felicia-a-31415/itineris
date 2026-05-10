@@ -159,6 +159,7 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
     commitEditingName,
     saveTask,
     createTaskForDate,
+    createTaskFromList,
     toggleTask,
     deleteCompletedTasks,
     handleAgendaImageUpload,
@@ -617,6 +618,7 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
       onCommitEditingName={commitEditingName}
       onCancelEditingName={cancelEditingName}
       onToggleTask={toggleTask}
+      onCreateTask={createTaskFromList}
       onInfoTaskChange={setInfoTaskId}
       onShowCompletedTasksChange={setShowCompletedTasks}
       onDeleteCompletedMenuOpenChange={setDeleteCompletedMenuOpen}

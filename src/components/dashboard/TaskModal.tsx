@@ -30,6 +30,17 @@ export function TaskEditor({
   onClose,
   onSave,
 }: TaskEditorProps) {
+  const titleInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  React.useEffect(() => {
+    const focusTimer = window.setTimeout(() => {
+      titleInputRef.current?.focus();
+      titleInputRef.current?.select();
+    }, 0);
+
+    return () => window.clearTimeout(focusTimer);
+  }, []);
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -61,6 +72,7 @@ export function TaskEditor({
       <div className="max-h-[75vh] space-y-4 overflow-y-auto pt-4 app-scrollbar-hidden">
         <div className="overflow-hidden rounded-[22px] border border-white/[0.08] bg-white/[0.035]">
           <Input
+            ref={titleInputRef}
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder={titlePlaceholder}

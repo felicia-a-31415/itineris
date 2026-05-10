@@ -1,4 +1,4 @@
-import { Info } from 'lucide-react';
+import { Info, Plus } from 'lucide-react';
 
 import type { DashboardTask } from '../../lib/storage';
 import { Button } from '../../ui/button';
@@ -20,6 +20,7 @@ type DashboardTaskListPanelProps = {
   onCommitEditingName: (taskId: string) => void;
   onCancelEditingName: () => void;
   onToggleTask: (taskId: string) => void;
+  onCreateTask: () => void;
   onInfoTaskChange: (taskId: string | null) => void;
   onShowCompletedTasksChange: React.Dispatch<React.SetStateAction<boolean>>;
   onDeleteCompletedMenuOpenChange: (open: boolean) => void;
@@ -42,6 +43,7 @@ export function DashboardTaskListPanel({
   onCommitEditingName,
   onCancelEditingName,
   onToggleTask,
+  onCreateTask,
   onInfoTaskChange,
   onShowCompletedTasksChange,
   onDeleteCompletedMenuOpenChange,
@@ -51,6 +53,17 @@ export function DashboardTaskListPanel({
 }: DashboardTaskListPanelProps) {
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          onClick={onCreateTask}
+          className="h-10 rounded-full bg-[#6d42ff] px-4 text-sm font-semibold text-white transition hover:bg-[#7b55ff]"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Nouvelle tâche
+        </Button>
+      </div>
+
       {agendaTasks.length === 0 ? (
         <div className="rounded-[28px] border border-white/[0.08] bg-white/[0.025] px-5 py-8 text-center">
           <div className="text-lg font-semibold text-[#F5F2F7]">Aucune tâche pour l’instant</div>
@@ -73,6 +86,7 @@ export function DashboardTaskListPanel({
                 className={`group relative flex items-start gap-3 rounded-[22px] border border-white/[0.06] bg-white/[0.025] px-3 py-3 transition hover:border-white/[0.1] hover:bg-white/[0.04] ${
                   task.completed ? 'opacity-60' : ''
                 }`}
+                style={{ borderLeft: `4px solid ${task.color}` }}
               >
                 <div className="mt-0.5">
                   <Checkbox

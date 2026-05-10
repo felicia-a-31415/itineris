@@ -153,6 +153,28 @@ export function useDashboardTasks({
     setShowAddDialog(true);
   };
 
+  const createTaskFromList = () => {
+    const newTask: Task = {
+      id: Date.now().toString(),
+      name: '(Titre)',
+      completed: false,
+      color: selectedColor,
+      urgent: false,
+      date: undefined,
+      time: undefined,
+    };
+    setTasks((prev) => [...prev, newTask]);
+    setSelectedDate('');
+    setSelectedTime('');
+    setNewTaskName('(Titre)');
+    setModalTaskId(newTask.id);
+    setDraftTaskId(newTask.id);
+    draftTaskIdRef.current = newTask.id;
+    setEditingNameId(newTask.id);
+    setEditingNameValue('(Titre)');
+    setShowAddDialog(true);
+  };
+
   const toggleTask = (id: string) => {
     const targetTask = tasks.find((task) => task.id === id);
     if (targetTask) {
@@ -323,6 +345,7 @@ export function useDashboardTasks({
     commitEditingName,
     saveTask,
     createTaskForDate,
+    createTaskFromList,
     toggleTask,
     deleteCompletedTasks,
     handleAgendaImageUpload,
