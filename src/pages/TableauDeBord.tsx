@@ -846,7 +846,7 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
                 <button
                   type="button"
                   onClick={handleCreateNewChat}
-                  className="h-10 shrink-0 rounded-full bg-[#6d42ff] px-4 text-left text-sm font-semibold text-white transition hover:bg-[#7b55ff]"
+                  className="h-10 shrink-0 rounded-full border border-white/[0.08] bg-white/[0.035] px-4 text-left text-sm font-semibold text-[#F5F2F7] transition hover:border-white/12 hover:bg-white/[0.06]"
                 >
                   + Nouveau chat
                 </button>
