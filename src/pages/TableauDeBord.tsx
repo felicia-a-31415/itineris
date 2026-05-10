@@ -543,6 +543,7 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
 
   useEffect(() => {
     const nextPositions: Record<string, number> = {};
+    const pendingMotion = pendingTaskMotionRef.current;
 
     visibleTasks.forEach((task) => {
       const node = taskListItemRefs.current[task.id];
@@ -552,13 +553,14 @@ export function TableauDeBord({ userName: _userName = 'étudiant' }: TableauDeBo
       const previousTop = taskListPositionsRef.current[task.id];
       nextPositions[task.id] = nextTop;
 
+      if (!pendingMotion) return;
       if (previousTop === undefined) return;
 
       const deltaY = previousTop - nextTop;
       if (Math.abs(deltaY) < 1) return;
 
-      const isTargetTask = pendingTaskMotionRef.current?.id === task.id;
-      const direction = pendingTaskMotionRef.current?.direction;
+      const isTargetTask = pendingMotion.id === task.id;
+      const direction = pendingMotion.direction;
 
       node.animate(
         isTargetTask && direction === 'down'

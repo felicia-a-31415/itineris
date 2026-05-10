@@ -40,10 +40,10 @@ interface ParametresScreenProps {
 }
 
 const cardClassName =
-  'rounded-[28px] border border-white/[0.06] bg-white/[0.025] p-4 shadow-none transition md:p-5';
+  'rounded-[28px] border border-white/[0.06] bg-white/[0.025] p-3 shadow-none transition md:p-4';
 
 const inputClassName =
-  'mt-2 rounded-xl border-white/[0.08] bg-[rgba(10,9,18,0.48)] text-[#F5F2F7] placeholder:text-white/36 focus-visible:border-[#9F7BFF]/50 focus-visible:ring-[#9F7BFF]/18';
+  'mt-1.5 rounded-xl border-white/[0.08] bg-[rgba(10,9,18,0.48)] text-[#F5F2F7] placeholder:text-white/36 focus-visible:border-[#9F7BFF]/50 focus-visible:ring-[#9F7BFF]/18';
 
 export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) {
   const { user, updateEmail, updatePassword, signOut } = useAuth();
@@ -172,8 +172,8 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
   };
 
   return (
-    <div className="app-shell min-h-screen p-4 pb-28 text-[#F5F2F7] md:p-8 md:pb-32">
-      <div className="mx-auto max-w-6xl space-y-6">
+    <div className="app-shell min-h-screen p-6 pb-28 text-[#F5F2F7] md:p-10 md:pb-32">
+      <div className="mx-auto max-w-6xl space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-[-0.01em] text-[#F5F2F7]">Paramètres</h1>
@@ -190,15 +190,15 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
           </Button>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Card className={`${cardClassName} flex min-h-[320px] flex-col space-y-4`}>
+        <div className="grid gap-3 lg:grid-cols-2">
+          <Card className={`${cardClassName} flex flex-col space-y-3`}>
             <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#1F2230] bg-[#10131B]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#1F2230] bg-[#10131B]">
                 <CircleUserRound className="h-5 w-5 text-[#F5F2F7]" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-[#F5F2F7]">Profil</h2>
-                <p className="text-sm leading-5 app-muted">
+                <h2 className="text-lg font-semibold text-[#F5F2F7]">Profil</h2>
+                <p className="text-xs leading-5 app-muted">
                   Les infos visibles dans ton espace de travail.
                 </p>
               </div>
@@ -245,7 +245,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             </div>
           </Card>
 
-          <Card className={`${cardClassName} flex min-h-[320px] flex-col space-y-3`}>
+          <Card className={`${cardClassName} flex flex-col space-y-3`}>
             <div className="flex items-start gap-3">
               <div className="app-panel-soft flex h-10 w-10 items-center justify-center rounded-2xl">
                 <Mail className="h-4 w-4 text-[#F5F2F7]" />
@@ -299,7 +299,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             </div>
           </Card>
 
-          <Card className={`${cardClassName} flex min-h-[320px] flex-col space-y-3`}>
+          <Card className={`${cardClassName} flex flex-col space-y-3`}>
             <div className="flex items-start gap-3">
               <div className="app-panel-soft flex h-10 w-10 items-center justify-center rounded-2xl">
                 <KeyRound className="h-4 w-4 text-[#F5F2F7]" />
@@ -353,7 +353,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
             </div>
           </Card>
 
-          <Card className={`${cardClassName} flex min-h-[320px] flex-col space-y-4`}>
+          <Card className={`${cardClassName} flex flex-col space-y-3`}>
             {!user ? (
               <div className="rounded-2xl border border-white/10 bg-[rgba(17,20,29,0.84)] px-4 py-4 text-sm app-muted">
                 Les réglages de sécurité du compte sont disponibles seulement après connexion à Supabase.
@@ -381,7 +381,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               Déconnexion
             </Button>
 
-            <div className="mt-auto space-y-3 border-t border-white/[0.06] pt-4">
+            <div className="mt-auto space-y-2.5 border-t border-white/[0.06] pt-3">
               <div>
                 <h3 className="text-sm font-semibold text-[#FFB4B4]">Supprimer le compte</h3>
                 <p className="mt-1 text-xs leading-5 app-muted">
