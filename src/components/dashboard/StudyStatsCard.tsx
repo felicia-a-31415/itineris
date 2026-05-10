@@ -92,7 +92,7 @@ export function StudyStatsCard({
   };
 
   return (
-    <Card className="mx-auto min-w-0 max-w-4xl overflow-visible rounded-[28px] border-transparent bg-transparent px-1 pt-1 shadow-none">
+    <Card className="w-full min-w-0 overflow-visible rounded-[28px] border-transparent bg-transparent px-1 pt-1 shadow-none">
       <div className="flex flex-col gap-4">
         <div>
           <div>
