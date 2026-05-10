@@ -166,6 +166,8 @@ export function useDashboardChat({
         ? `${message || 'Fichiers joints'}\n\nPieces jointes: ${attachmentNames.join(', ')}`
         : effectiveMessage;
     const nextMessages = [...messages, { role: 'user' as const, content: displayMessage }];
+    const firstUserMessage =
+      nextMessages.find((item) => item.role === 'user' && item.content.trim().length > 0)?.content ?? effectiveMessage;
 
     setMessages(nextMessages);
     setChatInput('');
@@ -207,6 +209,7 @@ export function useDashboardChat({
             timer: timerContext,
             currentDate: currentDateContext,
             needsChatTitle: shouldGenerateChatTitle?.() ?? false,
+            firstUserMessage,
           },
         }),
       });
