@@ -108,7 +108,9 @@ export function AgendaCard({
       <div className={`flex flex-col ${calendarMode === 'tasks' ? 'gap-3' : 'gap-4'}`}>
         <div className="flex flex-col gap-1">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/42">Agenda</p>
-          <p className="text-sm app-muted">Planifie tes remises, examens et blocs de travail.</p>
+          <p className="text-sm app-muted">
+            Planifie tes remises, examens et blocs de travail. Clique sur une colonne pour ajouter une tâche.
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-y border-white/[0.06] py-3">

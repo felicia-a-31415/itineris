@@ -151,13 +151,13 @@ export function StudyStatsCard({
           {weekDates.map((date, index) => {
             const minutes = Math.round(activeWeekMinutes[index] ?? 0);
             const showBar = minutes > 0;
-            const barHeight = Math.max(showBar ? 8 : 0, Math.min(190, (minutes / chartMaxMinutes) * 190));
+            const barHeight = Math.max(showBar ? 8 : 0, Math.min(220, (minutes / chartMaxMinutes) * 220));
             const isDragging = draggingDayIndex === index;
             return (
               <div key={index} className="flex flex-col items-center gap-1.5">
                 <div
                   data-study-bar="true"
-                  className="relative flex h-48 w-full touch-none items-end rounded-2xl bg-white/[0.025]"
+                  className="relative flex h-56 w-full touch-none items-end rounded-2xl bg-white/[0.025]"
                 >
                   {showBar ? (
                     <div
@@ -173,7 +173,7 @@ export function StudyStatsCard({
                         ? 'border-white/80 bg-white/70 shadow-[0_0_18px_rgba(255,255,255,0.28)]'
                         : 'border-white/20 bg-white/18 hover:border-white/48 hover:bg-white/32'
                     }`}
-                    style={{ bottom: `${Math.min(186, Math.max(0, barHeight - 8))}px` }}
+                    style={{ bottom: `${Math.min(216, Math.max(0, barHeight - 8))}px` }}
                     aria-label={`Ajuster le temps étudié ${getDayName(date)}`}
                     title="Tire pour ajuster"
                   />
