@@ -234,7 +234,7 @@ export function Parametres({ onBack, userData, onSave }: ParametresScreenProps) 
               </div>
             ) : null}
 
-            <div className="mt-auto pt-2">
+            <div className="pt-1">
               <Button
                 onClick={handleSaveProfile}
                 className="h-10 rounded-full bg-[#6d42ff] px-4 text-sm text-white hover:bg-[#7b55ff]"
