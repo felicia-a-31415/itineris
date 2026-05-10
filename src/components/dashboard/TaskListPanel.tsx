@@ -57,6 +57,7 @@ export function DashboardTaskListPanel({
         <Button
           type="button"
           onClick={onCreateTask}
+          variant="ghost"
           className="h-10 rounded-full border border-white/[0.08] bg-white/[0.035] px-4 text-sm font-semibold text-[#F5F2F7] transition hover:border-white/12 hover:bg-white/[0.06]"
         >
           <Plus className="mr-2 h-4 w-4" />
